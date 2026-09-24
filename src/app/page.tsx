@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 type Product = {
@@ -25,7 +26,6 @@ export default async function HomePage() {
   let fetchError: string | null = null;
 
   try {
-    // Check if environment variables exist
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       fetchError = "Supabase environment variables are missing.";
     } else {
@@ -54,12 +54,12 @@ export default async function HomePage() {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-hairline">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="text-xl font-semibold tracking-tight">Regal Store</span>
-            </div>
+            </Link>
 
             <div className="hidden md:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
@@ -84,9 +84,12 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <button className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-pill hover:bg-shade-70 transition-colors">
+            <Link
+              href="/sign-in"
+              className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-pill hover:bg-shade-70 transition-colors"
+            >
               Sign in
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -103,9 +106,12 @@ export default async function HomePage() {
                 Discover premium products<br />delivered to your door
               </h1>
             </div>
-            <button className="self-start px-6 py-3 border border-white/40 text-white rounded-pill text-sm font-medium hover:bg-white hover:text-black transition-colors">
+            <Link
+              href="/custom-order"
+              className="self-start px-6 py-3 border border-white/40 text-white rounded-pill text-sm font-medium hover:bg-white hover:text-black transition-colors"
+            >
               Request a custom order
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -153,8 +159,9 @@ export default async function HomePage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {productList.map((product) => (
-              <article
+              <Link
                 key={product.id}
+                href={`/products/${product.id}`}
                 className="group bg-white rounded-xl overflow-hidden border border-hairline hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="relative aspect-[4/5] bg-shade-30/30 overflow-hidden">
@@ -184,7 +191,7 @@ export default async function HomePage() {
                   </h3>
                   <p className="text-base font-semibold">{formatPrice(product.price)}</p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}
