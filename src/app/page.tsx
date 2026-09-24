@@ -1,72 +1,14 @@
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
 
-// Temporary mock products (we will replace this with Supabase data later)
-const products = [
-  {
-    id: 1,
-    name: "Classic Oversized Polo",
-    price: 12500,
-    image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=500&fit=crop",
-    category: "Fashion",
-    isNew: true,
-  },
-  {
-    id: 2,
-    name: "Wireless Earbuds Pro",
-    price: 18900,
-    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=500&fit=crop",
-    category: "Electronics",
-    isNew: true,
-  },
-  {
-    id: 3,
-    name: "Leather Crossbody Bag",
-    price: 9800,
-    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=500&fit=crop",
-    category: "Fashion",
-    isNew: false,
-  },
-  {
-    id: 4,
-    name: "Minimalist Watch",
-    price: 15500,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=500&fit=crop",
-    category: "Accessories",
-    isNew: true,
-  },
-  {
-    id: 5,
-    name: "Cotton Linen Shirt",
-    price: 8700,
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop",
-    category: "Fashion",
-    isNew: false,
-  },
-  {
-    id: 6,
-    name: "Portable Power Bank",
-    price: 11200,
-    image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=500&fit=crop",
-    category: "Electronics",
-    isNew: false,
-  },
-  {
-    id: 7,
-    name: "Suede Loafers",
-    price: 14500,
-    image: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=500&fit=crop",
-    category: "Fashion",
-    isNew: true,
-  },
-  {
-    id: 8,
-    name: "Ceramic Diffuser",
-    price: 6900,
-    image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=500&fit=crop",
-    category: "Home",
-    isNew: false,
-  },
-];
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  category: string | null;
+  is_new: boolean | null;
+};
 
 const categories = ["All", "Fashion", "Electronics", "Home", "Accessories"];
 
@@ -78,7 +20,20 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("id, name, price, image_url, category, is_new")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching products:", error.message);
+  }
+
+  const productList: Product[] = products || [];
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -128,7 +83,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-widest text-shade-40 mb-2">
-                Nigeria&apos;s trusted import marketplace
+                Nigeria's trusted import marketplace
               </p>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight leading-tight">
                 Discover premium products<br />delivered to your door
@@ -165,39 +120,52 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-medium tracking-tight">Trending today</h2>
-          <span className="text-sm text-shade-50">{products.length} products</span>
+          <span className="text-sm text-shade-50">{productList.length} products</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product) => (
-            <article
-              key={product.id}
-              className="group bg-white rounded-xl overflow-hidden border border-hairline hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="relative aspect-[4/5] bg-shade-30/30 overflow-hidden">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                />
-                {product.isNew && (
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-aloe-10 text-ink text-xs font-medium rounded-pill">
-                    New
-                  </span>
-                )}
-              </div>
-              <div className="p-4">
-                <p className="text-xs text-shade-50 mb-1">{product.category}</p>
-                <h3 className="text-sm font-medium leading-snug mb-2 line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="text-base font-semibold">{formatPrice(product.price)}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {productList.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-shade-50 text-lg">No products yet.</p>
+            <p className="text-shade-40 text-sm mt-2">Add some products in Supabase to see them here.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {productList.map((product) => (
+              <article
+                key={product.id}
+                className="group bg-white rounded-xl overflow-hidden border border-hairline hover:shadow-lg transition-shadow duration-300"
+              >
+                <div className="relative aspect-[4/5] bg-shade-30/30 overflow-hidden">
+                  {product.image_url ? (
+                    <Image
+                      src={product.image_url}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-shade-40 text-sm">
+                      No image
+                    </div>
+                  )}
+                  {product.is_new && (
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-aloe-10 text-ink text-xs font-medium rounded-pill">
+                      New
+                    </span>
+                  )}
+                </div>
+                <div className="p-4">
+                  <p className="text-xs text-shade-50 mb-1">{product.category || "Uncategorized"}</p>
+                  <h3 className="text-sm font-medium leading-snug mb-2 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="text-base font-semibold">{formatPrice(product.price)}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </main>
 
       {/* Footer */}
