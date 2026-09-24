@@ -21,18 +21,32 @@ function formatPrice(price: number) {
 }
 
 export default async function HomePage() {
-  const supabase = await createClient();
+  let productList: Product[] = [];
+  let fetchError: string | null = null;
 
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("id, name, price, image_url, category, is_new")
-    .order("created_at", { ascending: false });
+  try {
+    // Check if environment variables exist
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      fetchError = "Supabase environment variables are missing.";
+    } else {
+      const supabase = await createClient();
 
-  if (error) {
-    console.error("Error fetching products:", error.message);
+      const { data: products, error } = await supabase
+        .from("products")
+        .select("id, name, price, image_url, category, is_new")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        fetchError = error.message;
+        console.error("Supabase error:", error.message);
+      } else {
+        productList = products || [];
+      }
+    }
+  } catch (err: any) {
+    fetchError = err?.message || "Unknown error connecting to database";
+    console.error("Server error:", err);
   }
-
-  const productList: Product[] = products || [];
 
   return (
     <div className="min-h-screen">
@@ -123,7 +137,15 @@ export default async function HomePage() {
           <span className="text-sm text-shade-50">{productList.length} products</span>
         </div>
 
-        {productList.length === 0 ? (
+        {fetchError ? (
+          <div className="text-center py-20 max-w-md mx-auto">
+            <p className="text-red-600 font-medium mb-2">Could not load products</p>
+            <p className="text-shade-50 text-sm">{fetchError}</p>
+            <p className="text-shade-40 text-xs mt-4">
+              Please check that the Supabase environment variables are correctly set in Vercel.
+            </p>
+          </div>
+        ) : productList.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-shade-50 text-lg">No products yet.</p>
             <p className="text-shade-40 text-sm mt-2">Add some products in Supabase to see them here.</p>
