@@ -1,46 +1,64 @@
 # Regal Store
 
-Premium product catalog / e-commerce website inspired by QAFRICA.
+Premium product catalog / e-commerce website for Nigeria.
 
-Built with:
-- **Next.js** (React framework)
-- **Supabase** (Database, Auth, Storage)
-- **Vercel** (Hosting)
-- **Tailwind CSS** + Shopify-inspired DESIGN.md for beautiful consistent UI
+Built with **Next.js**, **Supabase**, **Tailwind CSS**, and a Shopify-inspired design system.
 
-## Current Status
+## Features (current)
+- Clean product grid inspired by QAFRICA
+- Category filters
+- Search bar
+- Responsive design
+- Ready for Supabase products table
 
-- GitHub repository created
-- DESIGN.md added (Shopify-inspired design system)
+## Getting Started
 
-## Next Steps (Do these in order)
+### 1. Clone the repo
+```bash
+git clone https://github.com/mrjosh001/regal-store.git
+cd regal-store
+```
 
-### 1. Create a free Supabase project
-1. Go to [https://supabase.com](https://supabase.com) and sign up / log in
-2. Click **New Project**
-3. Name it `regal-store`
-4. Set a database password (save it somewhere safe)
-5. Choose a region close to Nigeria (or the default)
-6. Wait ~1–2 minutes for it to be ready
+### 2. Install dependencies
+```bash
+npm install
+```
 
-### 2. Get your Supabase keys
-In your Supabase project dashboard:
-- Go to **Project Settings** → **API**
-- Copy:
-  - Project URL
-  - `anon` / `public` key
+### 3. Set up environment variables
+Copy the example file and fill in your Supabase keys:
 
-### 3. Tell me when you're done
-Reply here with:
-- “Supabase ready”
+```bash
+cp .env.example .env.local
+```
 
-Then I will:
-1. Scaffold the full Next.js + Supabase starter into this repo
-2. Set up the product listing page (like QAFRICA recommendations)
-3. Connect it to your Supabase database
-4. Help you deploy to Vercel
+Edit `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=https://mktdgboqexfxllsxydjp.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
+> Use the **anon / publishable** key (not the secret key).
+
+### 4. Run the development server
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+```
+src/
+  app/           → Pages (App Router)
+  lib/supabase/  → Supabase clients
+```
+
+## Next Steps
+- Connect real products from Supabase
+- Add authentication
+- Deploy to Vercel
 
 ---
 
-**Brand name:** Regal Store  
-**Design system:** Shopify-inspired (clean, modern, pill buttons, strong product cards)
+**Brand:** Regal Store  
+**Design system:** Shopify-inspired (see DESIGN.md)
