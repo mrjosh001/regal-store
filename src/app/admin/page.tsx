@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 
 type Product = {
@@ -19,7 +18,6 @@ type Product = {
 
 export default function AdminPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,20 +36,37 @@ export default function AdminPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    async function checkUser() {
+    async function init() {
+      // Dynamically import to avoid build-time env issues
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push("/sign-in");
         return;
       }
       setUser(user);
-      await fetchProducts();
+
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (data) setProducts(data);
       setLoading(false);
     }
-    checkUser();
-  }, []);
+
+    init();
+  }, [router]);
+
+  async function getSupabase() {
+    const { createClient } = await import("@/lib/supabase/client");
+    return createClient();
+  }
 
   async function fetchProducts() {
+    const supabase = await getSupabase();
     const { data, error } = await supabase
       .from("products")
       .select("*")
@@ -76,9 +91,9 @@ export default function AdminPage() {
     setMessage(null);
 
     try {
+      const supabase = await getSupabase();
       let imageUrl = null;
 
-      // Upload image if selected
       if (imageFile) {
         const fileExt = imageFile.name.split(".").pop();
         const fileName = `${Date.now()}.${fileExt}`;
@@ -88,23 +103,26 @@ export default function AdminPage() {
           .upload(fileName, imageFile);
 
         if (uploadError) {
-          // If bucket doesn't exist, show helpful message
-          if (uploadError.message.includes("Bucket not found") || uploadError.message.includes("not found")) {
-            setMessage("Storage bucket 'product-images' not found. Please create it in Supabase Storage first.");
+          if (
+            uploadError.message.includes("Bucket not found") ||
+            uploadError.message.includes("not found")
+          ) {
+            setMessage(
+              "Storage bucket 'product-images' not found. Please create it in Supabase Storage first."
+            );
             setSubmitting(false);
             return;
           }
           throw uploadError;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(fileName);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("product-images").getPublicUrl(fileName);
 
         imageUrl = publicUrl;
       }
 
-      // Insert product
       const { error } = await supabase.from("products").insert({
         name,
         description: description || null,
@@ -116,7 +134,6 @@ export default function AdminPage() {
 
       if (error) throw error;
 
-      // Reset form
       setName("");
       setDescription("");
       setPrice("");
@@ -138,6 +155,7 @@ export default function AdminPage() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
+    const supabase = await getSupabase();
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (!error) {
       setProducts(products.filter((p) => p.id !== id));
@@ -148,6 +166,7 @@ export default function AdminPage() {
   }
 
   async function handleSignOut() {
+    const supabase = await getSupabase();
     await supabase.auth.signOut();
     router.push("/");
   }
@@ -196,7 +215,6 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Message */}
         {message && (
           <div className="mb-6 px-4 py-3 bg-black text-white text-sm rounded-xl flex items-center justify-between">
             <span>{message}</span>
@@ -206,7 +224,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Header + Add button */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
@@ -220,7 +237,6 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Add Product Form */}
         {showForm && (
           <div className="bg-white rounded-2xl border border-black/5 p-6 mb-10 shadow-sm">
             <h2 className="text-lg font-medium mb-6">Add New Product</h2>
@@ -294,7 +310,6 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium mb-1.5">Product Photo</label>
                 <div className="flex items-start gap-4">
@@ -332,7 +347,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Products List */}
         <div className="bg-white rounded-2xl border border-black/5 overflow-hidden shadow-sm">
           {products.length === 0 ? (
             <div className="p-12 text-center text-black/40">
@@ -341,7 +355,10 @@ export default function AdminPage() {
           ) : (
             <div className="divide-y divide-black/5">
               {products.map((product) => (
-                <div key={product.id} className="flex items-center gap-4 p-4 hover:bg-black/[0.01]">
+                <div
+                  key={product.id}
+                  className="flex items-center gap-4 p-4 hover:bg-black/[0.01]"
+                >
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-black/5 flex-shrink-0">
                     {product.image_url ? (
                       <Image
@@ -379,13 +396,17 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* Setup Instructions */}
         <div className="mt-10 p-5 bg-amber-50 border border-amber-200 rounded-2xl text-sm">
           <p className="font-medium text-amber-900 mb-2">Important Setup Steps</p>
           <ol className="list-decimal list-inside space-y-1 text-amber-800">
-            <li>Go to Supabase → Storage → Create a new bucket named <strong>product-images</strong></li>
-            <li>Make the bucket <strong>Public</strong></li>
-            <li>Go to Storage → Policies and allow public uploads/reads (or use the SQL below)</li>
+            <li>
+              Go to Supabase → Storage → Create a new bucket named{" "}
+              <strong>product-images</strong>
+            </li>
+            <li>
+              Make the bucket <strong>Public</strong>
+            </li>
+            <li>Run the storage policies SQL I gave you earlier</li>
           </ol>
         </div>
       </main>
