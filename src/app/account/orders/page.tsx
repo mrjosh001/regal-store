@@ -41,7 +41,7 @@ export default function OrdersPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#faf9f7]">
-          <p className="text-black/40">Loading...</p>
+          <p className="text-black/40">Loading orders...</p>
         </div>
       }
     >
