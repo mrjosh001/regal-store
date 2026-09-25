@@ -21,6 +21,7 @@ export default function AdminPage() {
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -37,16 +38,31 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function init() {
-      // Dynamically import to avoid build-time env issues
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
 
       const { data: { user } } = await supabase.auth.getUser();
+
       if (!user) {
         router.push("/sign-in");
         return;
       }
-      setUser(user);
+
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name, email")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile || profile.role !== "admin") {
+        setLoading(false);
+        setIsAdmin(false);
+        return;
+      }
+
+      setUser({ ...user, ...profile });
+      setIsAdmin(true);
 
       const { data } = await supabase
         .from("products")
@@ -182,7 +198,32 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#faf9f7]">
-        <p className="text-black/50">Loading admin...</p>
+        <p className="text-black/50">Checking access...</p>
+      </div>
+    );
+  }
+
+  // Not an admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf9f7] px-4">
+        <div className="bg-white rounded-2xl border border-black/5 p-8 max-w-md w-full text-center shadow-sm">
+          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold mb-2">Access Denied</h1>
+          <p className="text-sm text-black/50 mb-6">
+            You do not have permission to access the Admin Dashboard.
+          </p>
+          <Link
+            href="/"
+            className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full hover:bg-black/80 transition"
+          >
+            Back to Store
+          </Link>
+        </div>
       </div>
     );
   }
@@ -199,11 +240,13 @@ export default function AdminPage() {
               </div>
               <span className="font-semibold">Regal Store</span>
             </Link>
-            <span className="text-sm text-black/40 hidden sm:inline">Admin Dashboard</span>
+            <span className="text-sm bg-black text-white px-2.5 py-0.5 rounded-full">Admin</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-black/50 hidden sm:inline">{user?.email}</span>
+            <span className="text-sm text-black/50 hidden sm:inline">
+              {user?.full_name || user?.email}
+            </span>
             <button
               onClick={handleSignOut}
               className="text-sm px-4 py-2 border border-black/10 rounded-full hover:bg-black/5 transition"
@@ -224,10 +267,34 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <p className="text-sm text-black/50">Total Products</p>
+            <p className="text-2xl font-semibold mt-1">{products.length}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <p className="text-sm text-black/50">New Items</p>
+            <p className="text-2xl font-semibold mt-1">
+              {products.filter((p) => p.is_new).length}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <p className="text-sm text-black/50">Categories</p>
+            <p className="text-2xl font-semibold mt-1">
+              {new Set(products.map((p) => p.category)).size}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl border border-black/5 p-5">
+            <p className="text-sm text-black/50">Store Status</p>
+            <p className="text-2xl font-semibold mt-1 text-green-600">Live</p>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
-            <p className="text-sm text-black/50 mt-1">{products.length} products in store</p>
+            <p className="text-sm text-black/50 mt-1">Manage your store products</p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
@@ -394,20 +461,6 @@ export default function AdminPage() {
               ))}
             </div>
           )}
-        </div>
-
-        <div className="mt-10 p-5 bg-amber-50 border border-amber-200 rounded-2xl text-sm">
-          <p className="font-medium text-amber-900 mb-2">Important Setup Steps</p>
-          <ol className="list-decimal list-inside space-y-1 text-amber-800">
-            <li>
-              Go to Supabase → Storage → Create a new bucket named{" "}
-              <strong>product-images</strong>
-            </li>
-            <li>
-              Make the bucket <strong>Public</strong>
-            </li>
-            <li>Run the storage policies SQL I gave you earlier</li>
-          </ol>
         </div>
       </main>
     </div>
