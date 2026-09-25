@@ -14,10 +14,11 @@ export default function Header() {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
-        // Get profile for full name and role
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name, role")
@@ -92,14 +93,19 @@ export default function Header() {
                     Admin
                   </Link>
                 )}
-                <div className="flex items-center gap-2">
+
+                <Link
+                  href="/account"
+                  className="flex items-center gap-2 hover:opacity-80 transition"
+                >
                   <div className="w-8 h-8 bg-black/10 rounded-full flex items-center justify-center text-sm font-medium">
                     {(user.full_name || user.email || "U")[0].toUpperCase()}
                   </div>
                   <span className="text-sm font-medium hidden sm:block max-w-[120px] truncate">
                     {user.full_name || user.email?.split("@")[0]}
                   </span>
-                </div>
+                </Link>
+
                 <button
                   onClick={handleSignOut}
                   className="text-sm px-4 py-2 border border-black/10 rounded-full hover:bg-black/5 transition"
