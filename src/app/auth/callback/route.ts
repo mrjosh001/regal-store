@@ -11,10 +11,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Successful login / email confirmation → redirect to home
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
-  // Return the user to an error page with instructions
+  // Something went wrong → send to sign-in with error
   return NextResponse.redirect(`${origin}/sign-in?error=auth`);
 }
