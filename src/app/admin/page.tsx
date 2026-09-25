@@ -46,8 +46,7 @@ export default function AdminPage() {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("Fashion");
   const [isNew, setIsNew] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     async function init() {
@@ -78,14 +77,12 @@ export default function AdminPage() {
       setUser({ ...user, ...profile });
       setIsAdmin(true);
 
-      // Load products
       const { data: productsData } = await supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false });
       if (productsData) setProducts(productsData);
 
-      // Load users
       const { data: usersData } = await supabase
         .from("profiles")
         .select("id, full_name, email, role, created_at")
@@ -121,14 +118,6 @@ export default function AdminPage() {
     if (data) setUsers(data);
   }
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -136,33 +125,6 @@ export default function AdminPage() {
 
     try {
       const supabase = await getSupabase();
-      let imageUrl = null;
-
-      if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("product-images")
-          .upload(fileName, imageFile);
-
-        if (uploadError) {
-          if (
-            uploadError.message.includes("Bucket not found") ||
-            uploadError.message.includes("not found")
-          ) {
-            setMessage("Storage bucket 'product-images' not found. Create it in Supabase Storage.");
-            setSubmitting(false);
-            return;
-          }
-          throw uploadError;
-        }
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("product-images").getPublicUrl(fileName);
-        imageUrl = publicUrl;
-      }
 
       const { error } = await supabase.from("products").insert({
         name,
@@ -170,7 +132,7 @@ export default function AdminPage() {
         price: parseInt(price),
         category,
         is_new: isNew,
-        image_url: imageUrl,
+        image_url: imageUrl.trim() || null,
       });
 
       if (error) throw error;
@@ -180,8 +142,7 @@ export default function AdminPage() {
       setPrice("");
       setCategory("Fashion");
       setIsNew(true);
-      setImageFile(null);
-      setImagePreview(null);
+      setImageUrl("");
       setShowForm(false);
       setMessage("Product added successfully!");
       await fetchProducts();
@@ -251,13 +212,8 @@ export default function AdminPage() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f4] px-4">
         <div className="bg-white rounded-2xl border border-black/5 p-8 max-w-md w-full text-center shadow-sm">
           <h1 className="text-xl font-semibold mb-2">Access Denied</h1>
-          <p className="text-sm text-black/50 mb-6">
-            Only admins can access this dashboard.
-          </p>
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full"
-          >
+          <p className="text-sm text-black/50 mb-6">Only admins can access this dashboard.</p>
+          <Link href="/" className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full">
             Back to Store
           </Link>
         </div>
@@ -267,7 +223,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f4] flex">
-      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-black/5 hidden md:flex flex-col fixed h-full">
         <div className="p-5 border-b border-black/5">
           <Link href="/" className="flex items-center gap-2">
@@ -293,9 +248,7 @@ export default function AdminPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                activeTab === tab.id
-                  ? "bg-black text-white"
-                  : "text-black/60 hover:bg-black/5"
+                activeTab === tab.id ? "bg-black text-white" : "text-black/60 hover:bg-black/5"
               }`}
             >
               {tab.label}
@@ -309,24 +262,17 @@ export default function AdminPage() {
               {(user?.full_name || user?.email || "A")[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">
-                {user?.full_name || "Admin"}
-              </p>
+              <p className="text-sm font-medium truncate">{user?.full_name || "Admin"}</p>
               <p className="text-xs text-black/40 truncate">{user?.email}</p>
             </div>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full text-sm py-2 border border-black/10 rounded-xl hover:bg-black/5 transition"
-          >
+          <button onClick={handleSignOut} className="w-full text-sm py-2 border border-black/10 rounded-xl hover:bg-black/5">
             Sign out
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 md:ml-64">
-        {/* Mobile header */}
         <header className="md:hidden bg-white border-b border-black/5 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
           <span className="font-semibold">Admin</span>
           <div className="flex gap-2">
@@ -348,17 +294,13 @@ export default function AdminPage() {
           {message && (
             <div className="mb-6 px-4 py-3 bg-black text-white text-sm rounded-xl flex items-center justify-between">
               <span>{message}</span>
-              <button onClick={() => setMessage(null)} className="text-white/70">
-                ✕
-              </button>
+              <button onClick={() => setMessage(null)} className="text-white/70">✕</button>
             </div>
           )}
 
-          {/* OVERVIEW TAB */}
           {activeTab === "overview" && (
             <div>
               <h1 className="text-2xl font-semibold tracking-tight mb-6">Overview</h1>
-
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white rounded-2xl border border-black/5 p-5">
                   <p className="text-sm text-black/50">Total Products</p>
@@ -366,9 +308,7 @@ export default function AdminPage() {
                 </div>
                 <div className="bg-white rounded-2xl border border-black/5 p-5">
                   <p className="text-sm text-black/50">New Items</p>
-                  <p className="text-3xl font-semibold mt-1">
-                    {products.filter((p) => p.is_new).length}
-                  </p>
+                  <p className="text-3xl font-semibold mt-1">{products.filter((p) => p.is_new).length}</p>
                 </div>
                 <div className="bg-white rounded-2xl border border-black/5 p-5">
                   <p className="text-sm text-black/50">Total Users</p>
@@ -376,34 +316,19 @@ export default function AdminPage() {
                 </div>
                 <div className="bg-white rounded-2xl border border-black/5 p-5">
                   <p className="text-sm text-black/50">Admins</p>
-                  <p className="text-3xl font-semibold mt-1">
-                    {users.filter((u) => u.role === "admin").length}
-                  </p>
+                  <p className="text-3xl font-semibold mt-1">{users.filter((u) => u.role === "admin").length}</p>
                 </div>
               </div>
-
               <div className="bg-white rounded-2xl border border-black/5 p-6">
                 <h2 className="font-medium mb-4">Quick Actions</h2>
                 <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => {
-                      setActiveTab("products");
-                      setShowForm(true);
-                    }}
-                    className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full"
-                  >
+                  <button onClick={() => { setActiveTab("products"); setShowForm(true); }} className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full">
                     + Add Product
                   </button>
-                  <button
-                    onClick={() => setActiveTab("users")}
-                    className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5"
-                  >
+                  <button onClick={() => setActiveTab("users")} className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5">
                     Manage Users
                   </button>
-                  <Link
-                    href="/"
-                    className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5"
-                  >
+                  <Link href="/" className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5">
                     View Store
                   </Link>
                 </div>
@@ -411,7 +336,6 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* PRODUCTS TAB */}
           {activeTab === "products" && (
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -419,10 +343,7 @@ export default function AdminPage() {
                   <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
                   <p className="text-sm text-black/50 mt-1">{products.length} products</p>
                 </div>
-                <button
-                  onClick={() => setShowForm(!showForm)}
-                  className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full"
-                >
+                <button onClick={() => setShowForm(!showForm)} className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full">
                   {showForm ? "Cancel" : "+ Add Product"}
                 </button>
               </div>
@@ -434,45 +355,27 @@ export default function AdminPage() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Name *</label>
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                        />
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Price (₦) *</label>
-                        <input
-                          type="number"
-                          value={price}
-                          onChange={(e) => setPrice(e.target.value)}
-                          required
-                          min="0"
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                        />
+                        <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0"
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10" />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Description</label>
-                      <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 resize-none"
-                      />
+                      <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
+                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 resize-none" />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Category</label>
-                        <select
-                          value={category}
-                          onChange={(e) => setCategory(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm"
-                        >
+                        <select value={category} onChange={(e) => setCategory(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm">
                           <option>Fashion</option>
                           <option>Electronics</option>
                           <option>Home</option>
@@ -483,39 +386,34 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-end">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isNew}
-                            onChange={(e) => setIsNew(e.target.checked)}
-                            className="w-4 h-4"
-                          />
+                          <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} className="w-4 h-4" />
                           <span className="text-sm font-medium">Mark as New</span>
                         </label>
                       </div>
                     </div>
 
+                    {/* IMAGE URL - Primary method */}
                     <div>
-                      <label className="block text-sm font-medium mb-1.5">Photo</label>
-                      <div className="flex items-start gap-4">
-                        <label className="flex-1 cursor-pointer">
-                          <div className="border-2 border-dashed border-black/15 rounded-xl p-5 text-center text-sm text-black/50">
-                            {imageFile ? imageFile.name : "Click to upload"}
-                          </div>
-                          <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                        </label>
-                        {imagePreview && (
-                          <div className="relative w-20 h-20 rounded-xl overflow-hidden border">
-                            <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-                          </div>
-                        )}
-                      </div>
+                      <label className="block text-sm font-medium mb-1.5">Image URL</label>
+                      <input
+                        type="url"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://example.com/photo.jpg"
+                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                      />
+                      <p className="text-xs text-black/40 mt-1.5">
+                        Paste any image link (from Google, Unsplash, your phone, etc.)
+                      </p>
+                      {imageUrl && (
+                        <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden border border-black/10">
+                          <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized />
+                        </div>
+                      )}
                     </div>
 
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="px-8 py-3 bg-black text-white text-sm font-medium rounded-full disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={submitting}
+                      className="px-8 py-3 bg-black text-white text-sm font-medium rounded-full disabled:opacity-50">
                       {submitting ? "Adding..." : "Add Product"}
                     </button>
                   </form>
@@ -531,11 +429,9 @@ export default function AdminPage() {
                       <div key={product.id} className="flex items-center gap-4 p-4">
                         <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-black/5 flex-shrink-0">
                           {product.image_url ? (
-                            <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+                            <Image src={product.image_url} alt={product.name} fill className="object-cover" unoptimized />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs text-black/30">
-                              —
-                            </div>
+                            <div className="w-full h-full flex items-center justify-center text-xs text-black/30">—</div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -545,10 +441,8 @@ export default function AdminPage() {
                             {product.is_new && <span className="ml-2 text-green-600">New</span>}
                           </p>
                         </div>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-sm text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg"
-                        >
+                        <button onClick={() => handleDelete(product.id)}
+                          className="text-sm text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg">
                           Delete
                         </button>
                       </div>
@@ -559,16 +453,12 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* USERS TAB */}
           {activeTab === "users" && (
             <div>
               <div className="mb-6">
                 <h1 className="text-2xl font-semibold tracking-tight">Users & Admins</h1>
-                <p className="text-sm text-black/50 mt-1">
-                  Manage customers and promote users to admin
-                </p>
+                <p className="text-sm text-black/50 mt-1">Manage customers and promote users to admin</p>
               </div>
-
               <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
                 {users.length === 0 ? (
                   <div className="p-12 text-center text-black/40">No users yet</div>
@@ -580,25 +470,17 @@ export default function AdminPage() {
                           {(u.full_name || u.email || "U")[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">
-                            {u.full_name || "No name"}
-                          </p>
+                          <p className="font-medium text-sm truncate">{u.full_name || "No name"}</p>
                           <p className="text-xs text-black/40 truncate">{u.email}</p>
                         </div>
-                        <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                            u.role === "admin"
-                              ? "bg-black text-white"
-                              : "bg-black/5 text-black/60"
-                          }`}
-                        >
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                          u.role === "admin" ? "bg-black text-white" : "bg-black/5 text-black/60"
+                        }`}>
                           {u.role || "customer"}
                         </span>
                         {u.id !== user?.id && (
-                          <button
-                            onClick={() => toggleAdmin(u.id, u.role)}
-                            className="text-sm px-3 py-1.5 border border-black/10 rounded-lg hover:bg-black/5"
-                          >
+                          <button onClick={() => toggleAdmin(u.id, u.role)}
+                            className="text-sm px-3 py-1.5 border border-black/10 rounded-lg hover:bg-black/5">
                             {u.role === "admin" ? "Remove Admin" : "Make Admin"}
                           </button>
                         )}
