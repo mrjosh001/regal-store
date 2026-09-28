@@ -9,17 +9,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#000000",
-        ink: "#000000",
+        brand: {
+          white: "#FFFFFF",
+          surface: "#F8FAFC",
+          black: "#0A0A0A",
+          blue: "#2563EB",
+          "blue-dark": "#1D4ED8",
+          "blue-light": "#DBEAFE",
+        },
+        primary: "#0A0A0A",
+        ink: "#0A0A0A",
         "on-primary": "#ffffff",
         "canvas-light": "#ffffff",
-        "canvas-cream": "#fbfbf5",
-        "aloe-10": "#c1fbd4",
-        "pistachio-10": "#d4f9e0",
+        "canvas-cream": "#F8FAFC",
         "shade-30": "#d4d4d8",
         "shade-40": "#a1a1aa",
         "shade-50": "#71717a",
-        "hairline": "#e4e4e7",
+        hairline: "#e4e4e7",
       },
       borderRadius: {
         pill: "9999px",

@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --background: #fbfbf5;
-  --foreground: #000000;
+  --background: #F8FAFC;
+  --foreground: #0A0A0A;
+  --brand-blue: #2563EB;
+  --brand-blue-dark: #1D4ED8;
+  --brand-black: #0A0A0A;
+  --brand-white: #FFFFFF;
 }
 
 body {
@@ -16,5 +20,12 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

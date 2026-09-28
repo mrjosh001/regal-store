@@ -51,15 +51,15 @@ export default async function HomePage() {
   const trending = productList.slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
+    <div className="min-h-screen bg-brand-surface">
       <Header />
 
       {/* Hero */}
-      <section className="relative bg-black text-white overflow-hidden">
+      <section className="relative bg-brand-black text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
           <div className="max-w-2xl">
             <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-4">
-              Nigeria's Trusted Import Marketplace
+              Nigeria&apos;s Trusted Import Marketplace
             </p>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6">
               Premium products.<br />
@@ -71,7 +71,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="#products"
-                className="px-7 py-3.5 bg-white text-black text-sm font-medium rounded-full hover:bg-white/90 transition"
+                className="px-7 py-3.5 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition"
               >
                 Shop Now
               </Link>
@@ -87,7 +87,7 @@ export default async function HomePage() {
       </section>
 
       {/* Categories */}
-      <div className="sticky top-16 z-40 bg-[#faf9f7]/90 backdrop-blur-md border-b border-black/5">
+      <div className="sticky top-16 z-40 bg-brand-surface/90 backdrop-blur-md border-b border-black/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-2 overflow-x-auto py-3.5 scrollbar-hide">
             {categories.map((cat) => (
@@ -95,8 +95,8 @@ export default async function HomePage() {
                 key={cat}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
                   cat === "All"
-                    ? "bg-black text-white"
-                    : "bg-white border border-black/8 text-black/70 hover:border-black/30"
+                    ? "bg-brand-blue text-white"
+                    : "bg-white border border-black/8 text-black/70 hover:border-brand-blue/40 hover:text-brand-blue"
                 }`}
               >
                 {cat}
@@ -111,8 +111,8 @@ export default async function HomePage() {
         {newProducts.length > 0 && (
           <section className="pt-12 pb-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-medium tracking-tight">New Ins</h2>
-              <span className="text-xs text-black/40 uppercase tracking-wider">Just dropped</span>
+              <h2 className="text-lg font-medium tracking-tight text-brand-black">New Ins</h2>
+              <span className="text-xs text-brand-blue font-medium uppercase tracking-wider">Just dropped</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
               {newProducts.map((product) => (
@@ -125,7 +125,7 @@ export default async function HomePage() {
         {/* Trending */}
         <section className="py-10">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-medium tracking-tight">Trending Today</h2>
+            <h2 className="text-lg font-medium tracking-tight text-brand-black">Trending Today</h2>
             <span className="text-sm text-black/40">{productList.length} products</span>
           </div>
 
@@ -136,7 +136,7 @@ export default async function HomePage() {
             </div>
           ) : productList.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-16 h-16 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+              <div className="w-16 h-16 bg-brand-blue/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                 🛍️
               </div>
               <p className="text-black/50 font-medium mb-1">No products yet</p>
@@ -155,17 +155,17 @@ export default async function HomePage() {
 
         {/* Custom Order CTA */}
         <section className="py-8 mb-12">
-          <div className="bg-white rounded-3xl border border-black/5 p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="bg-white rounded-3xl border border-black/5 p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
             <div>
-              <p className="text-xs uppercase tracking-wider text-black/40 mb-2">Can't find it?</p>
-              <h3 className="text-xl font-medium tracking-tight mb-1">Request a custom order</h3>
+              <p className="text-xs uppercase tracking-wider text-brand-blue font-medium mb-2">Can&apos;t find it?</p>
+              <h3 className="text-xl font-medium tracking-tight mb-1 text-brand-black">Request a custom order</h3>
               <p className="text-sm text-black/50 max-w-md">
-                Send us a photo or link of what you want — we'll source it for you.
+                Send us a photo or link of what you want — we&apos;ll source it for you.
               </p>
             </div>
             <Link
               href="/custom-order"
-              className="px-6 py-3 bg-black text-white text-sm font-medium rounded-full whitespace-nowrap hover:bg-black/80 transition"
+              className="px-6 py-3 bg-brand-blue text-white text-sm font-medium rounded-full whitespace-nowrap hover:bg-brand-blue-dark transition"
             >
               Request Now →
             </Link>
@@ -179,10 +179,10 @@ export default async function HomePage() {
           <div className="flex flex-col md:flex-row justify-between gap-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-black rounded-full flex items-center justify-center">
+                <div className="w-7 h-7 bg-brand-blue rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-xs">R</span>
                 </div>
-                <span className="font-semibold">Regal Store</span>
+                <span className="font-semibold text-brand-black">Regal Store</span>
               </div>
               <p className="text-sm text-black/40 max-w-xs">
                 Premium products, carefully selected and delivered across Nigeria.
@@ -190,13 +190,13 @@ export default async function HomePage() {
             </div>
             <div className="flex gap-10 text-sm text-black/50">
               <div className="space-y-2">
-                <p className="font-medium text-black">Shop</p>
+                <p className="font-medium text-brand-black">Shop</p>
                 <p>Fashion</p>
                 <p>Electronics</p>
                 <p>Home</p>
               </div>
               <div className="space-y-2">
-                <p className="font-medium text-black">Support</p>
+                <p className="font-medium text-brand-black">Support</p>
                 <p>Help Center</p>
                 <p>Track Order</p>
                 <p>Contact</p>
@@ -220,11 +220,8 @@ function ProductCard({
   formatPrice: (n: number) => string;
 }) {
   return (
-    <Link
-      href={`/products/${product.id}`}
-      className="group block"
-    >
-      <div className="relative aspect-[3/4] bg-[#f0eeeb] rounded-2xl overflow-hidden mb-3">
+    <Link href={`/products/${product.id}`} className="group block">
+      <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-3 border border-black/5">
         {product.image_url ? (
           <Image
             src={product.image_url}
@@ -240,7 +237,7 @@ function ProductCard({
           </div>
         )}
         {product.is_new && (
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-white text-black text-[10px] font-semibold uppercase tracking-wider rounded-md shadow-sm">
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-brand-blue text-white text-[10px] font-semibold uppercase tracking-wider rounded-md">
             New
           </span>
         )}
@@ -249,10 +246,12 @@ function ProductCard({
         <p className="text-[11px] text-black/40 mb-0.5 uppercase tracking-wide">
           {product.category || "Product"}
         </p>
-        <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-1 group-hover:underline underline-offset-2">
+        <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-1 text-brand-black group-hover:text-brand-blue transition-colors">
           {product.name}
         </h3>
-        <p className="text-sm font-semibold tracking-tight">{formatPrice(product.price)}</p>
+        <p className="text-sm font-semibold tracking-tight text-brand-black">
+          {formatPrice(product.price)}
+        </p>
       </div>
     </Link>
   );

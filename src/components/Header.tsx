@@ -47,14 +47,16 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/5">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">R</span>
             </div>
-            <span className="text-xl font-semibold tracking-tight">Regal Store</span>
+            <span className="text-xl font-semibold tracking-tight text-brand-black">
+              Regal Store
+            </span>
           </Link>
 
           <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -62,7 +64,7 @@ export default function Header() {
               <input
                 type="search"
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-full border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
               />
               <svg
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40"
@@ -88,7 +90,7 @@ export default function Header() {
                 {user.role === "admin" && (
                   <Link
                     href="/admin"
-                    className="text-sm font-medium text-black/60 hover:text-black hidden sm:block"
+                    className="text-sm font-medium text-brand-blue hover:text-brand-blue-dark hidden sm:block"
                   >
                     Admin
                   </Link>
@@ -98,17 +100,17 @@ export default function Header() {
                   href="/account"
                   className="flex items-center gap-2 hover:opacity-80 transition"
                 >
-                  <div className="w-8 h-8 bg-black/10 rounded-full flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center text-sm font-semibold">
                     {(user.full_name || user.email || "U")[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium hidden sm:block max-w-[120px] truncate">
+                  <span className="text-sm font-medium hidden sm:block max-w-[120px] truncate text-brand-black">
                     {user.full_name || user.email?.split("@")[0]}
                   </span>
                 </Link>
 
                 <button
                   onClick={handleSignOut}
-                  className="text-sm px-4 py-2 border border-black/10 rounded-full hover:bg-black/5 transition"
+                  className="text-sm px-4 py-2 border border-black/10 rounded-full hover:bg-black/5 transition text-brand-black"
                 >
                   Sign out
                 </button>
@@ -116,7 +118,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/sign-in"
-                className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full hover:bg-black/80 transition-colors"
+                className="px-5 py-2.5 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition-colors"
               >
                 Sign in
               </Link>
