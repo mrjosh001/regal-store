@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import Header from "@/components/Header";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -29,32 +30,26 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-canvas-cream">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-hairline">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
-              </div>
-              <span className="text-xl font-semibold tracking-tight">Regal Store</span>
-            </Link>
-            <Link
-              href="/"
-              className="text-sm font-medium text-shade-50 hover:text-black"
-            >
-              ← Back to shop
-            </Link>
-          </div>
-        </div>
-      </header>
+  const whatsappMessage = encodeURIComponent(
+    `Hi Regal Store! I want to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}\n\nPlease confirm availability.`
+  );
+  const whatsappUrl = `https://wa.me/234?text=${whatsappMessage}`;
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid md:grid-cols-2 gap-10">
+  return (
+    <div className="min-h-screen bg-brand-surface">
+      <Header />
+
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-black/50 hover:text-brand-blue mb-6 transition"
+        >
+          ← Back to shop
+        </Link>
+
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Image */}
-          <div className="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden border border-hairline">
+          <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden border border-black/5">
             {product.image_url ? (
               <Image
                 src={product.image_url}
@@ -63,14 +58,15 @@ export default async function ProductPage({ params }: Props) {
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                unoptimized
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-shade-40">
+              <div className="w-full h-full flex items-center justify-center text-black/30">
                 No image
               </div>
             )}
             {product.is_new && (
-              <span className="absolute top-4 left-4 px-3 py-1 bg-aloe-10 text-ink text-xs font-medium rounded-pill">
+              <span className="absolute top-4 left-4 px-2.5 py-1 bg-brand-blue text-white text-[11px] font-semibold uppercase tracking-wider rounded-md">
                 New
               </span>
             )}
@@ -78,23 +74,47 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Details */}
           <div className="flex flex-col">
-            <p className="text-sm text-shade-50 mb-2">{product.category || "Uncategorized"}</p>
-            <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-4">
+            <p className="text-xs uppercase tracking-wider text-brand-blue font-medium mb-2">
+              {product.category || "Product"}
+            </p>
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-brand-black mb-3">
               {product.name}
             </h1>
-            <p className="text-2xl font-semibold mb-6">{formatPrice(product.price)}</p>
+            <p className="text-2xl font-semibold text-brand-black mb-6">
+              {formatPrice(product.price)}
+            </p>
 
-            {product.description && (
-              <p className="text-shade-50 leading-relaxed mb-8">{product.description}</p>
+            {product.description ? (
+              <p className="text-black/60 leading-relaxed mb-8 text-sm md:text-base">
+                {product.description}
+              </p>
+            ) : (
+              <p className="text-black/40 text-sm mb-8">
+                Premium quality product, carefully sourced for Regal Store customers.
+              </p>
             )}
 
             <div className="mt-auto space-y-3">
-              <button className="w-full py-3.5 bg-black text-white font-medium rounded-pill hover:bg-shade-70 transition-colors">
-                Add to Cart
-              </button>
-              <button className="w-full py-3.5 border border-hairline font-medium rounded-pill hover:border-black transition-colors">
-                Request this item
-              </button>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#25D366] text-white font-medium rounded-full hover:bg-[#1da851] transition"
+              >
+                <span>Order via WhatsApp</span>
+              </a>
+              <Link
+                href="/custom-order"
+                className="flex items-center justify-center w-full py-3.5 border border-black/10 text-brand-black font-medium rounded-full hover:border-brand-blue hover:text-brand-blue transition"
+              >
+                Request similar item
+              </Link>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-black/5 space-y-2 text-sm text-black/40">
+              <p>✓ Sourced from trusted suppliers</p>
+              <p>✓ Nationwide delivery available</p>
+              <p>✓ Chat with us before you pay</p>
             </div>
           </div>
         </div>
