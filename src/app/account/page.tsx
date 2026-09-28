@@ -80,7 +80,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#faf9f7]">
+      <div className="min-h-screen flex items-center justify-center bg-brand-surface">
         <p className="text-black/40">Loading account...</p>
       </div>
     );
@@ -107,20 +107,19 @@ export default function AccountPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
-      {/* Top bar */}
+    <div className="min-h-screen bg-brand-surface">
       <div className="bg-white border-b border-black/5 sticky top-0 z-40">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={() => setShowDrawer(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 text-lg"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10 text-lg"
           >
             ☰
           </button>
-          <span className="font-semibold text-sm">My Account</span>
+          <span className="font-semibold text-sm text-brand-black">My Account</span>
           <button
             onClick={() => setShowSettings(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10"
           >
             ⚙️
           </button>
@@ -129,32 +128,31 @@ export default function AccountPage() {
 
       <main className="max-w-lg mx-auto px-4 py-6">
         {message && (
-          <div className="mb-4 px-4 py-2.5 bg-black text-white text-sm rounded-xl flex justify-between">
+          <div className="mb-4 px-4 py-2.5 bg-brand-blue text-white text-sm rounded-xl flex justify-between">
             <span>{message}</span>
             <button onClick={() => setMessage(null)}>✕</button>
           </div>
         )}
 
-        {/* Profile header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => setShowAvatarPicker(true)}
-            className="relative w-16 h-16 rounded-full bg-black/10 flex items-center justify-center text-2xl"
+            className="relative w-16 h-16 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center text-2xl"
           >
             {selectedAvatar || (user?.full_name || user?.email || "U")[0].toUpperCase()}
-            <span className="absolute bottom-0 right-0 w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-[10px]">
+            <span className="absolute bottom-0 right-0 w-5 h-5 bg-brand-blue rounded-full flex items-center justify-center text-white text-[10px]">
               ✎
             </span>
           </button>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">
+            <h1 className="text-xl font-semibold tracking-tight text-brand-black">
               {user?.full_name || "Customer"}
             </h1>
             <p className="text-sm text-black/40">{user?.email}</p>
             {user?.role === "admin" && (
               <Link
                 href="/admin"
-                className="inline-block mt-1 text-xs font-medium bg-black text-white px-2.5 py-0.5 rounded-full"
+                className="inline-block mt-1 text-xs font-medium bg-brand-blue text-white px-2.5 py-0.5 rounded-full"
               >
                 Admin Dashboard →
               </Link>
@@ -162,7 +160,6 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Order Status Grid */}
         <div className="bg-white rounded-2xl border border-black/5 p-5 mb-4">
           <div className="grid grid-cols-4 gap-4">
             {orderStatuses.map((item) => (
@@ -171,10 +168,10 @@ export default function AccountPage() {
                 href={item.href}
                 className="flex flex-col items-center gap-1.5 group"
               >
-                <div className="w-11 h-11 rounded-full bg-black/5 flex items-center justify-center text-lg group-hover:bg-black/10 transition">
+                <div className="w-11 h-11 rounded-full bg-brand-blue/5 flex items-center justify-center text-lg group-hover:bg-brand-blue/15 transition">
                   {item.icon}
                 </div>
-                <span className="text-[11px] font-medium text-black/50 text-center">
+                <span className="text-[11px] font-medium text-black/50 text-center group-hover:text-brand-blue">
                   {item.label}
                 </span>
               </Link>
@@ -182,7 +179,6 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Quick Links */}
         <div className="bg-white rounded-2xl border border-black/5 p-5 mb-4">
           <div className="grid grid-cols-3 gap-4">
             {quickLinks.map((item) => (
@@ -191,10 +187,10 @@ export default function AccountPage() {
                 href={item.href}
                 className="flex flex-col items-center gap-1.5 group"
               >
-                <div className="w-11 h-11 rounded-full bg-black/5 flex items-center justify-center text-lg group-hover:bg-black/10 transition">
+                <div className="w-11 h-11 rounded-full bg-brand-blue/5 flex items-center justify-center text-lg group-hover:bg-brand-blue/15 transition">
                   {item.icon}
                 </div>
-                <span className="text-[11px] font-medium text-black/50 text-center leading-tight">
+                <span className="text-[11px] font-medium text-black/50 text-center leading-tight group-hover:text-brand-blue">
                   {item.label}
                 </span>
               </Link>
@@ -202,47 +198,45 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Empty state */}
         <div className="bg-white rounded-2xl border border-black/5 p-8 text-center">
           <p className="text-black/30 text-sm">No active orders right now</p>
           <Link
             href="/"
-            className="inline-block mt-4 px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full"
+            className="inline-block mt-4 px-5 py-2.5 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition"
           >
             Start Shopping
           </Link>
         </div>
       </main>
 
-      {/* LEFT DRAWER */}
       {showDrawer && (
         <div className="fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
           <div className="relative bg-white w-72 h-full shadow-xl flex flex-col">
             <div className="p-5 border-b border-black/5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-black/10 flex items-center justify-center text-xl">
+                <div className="w-12 h-12 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center text-xl">
                   {selectedAvatar || (user?.full_name || "U")[0].toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">{user?.full_name || "Customer"}</p>
+                  <p className="font-semibold text-sm text-brand-black">{user?.full_name || "Customer"}</p>
                   <p className="text-xs text-black/40">{user?.email}</p>
                 </div>
               </div>
             </div>
 
             <nav className="flex-1 p-3 space-y-1">
-              <Link href="/" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-black/5">
+              <Link href="/" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
                 🏠 Home / Store
               </Link>
-              <Link href="/account" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium bg-black/5">
+              <Link href="/account" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium bg-brand-blue/10 text-brand-blue">
                 👤 My Account
               </Link>
-              <Link href="/custom-order" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-black/5">
+              <Link href="/custom-order" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
                 ✨ Custom Order
               </Link>
               {user?.role === "admin" && (
-                <Link href="/admin" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-black/5">
+                <Link href="/admin" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
                   ⚙️ Admin Dashboard
                 </Link>
               )}
@@ -251,7 +245,7 @@ export default function AccountPage() {
                   setShowDrawer(false);
                   setShowSettings(true);
                 }}
-                className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium hover:bg-black/5"
+                className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5"
               >
                 🔧 Settings
               </button>
@@ -269,28 +263,27 @@ export default function AccountPage() {
         </div>
       )}
 
-      {/* Settings Sheet */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowSettings(false)} />
           <div className="relative bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 pb-10">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Settings</h2>
+              <h2 className="text-lg font-semibold text-brand-black">Settings</h2>
               <button onClick={() => setShowSettings(false)} className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center">
                 ✕
               </button>
             </div>
             <p className="text-sm text-black/40 mb-4">{user?.email}</p>
             <div className="space-y-2">
-              <div className="px-4 py-3.5 rounded-xl bg-black/[0.03]">
+              <div className="px-4 py-3.5 rounded-xl bg-brand-surface">
                 <p className="text-sm font-medium">Account & Security</p>
                 <p className="text-xs text-black/40">Email and password</p>
               </div>
-              <div className="px-4 py-3.5 rounded-xl bg-black/[0.03]">
+              <div className="px-4 py-3.5 rounded-xl bg-brand-surface">
                 <p className="text-sm font-medium">Delivery Preference</p>
                 <p className="text-xs text-black/40">Coming soon</p>
               </div>
-              <div className="px-4 py-3.5 rounded-xl bg-black/[0.03]">
+              <div className="px-4 py-3.5 rounded-xl bg-brand-surface">
                 <p className="text-sm font-medium">Addresses</p>
                 <p className="text-xs text-black/40">Coming soon</p>
               </div>
@@ -305,20 +298,19 @@ export default function AccountPage() {
         </div>
       )}
 
-      {/* Avatar Picker */}
       {showAvatarPicker && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowAvatarPicker(false)} />
           <div className="relative bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 pb-10">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Profile Picture</h2>
+              <h2 className="text-lg font-semibold text-brand-black">Profile Picture</h2>
               <button onClick={() => setShowAvatarPicker(false)} className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center">
                 ✕
               </button>
             </div>
 
             <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 rounded-full bg-black/10 flex items-center justify-center text-4xl">
+              <div className="w-24 h-24 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center text-4xl">
                 {selectedAvatar || (user?.full_name || "U")[0].toUpperCase()}
               </div>
             </div>
@@ -332,8 +324,8 @@ export default function AccountPage() {
                   disabled={saving}
                   className={`w-12 h-12 rounded-full flex items-center justify-center text-xl transition ${
                     selectedAvatar === emoji
-                      ? "bg-black text-white"
-                      : "bg-black/5 hover:bg-black/10"
+                      ? "bg-brand-blue text-white"
+                      : "bg-brand-blue/5 hover:bg-brand-blue/15"
                   }`}
                 >
                   {emoji}
