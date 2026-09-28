@@ -57,15 +57,17 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
+    <div className="min-h-screen bg-brand-surface flex flex-col">
       <header className="border-b border-black/5 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-xl font-semibold tracking-tight">Regal Store</span>
+              <span className="text-xl font-semibold tracking-tight text-brand-black">
+                Regal Store
+              </span>
             </Link>
           </div>
         </div>
@@ -75,14 +77,16 @@ export default function SignInPage() {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl border border-black/5 p-8 shadow-sm">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-semibold tracking-tight mb-2">Welcome back</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-brand-black mb-2">
+                Welcome back
+              </h1>
               <p className="text-sm text-black/50">Sign in to your Regal Store account</p>
             </div>
 
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-black/10 rounded-xl text-sm font-medium hover:bg-black/[0.02] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-black/10 rounded-xl text-sm font-medium hover:bg-brand-blue/5 transition-colors disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -104,23 +108,20 @@ export default function SignInPage() {
 
             <form onSubmit={handleEmailSignIn} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5">Email</label>
+                <label className="block text-sm font-medium mb-1.5 text-brand-black">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-medium">Password</label>
-                  <button type="button" className="text-xs text-black/50 hover:text-black">
-                    Forgot password?
-                  </button>
+                  <label className="block text-sm font-medium text-brand-black">Password</label>
                 </div>
                 <input
                   type="password"
@@ -128,20 +129,18 @@ export default function SignInPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
                 />
               </div>
 
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
-                  {error}
-                </div>
+                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-black text-white font-medium rounded-full hover:bg-black/80 transition-colors disabled:opacity-50 mt-2"
+                className="w-full py-3.5 bg-brand-blue text-white font-medium rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-50 mt-2"
               >
                 {loading ? "Signing in..." : "Sign in"}
               </button>
@@ -149,14 +148,14 @@ export default function SignInPage() {
 
             <p className="text-center text-sm text-black/50 mt-6">
               Don&apos;t have an account?{" "}
-              <Link href="/sign-up" className="text-black font-medium hover:underline">
+              <Link href="/sign-up" className="text-brand-blue font-medium hover:underline">
                 Create one
               </Link>
             </p>
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-black/40 hover:text-black">
+            <Link href="/" className="text-sm text-black/40 hover:text-brand-blue">
               ← Back to shop
             </Link>
           </div>

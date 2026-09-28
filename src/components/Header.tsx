@@ -8,6 +8,7 @@ export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function getUser() {
@@ -46,6 +47,12 @@ export default function Header() {
     router.refresh();
   }
 
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = search.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,10 +66,12 @@ export default function Header() {
             </span>
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <input
                 type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-full border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
               />
@@ -80,9 +89,16 @@ export default function Header() {
                 />
               </svg>
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/search"
+              className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10"
+            >
+              🔍
+            </Link>
+
             {loading ? (
               <div className="w-20 h-9 bg-black/5 rounded-full animate-pulse" />
             ) : user ? (
