@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
+import ProductActions from "@/components/ProductActions";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -30,11 +31,6 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  const whatsappMessage = encodeURIComponent(
-    `Hi Regal Store! I want to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}\n\nPlease confirm availability.`
-  );
-  const whatsappUrl = `https://wa.me/234?text=${whatsappMessage}`;
-
   return (
     <div className="min-h-screen bg-brand-surface">
       <Header />
@@ -48,7 +44,6 @@ export default async function ProductPage({ params }: Props) {
         </Link>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-          {/* Image */}
           <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden border border-black/5">
             {product.image_url ? (
               <Image
@@ -72,7 +67,6 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
 
-          {/* Details */}
           <div className="flex flex-col">
             <p className="text-xs uppercase tracking-wider text-brand-blue font-medium mb-2">
               {product.category || "Product"}
@@ -94,22 +88,7 @@ export default async function ProductPage({ params }: Props) {
               </p>
             )}
 
-            <div className="mt-auto space-y-3">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#25D366] text-white font-medium rounded-full hover:bg-[#1da851] transition"
-              >
-                <span>Order via WhatsApp</span>
-              </a>
-              <Link
-                href="/custom-order"
-                className="flex items-center justify-center w-full py-3.5 border border-black/10 text-brand-black font-medium rounded-full hover:border-brand-blue hover:text-brand-blue transition"
-              >
-                Request similar item
-              </Link>
-            </div>
+            <ProductActions product={product} />
 
             <div className="mt-8 pt-6 border-t border-black/5 space-y-2 text-sm text-black/40">
               <p>✓ Sourced from trusted suppliers</p>

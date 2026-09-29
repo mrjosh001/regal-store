@@ -3,12 +3,23 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { cartCount } from "@/lib/cart";
 
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    setCount(cartCount());
+    function onCart() {
+      setCount(cartCount());
+    }
+    window.addEventListener("cart-updated", onCart);
+    return () => window.removeEventListener("cart-updated", onCart);
+  }, []);
 
   useEffect(() => {
     async function getUser() {
@@ -91,7 +102,7 @@ export default function Header() {
             </div>
           </form>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/search"
               className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10"
@@ -99,8 +110,20 @@ export default function Header() {
               🔍
             </Link>
 
+            <Link
+              href="/cart"
+              className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10"
+            >
+              <span className="text-lg">🛒</span>
+              {count > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 min-w-[18px] px-1 bg-brand-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {count > 9 ? "9+" : count}
+                </span>
+              )}
+            </Link>
+
             {loading ? (
-              <div className="w-20 h-9 bg-black/5 rounded-full animate-pulse" />
+              <div className="w-16 h-9 bg-black/5 rounded-full animate-pulse" />
             ) : user ? (
               <>
                 {user.role === "admin" && (
@@ -119,14 +142,11 @@ export default function Header() {
                   <div className="w-8 h-8 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center text-sm font-semibold">
                     {(user.full_name || user.email || "U")[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium hidden sm:block max-w-[120px] truncate text-brand-black">
-                    {user.full_name || user.email?.split("@")[0]}
-                  </span>
                 </Link>
 
                 <button
                   onClick={handleSignOut}
-                  className="text-sm px-4 py-2 border border-black/10 rounded-full hover:bg-black/5 transition text-brand-black"
+                  className="text-sm px-3 py-2 border border-black/10 rounded-full hover:bg-black/5 transition text-brand-black hidden sm:block"
                 >
                   Sign out
                 </button>
@@ -134,7 +154,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/sign-in"
-                className="px-5 py-2.5 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition-colors"
+                className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition-colors"
               >
                 Sign in
               </Link>
