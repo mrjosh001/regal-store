@@ -10,6 +10,7 @@ type Product = {
   name: string;
   description: string | null;
   price: number;
+  compare_at_price?: number | null;
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
@@ -44,6 +45,7 @@ export default function AdminPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [compareAtPrice, setCompareAtPrice] = useState("");
   const [category, setCategory] = useState("Fashion");
   const [isNew, setIsNew] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
@@ -122,6 +124,7 @@ export default function AdminPage() {
     setName("");
     setDescription("");
     setPrice("");
+    setCompareAtPrice("");
     setCategory("Fashion");
     setIsNew(true);
     setImageUrl("");
@@ -134,6 +137,7 @@ export default function AdminPage() {
     setName(product.name);
     setDescription(product.description || "");
     setPrice(String(product.price));
+    setCompareAtPrice(product.compare_at_price ? String(product.compare_at_price) : "");
     setCategory(product.category || "Fashion");
     setIsNew(!!product.is_new);
     setImageUrl(product.image_url || "");
@@ -148,13 +152,14 @@ export default function AdminPage() {
 
     try {
       const supabase = await getSupabase();
-      const payload = {
+      const payload: Record<string, unknown> = {
         name,
         description: description || null,
         price: parseInt(price),
         category,
         is_new: isNew,
         image_url: imageUrl.trim() || null,
+        compare_at_price: compareAtPrice ? parseInt(compareAtPrice) : null,
       };
 
       if (editingId) {
@@ -401,10 +406,18 @@ export default function AdminPage() {
                           className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1.5">Price (₦) *</label>
+                        <label className="block text-sm font-medium mb-1.5">Sale Price (₦) *</label>
                         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0"
                           className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5">Original Price (₦)</label>
+                      <input type="number" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} min="0"
+                        placeholder="Leave empty if not on sale"
+                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
+                      <p className="text-xs text-black/40 mt-1">If higher than sale price, shows “-% OFF” badge on the store</p>
                     </div>
 
                     <div>
