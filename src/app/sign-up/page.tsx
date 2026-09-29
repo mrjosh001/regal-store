@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
-  const router = useRouter();
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,9 +26,7 @@ export default function SignUpPage() {
       email,
       password,
       options: {
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
       },
     });
 
@@ -65,20 +60,20 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#faf9f7] flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-brand-surface flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-md bg-white rounded-2xl border border-black/5 p-8 shadow-sm text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-12 h-12 bg-brand-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold mb-2">Check your email</h1>
+          <h1 className="text-xl font-semibold mb-2 text-brand-black">Check your email</h1>
           <p className="text-sm text-black/50 mb-6">
             We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
           </p>
           <Link
             href="/sign-in"
-            className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full hover:bg-black/80 transition"
+            className="inline-block px-6 py-3 bg-brand-blue text-white text-sm font-medium rounded-full hover:bg-brand-blue-dark transition"
           >
             Back to Sign in
           </Link>
@@ -88,15 +83,15 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
+    <div className="min-h-screen bg-brand-surface flex flex-col">
       <header className="border-b border-black/5 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-xl font-semibold tracking-tight">Regal Store</span>
+              <span className="text-xl font-semibold tracking-tight text-brand-black">Regal Store</span>
             </Link>
           </div>
         </div>
@@ -106,14 +101,14 @@ export default function SignUpPage() {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl border border-black/5 p-8 shadow-sm">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-semibold tracking-tight mb-2">Create account</h1>
+              <h1 className="text-2xl font-semibold tracking-tight mb-2 text-brand-black">Create account</h1>
               <p className="text-sm text-black/50">Join Regal Store today</p>
             </div>
 
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-black/10 rounded-xl text-sm font-medium hover:bg-black/[0.02] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-black/10 rounded-xl text-sm font-medium hover:bg-brand-blue/5 transition-colors disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -135,31 +130,31 @@ export default function SignUpPage() {
 
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium mb-1.5 text-brand-black">Full Name</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5">Email</label>
+                <label className="block text-sm font-medium mb-1.5 text-brand-black">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5">Password</label>
+                <label className="block text-sm font-medium mb-1.5 text-brand-black">Password</label>
                 <input
                   type="password"
                   value={password}
@@ -167,20 +162,18 @@ export default function SignUpPage() {
                   placeholder="At least 6 characters"
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/40"
                 />
               </div>
 
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
-                  {error}
-                </div>
+                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-black text-white font-medium rounded-full hover:bg-black/80 transition-colors disabled:opacity-50 mt-2"
+                className="w-full py-3.5 bg-brand-blue text-white font-medium rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-50 mt-2"
               >
                 {loading ? "Creating account..." : "Create account"}
               </button>
@@ -188,14 +181,14 @@ export default function SignUpPage() {
 
             <p className="text-center text-sm text-black/50 mt-6">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-black font-medium hover:underline">
+              <Link href="/sign-in" className="text-brand-blue font-medium hover:underline">
                 Sign in
               </Link>
             </p>
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-black/40 hover:text-black">
+            <Link href="/" className="text-sm text-black/40 hover:text-brand-blue">
               ← Back to shop
             </Link>
           </div>
