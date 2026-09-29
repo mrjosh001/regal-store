@@ -8,6 +8,7 @@ type Product = {
   id: string;
   name: string;
   price: number;
+  compare_at_price?: number | null;
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
@@ -21,6 +22,11 @@ function formatPrice(price: number) {
     currency: "NGN",
     minimumFractionDigits: 0,
   }).format(price);
+}
+
+function discountPercent(price: number, compare: number) {
+  if (!compare || compare <= price) return null;
+  return Math.round(((compare - price) / compare) * 100);
 }
 
 export default function ProductGrid({ products }: { products: Product[] }) {
@@ -38,7 +44,6 @@ export default function ProductGrid({ products }: { products: Product[] }) {
 
   return (
     <>
-      {/* Categories */}
       <div className="sticky top-16 z-40 bg-brand-surface/90 backdrop-blur-md border-b border-black/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-2 overflow-x-auto py-3.5 scrollbar-hide">
@@ -60,7 +65,6 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="products">
-        {/* New Ins */}
         {newProducts.length > 0 && active === "All" && (
           <section className="pt-12 pb-6">
             <div className="flex items-center justify-between mb-6">
@@ -77,7 +81,6 @@ export default function ProductGrid({ products }: { products: Product[] }) {
           </section>
         )}
 
-        {/* Main grid */}
         <section className="py-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-medium tracking-tight text-brand-black">
@@ -104,6 +107,10 @@ export default function ProductGrid({ products }: { products: Product[] }) {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const off = product.compare_at_price
+    ? discountPercent(product.price, product.compare_at_price)
+    : null;
+
   return (
     <Link href={`/products/${product.id}`} className="group block">
       <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-3 border border-black/5">
@@ -121,11 +128,18 @@ function ProductCard({ product }: { product: Product }) {
             No image
           </div>
         )}
-        {product.is_new && (
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-brand-blue text-white text-[10px] font-semibold uppercase tracking-wider rounded-md">
-            New
-          </span>
-        )}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
+          {off && (
+            <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-semibold uppercase tracking-wider rounded-md">
+              -{off}%
+            </span>
+          )}
+          {product.is_new && (
+            <span className="px-2 py-0.5 bg-brand-blue text-white text-[10px] font-semibold uppercase tracking-wider rounded-md">
+              New
+            </span>
+          )}
+        </div>
       </div>
       <div className="px-0.5">
         <p className="text-[11px] text-black/40 mb-0.5 uppercase tracking-wide">
@@ -134,9 +148,16 @@ function ProductCard({ product }: { product: Product }) {
         <h3 className="text-sm font-medium leading-snug line-clamp-2 mb-1 text-brand-black group-hover:text-brand-blue transition-colors">
           {product.name}
         </h3>
-        <p className="text-sm font-semibold tracking-tight text-brand-black">
-          {formatPrice(product.price)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold tracking-tight text-brand-black">
+            {formatPrice(product.price)}
+          </p>
+          {off && product.compare_at_price && (
+            <p className="text-xs text-black/40 line-through">
+              {formatPrice(product.compare_at_price)}
+            </p>
+          )}
+        </div>
       </div>
     </Link>
   );

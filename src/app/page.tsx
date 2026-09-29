@@ -7,6 +7,7 @@ type Product = {
   id: string;
   name: string;
   price: number;
+  compare_at_price?: number | null;
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
@@ -22,10 +23,20 @@ export default async function HomePage() {
     } else {
       const supabase = await createClient();
 
-      const { data: products, error } = await supabase
+      // Try with compare_at_price; fall back if column not yet added
+      let { data: products, error } = await supabase
         .from("products")
-        .select("id, name, price, image_url, category, is_new")
+        .select("id, name, price, compare_at_price, image_url, category, is_new")
         .order("created_at", { ascending: false });
+
+      if (error) {
+        const fallback = await supabase
+          .from("products")
+          .select("id, name, price, image_url, category, is_new")
+          .order("created_at", { ascending: false });
+        products = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) {
         fetchError = error.message;
@@ -41,7 +52,6 @@ export default async function HomePage() {
     <div className="min-h-screen bg-brand-surface">
       <Header />
 
-      {/* Hero */}
       <section className="relative bg-brand-black text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
           <div className="max-w-2xl">
@@ -112,7 +122,6 @@ export default async function HomePage() {
         <ProductGrid products={productList} />
       )}
 
-      {/* Custom Order CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-12">
         <div className="bg-white rounded-3xl border border-black/5 p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
           <div>
@@ -135,7 +144,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-black/5 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row justify-between gap-8">
