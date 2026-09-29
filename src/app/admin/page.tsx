@@ -37,10 +37,10 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -118,6 +118,29 @@ export default function AdminPage() {
     if (data) setUsers(data);
   }
 
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setPrice("");
+    setCategory("Fashion");
+    setIsNew(true);
+    setImageUrl("");
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function startEdit(product: Product) {
+    setEditingId(product.id);
+    setName(product.name);
+    setDescription(product.description || "");
+    setPrice(String(product.price));
+    setCategory(product.category || "Fashion");
+    setIsNew(!!product.is_new);
+    setImageUrl(product.image_url || "");
+    setShowForm(true);
+    setActiveTab("products");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -125,29 +148,32 @@ export default function AdminPage() {
 
     try {
       const supabase = await getSupabase();
-
-      const { error } = await supabase.from("products").insert({
+      const payload = {
         name,
         description: description || null,
         price: parseInt(price),
         category,
         is_new: isNew,
         image_url: imageUrl.trim() || null,
-      });
+      };
 
-      if (error) throw error;
+      if (editingId) {
+        const { error } = await supabase
+          .from("products")
+          .update(payload)
+          .eq("id", editingId);
+        if (error) throw error;
+        setMessage("Product updated!");
+      } else {
+        const { error } = await supabase.from("products").insert(payload);
+        if (error) throw error;
+        setMessage("Product added!");
+      }
 
-      setName("");
-      setDescription("");
-      setPrice("");
-      setCategory("Fashion");
-      setIsNew(true);
-      setImageUrl("");
-      setShowForm(false);
-      setMessage("Product added successfully!");
+      resetForm();
       await fetchProducts();
     } catch (err: any) {
-      setMessage(err.message || "Failed to add product");
+      setMessage(err.message || "Failed to save product");
     } finally {
       setSubmitting(false);
     }
@@ -167,9 +193,7 @@ export default function AdminPage() {
 
   async function toggleAdmin(userId: string, currentRole: string | null) {
     const newRole = currentRole === "admin" ? "customer" : "admin";
-    const action = newRole === "admin" ? "promote to Admin" : "remove Admin role";
-
-    if (!confirm(`Are you sure you want to ${action}?`)) return;
+    if (!confirm(`Set this user as ${newRole}?`)) return;
 
     const supabase = await getSupabase();
     const { error } = await supabase
@@ -178,7 +202,7 @@ export default function AdminPage() {
       .eq("id", userId);
 
     if (!error) {
-      setMessage(`User ${newRole === "admin" ? "promoted to Admin" : "set to Customer"}`);
+      setMessage(`User set to ${newRole}`);
       await fetchUsers();
     } else {
       setMessage(error.message);
@@ -201,7 +225,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f4]">
+      <div className="min-h-screen flex items-center justify-center bg-brand-surface">
         <p className="text-black/50">Loading admin...</p>
       </div>
     );
@@ -209,11 +233,11 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f4] px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-brand-surface px-4">
         <div className="bg-white rounded-2xl border border-black/5 p-8 max-w-md w-full text-center shadow-sm">
-          <h1 className="text-xl font-semibold mb-2">Access Denied</h1>
+          <h1 className="text-xl font-semibold mb-2 text-brand-black">Access Denied</h1>
           <p className="text-sm text-black/50 mb-6">Only admins can access this dashboard.</p>
-          <Link href="/" className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full">
+          <Link href="/" className="inline-block px-6 py-3 bg-brand-blue text-white text-sm font-medium rounded-full">
             Back to Store
           </Link>
         </div>
@@ -222,15 +246,15 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f4] flex">
+    <div className="min-h-screen bg-brand-surface flex">
       <aside className="w-64 bg-white border-r border-black/5 hidden md:flex flex-col fixed h-full">
         <div className="p-5 border-b border-black/5">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">R</span>
             </div>
             <div>
-              <p className="font-semibold text-sm">Regal Store</p>
+              <p className="font-semibold text-sm text-brand-black">Regal Store</p>
               <p className="text-xs text-black/40">Admin</p>
             </div>
           </Link>
@@ -248,7 +272,9 @@ export default function AdminPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                activeTab === tab.id ? "bg-black text-white" : "text-black/60 hover:bg-black/5"
+                activeTab === tab.id
+                  ? "bg-brand-blue text-white"
+                  : "text-black/60 hover:bg-brand-blue/5"
               }`}
             >
               {tab.label}
@@ -258,11 +284,11 @@ export default function AdminPage() {
 
         <div className="p-4 border-t border-black/5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 bg-black/10 rounded-full flex items-center justify-center text-sm font-medium">
+            <div className="w-9 h-9 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center text-sm font-medium">
               {(user?.full_name || user?.email || "A")[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">{user?.full_name || "Admin"}</p>
+              <p className="text-sm font-medium truncate text-brand-black">{user?.full_name || "Admin"}</p>
               <p className="text-xs text-black/40 truncate">{user?.email}</p>
             </div>
           </div>
@@ -274,14 +300,14 @@ export default function AdminPage() {
 
       <div className="flex-1 md:ml-64">
         <header className="md:hidden bg-white border-b border-black/5 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-          <span className="font-semibold">Admin</span>
+          <span className="font-semibold text-brand-black">Admin</span>
           <div className="flex gap-2">
             {(["overview", "products", "users"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`text-xs px-3 py-1.5 rounded-full ${
-                  activeTab === tab ? "bg-black text-white" : "bg-black/5"
+                  activeTab === tab ? "bg-brand-blue text-white" : "bg-black/5"
                 }`}
               >
                 {tab === "users" ? "Users" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -292,7 +318,7 @@ export default function AdminPage() {
 
         <main className="p-4 sm:p-6 lg:p-8 max-w-6xl">
           {message && (
-            <div className="mb-6 px-4 py-3 bg-black text-white text-sm rounded-xl flex items-center justify-between">
+            <div className="mb-6 px-4 py-3 bg-brand-blue text-white text-sm rounded-xl flex items-center justify-between">
               <span>{message}</span>
               <button onClick={() => setMessage(null)} className="text-white/70">✕</button>
             </div>
@@ -300,32 +326,37 @@ export default function AdminPage() {
 
           {activeTab === "overview" && (
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight mb-6">Overview</h1>
+              <h1 className="text-2xl font-semibold tracking-tight mb-6 text-brand-black">Overview</h1>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-sm text-black/50">Total Products</p>
-                  <p className="text-3xl font-semibold mt-1">{products.length}</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-sm text-black/50">New Items</p>
-                  <p className="text-3xl font-semibold mt-1">{products.filter((p) => p.is_new).length}</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-sm text-black/50">Total Users</p>
-                  <p className="text-3xl font-semibold mt-1">{users.length}</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-sm text-black/50">Admins</p>
-                  <p className="text-3xl font-semibold mt-1">{users.filter((u) => u.role === "admin").length}</p>
-                </div>
+                {[
+                  { label: "Total Products", value: products.length },
+                  { label: "New Items", value: products.filter((p) => p.is_new).length },
+                  { label: "Total Users", value: users.length },
+                  { label: "Admins", value: users.filter((u) => u.role === "admin").length },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-white rounded-2xl border border-black/5 p-5">
+                    <p className="text-sm text-black/50">{stat.label}</p>
+                    <p className="text-3xl font-semibold mt-1 text-brand-black">{stat.value}</p>
+                  </div>
+                ))}
               </div>
               <div className="bg-white rounded-2xl border border-black/5 p-6">
-                <h2 className="font-medium mb-4">Quick Actions</h2>
+                <h2 className="font-medium mb-4 text-brand-black">Quick Actions</h2>
                 <div className="flex flex-wrap gap-3">
-                  <button onClick={() => { setActiveTab("products"); setShowForm(true); }} className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full">
+                  <button
+                    onClick={() => {
+                      resetForm();
+                      setShowForm(true);
+                      setActiveTab("products");
+                    }}
+                    className="px-5 py-2.5 bg-brand-blue text-white text-sm font-medium rounded-full"
+                  >
                     + Add Product
                   </button>
-                  <button onClick={() => setActiveTab("users")} className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5">
+                  <button
+                    onClick={() => setActiveTab("users")}
+                    className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5"
+                  >
                     Manage Users
                   </button>
                   <Link href="/" className="px-5 py-2.5 border border-black/10 text-sm font-medium rounded-full hover:bg-black/5">
@@ -340,42 +371,53 @@ export default function AdminPage() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
+                  <h1 className="text-2xl font-semibold tracking-tight text-brand-black">Products</h1>
                   <p className="text-sm text-black/50 mt-1">{products.length} products</p>
                 </div>
-                <button onClick={() => setShowForm(!showForm)} className="px-5 py-2.5 bg-black text-white text-sm font-medium rounded-full">
+                <button
+                  onClick={() => {
+                    if (showForm) resetForm();
+                    else {
+                      resetForm();
+                      setShowForm(true);
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-brand-blue text-white text-sm font-medium rounded-full"
+                >
                   {showForm ? "Cancel" : "+ Add Product"}
                 </button>
               </div>
 
               {showForm && (
                 <div className="bg-white rounded-2xl border border-black/5 p-6 mb-8">
-                  <h2 className="text-lg font-medium mb-5">Add New Product</h2>
+                  <h2 className="text-lg font-medium mb-5 text-brand-black">
+                    {editingId ? "Edit Product" : "Add New Product"}
+                  </h2>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Name *</label>
                         <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10" />
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Price (₦) *</label>
                         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0"
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10" />
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Description</label>
                       <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 resize-none" />
+                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 resize-none" />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1.5">Category</label>
                         <select value={category} onChange={(e) => setCategory(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm">
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm">
                           <option>Fashion</option>
                           <option>Electronics</option>
                           <option>Home</option>
@@ -392,19 +434,12 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* IMAGE URL - Primary method */}
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Image URL</label>
-                      <input
-                        type="url"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
+                      <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
                         placeholder="https://example.com/photo.jpg"
-                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#faf9f7] text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                      />
-                      <p className="text-xs text-black/40 mt-1.5">
-                        Paste any image link (from Google, Unsplash, your phone, etc.)
-                      </p>
+                        className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
+                      <p className="text-xs text-black/40 mt-1.5">Paste any image link (Imgur, etc.)</p>
                       {imageUrl && (
                         <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden border border-black/10">
                           <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized />
@@ -413,8 +448,8 @@ export default function AdminPage() {
                     </div>
 
                     <button type="submit" disabled={submitting}
-                      className="px-8 py-3 bg-black text-white text-sm font-medium rounded-full disabled:opacity-50">
-                      {submitting ? "Adding..." : "Add Product"}
+                      className="px-8 py-3 bg-brand-blue text-white text-sm font-medium rounded-full disabled:opacity-50 hover:bg-brand-blue-dark">
+                      {submitting ? "Saving..." : editingId ? "Update Product" : "Add Product"}
                     </button>
                   </form>
                 </div>
@@ -435,12 +470,16 @@ export default function AdminPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{product.name}</p>
+                          <p className="font-medium text-sm truncate text-brand-black">{product.name}</p>
                           <p className="text-xs text-black/40">
                             {product.category} · {formatPrice(product.price)}
-                            {product.is_new && <span className="ml-2 text-green-600">New</span>}
+                            {product.is_new && <span className="ml-2 text-brand-blue font-medium">New</span>}
                           </p>
                         </div>
+                        <button onClick={() => startEdit(product)}
+                          className="text-sm text-brand-blue hover:bg-brand-blue/5 px-3 py-1.5 rounded-lg">
+                          Edit
+                        </button>
                         <button onClick={() => handleDelete(product.id)}
                           className="text-sm text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg">
                           Delete
@@ -456,7 +495,7 @@ export default function AdminPage() {
           {activeTab === "users" && (
             <div>
               <div className="mb-6">
-                <h1 className="text-2xl font-semibold tracking-tight">Users & Admins</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-brand-black">Users & Admins</h1>
                 <p className="text-sm text-black/50 mt-1">Manage customers and promote users to admin</p>
               </div>
               <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
@@ -466,15 +505,15 @@ export default function AdminPage() {
                   <div className="divide-y divide-black/5">
                     {users.map((u) => (
                       <div key={u.id} className="flex items-center gap-4 p-4">
-                        <div className="w-10 h-10 bg-black/10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                        <div className="w-10 h-10 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
                           {(u.full_name || u.email || "U")[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{u.full_name || "No name"}</p>
+                          <p className="font-medium text-sm truncate text-brand-black">{u.full_name || "No name"}</p>
                           <p className="text-xs text-black/40 truncate">{u.email}</p>
                         </div>
                         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          u.role === "admin" ? "bg-black text-white" : "bg-black/5 text-black/60"
+                          u.role === "admin" ? "bg-brand-blue text-white" : "bg-black/5 text-black/60"
                         }`}>
                           {u.role || "customer"}
                         </span>
