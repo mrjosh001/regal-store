@@ -21,15 +21,29 @@ export default async function ProductPage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: product, error } = await supabase
+  let { data: product, error } = await supabase
     .from("products")
-    .select("id, name, price, image_url, category, is_new, description")
+    .select("id, name, price, compare_at_price, image_url, category, is_new, description")
     .eq("id", id)
     .single();
+
+  if (error) {
+    const fallback = await supabase
+      .from("products")
+      .select("id, name, price, image_url, category, is_new, description")
+      .eq("id", id)
+      .single();
+    product = fallback.data as any;
+    error = fallback.error;
+  }
 
   if (error || !product) {
     notFound();
   }
+
+  const compare = (product as any).compare_at_price as number | null | undefined;
+  const onSale = compare && compare > product.price;
+  const off = onSale ? Math.round(((compare - product.price) / compare) * 100) : null;
 
   return (
     <div className="min-h-screen bg-brand-surface">
@@ -60,11 +74,18 @@ export default async function ProductPage({ params }: Props) {
                 No image
               </div>
             )}
-            {product.is_new && (
-              <span className="absolute top-4 left-4 px-2.5 py-1 bg-brand-blue text-white text-[11px] font-semibold uppercase tracking-wider rounded-md">
-                New
-              </span>
-            )}
+            <div className="absolute top-4 left-4 flex flex-col gap-1.5">
+              {off && (
+                <span className="px-2.5 py-1 bg-red-500 text-white text-[11px] font-semibold uppercase tracking-wider rounded-md">
+                  -{off}% OFF
+                </span>
+              )}
+              {product.is_new && (
+                <span className="px-2.5 py-1 bg-brand-blue text-white text-[11px] font-semibold uppercase tracking-wider rounded-md">
+                  New
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col">
@@ -74,9 +95,16 @@ export default async function ProductPage({ params }: Props) {
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-brand-black mb-3">
               {product.name}
             </h1>
-            <p className="text-2xl font-semibold text-brand-black mb-6">
-              {formatPrice(product.price)}
-            </p>
+            <div className="flex items-baseline gap-3 mb-6">
+              <p className="text-2xl font-semibold text-brand-black">
+                {formatPrice(product.price)}
+              </p>
+              {onSale && compare && (
+                <p className="text-lg text-black/40 line-through">
+                  {formatPrice(compare)}
+                </p>
+              )}
+            </div>
 
             {product.description ? (
               <p className="text-black/60 leading-relaxed mb-8 text-sm md:text-base">
