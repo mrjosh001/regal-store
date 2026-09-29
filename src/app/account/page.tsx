@@ -10,7 +10,6 @@ export default function AccountPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showDrawer, setShowDrawer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
@@ -110,12 +109,13 @@ export default function AccountPage() {
     <div className="min-h-screen bg-brand-surface">
       <div className="bg-white border-b border-black/5 sticky top-0 z-40">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <button
-            onClick={() => setShowDrawer(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10 text-lg"
+          <Link
+            href="/"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-brand-blue/10 text-brand-black"
+            aria-label="Back to store"
           >
-            ☰
-          </button>
+            ←
+          </Link>
           <span className="font-semibold text-sm text-brand-black">My Account</span>
           <button
             onClick={() => setShowSettings(true)}
@@ -126,7 +126,7 @@ export default function AccountPage() {
         </div>
       </div>
 
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 py-6 pb-24">
         {message && (
           <div className="mb-4 px-4 py-2.5 bg-brand-blue text-white text-sm rounded-xl flex justify-between">
             <span>{message}</span>
@@ -208,60 +208,6 @@ export default function AccountPage() {
           </Link>
         </div>
       </main>
-
-      {showDrawer && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowDrawer(false)} />
-          <div className="relative bg-white w-72 h-full shadow-xl flex flex-col">
-            <div className="p-5 border-b border-black/5">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center text-xl">
-                  {selectedAvatar || (user?.full_name || "U")[0].toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-brand-black">{user?.full_name || "Customer"}</p>
-                  <p className="text-xs text-black/40">{user?.email}</p>
-                </div>
-              </div>
-            </div>
-
-            <nav className="flex-1 p-3 space-y-1">
-              <Link href="/" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
-                🏠 Home / Store
-              </Link>
-              <Link href="/account" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium bg-brand-blue/10 text-brand-blue">
-                👤 My Account
-              </Link>
-              <Link href="/custom-order" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
-                ✨ Custom Order
-              </Link>
-              {user?.role === "admin" && (
-                <Link href="/admin" onClick={() => setShowDrawer(false)} className="block px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5">
-                  ⚙️ Admin Dashboard
-                </Link>
-              )}
-              <button
-                onClick={() => {
-                  setShowDrawer(false);
-                  setShowSettings(true);
-                }}
-                className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-blue/5"
-              >
-                🔧 Settings
-              </button>
-            </nav>
-
-            <div className="p-4 border-t border-black/5">
-              <button
-                onClick={handleSignOut}
-                className="w-full py-3 text-red-500 text-sm font-medium rounded-xl bg-red-50 hover:bg-red-100"
-              >
-                Log out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
