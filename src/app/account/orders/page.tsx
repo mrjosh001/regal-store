@@ -9,13 +9,13 @@ function OrdersContent() {
   const status = searchParams.get("status") || "all";
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
+    <div className="min-h-screen bg-brand-surface">
       <div className="bg-white border-b border-black/5 sticky top-0 z-40">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
-          <Link href="/account" className="text-sm text-black/50">
+          <Link href="/account" className="text-sm text-black/50 hover:text-brand-blue">
             ← Back
           </Link>
-          <span className="ml-4 font-semibold text-sm capitalize">
+          <span className="ml-4 font-semibold text-sm text-brand-black capitalize">
             {status.replace("-", " ")} Orders
           </span>
         </div>
@@ -27,7 +27,7 @@ function OrdersContent() {
         </p>
         <Link
           href="/"
-          className="inline-block px-6 py-3 bg-black text-white text-sm font-medium rounded-full"
+          className="inline-block px-6 py-3 bg-brand-blue text-white text-sm font-medium rounded-full"
         >
           Start Shopping
         </Link>
@@ -40,7 +40,7 @@ export default function OrdersPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#faf9f7]">
+        <div className="min-h-screen flex items-center justify-center bg-brand-surface">
           <p className="text-black/40">Loading orders...</p>
         </div>
       }
