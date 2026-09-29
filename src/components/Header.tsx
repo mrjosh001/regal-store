@@ -52,7 +52,6 @@ export default function Header() {
     getUser();
   }, []);
 
-  // Lock body scroll when sidebar open
   useEffect(() => {
     if (showSidebar) {
       document.body.style.overflow = "hidden";
@@ -134,23 +133,16 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setShowSidebar(true)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition relative"
+                  className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition"
                   aria-label="Open menu"
                 >
-                  {/* 3 vertical lines */}
-                  <span className="flex flex-col gap-[5px] items-center">
-                    <span className="block w-[3px] h-[3px] rounded-full bg-brand-black" />
-                    <span className="block w-[3px] h-[3px] rounded-full bg-brand-black" />
-                    <span className="block w-[3px] h-[3px] rounded-full bg-brand-black" />
-                  </span>
-                  {/* Actually use 3 vertical bars for clearer "3 lines" */}
-                  <span className="absolute inset-0 flex items-center justify-center gap-[4px]">
-                    <span className="block w-[2px] h-4 rounded-full bg-brand-black" />
-                    <span className="block w-[2px] h-4 rounded-full bg-brand-black" />
-                    <span className="block w-[2px] h-4 rounded-full bg-brand-black" />
+                  <span className="flex items-center justify-center gap-[4.5px]">
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
                   </span>
                   {count > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-brand-blue rounded-full" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-blue rounded-full ring-2 ring-white" />
                   )}
                 </button>
               )}
@@ -159,7 +151,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Left sidebar drawer */}
       {showSidebar && (
         <div className="fixed inset-0 z-[60] flex">
           <div
@@ -167,7 +158,6 @@ export default function Header() {
             onClick={() => setShowSidebar(false)}
           />
           <div className="relative bg-white w-[min(300px,88vw)] h-full shadow-2xl flex flex-col">
-            {/* Profile header */}
             <div className="p-5 bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
               {user ? (
                 <div className="flex items-center gap-3">
