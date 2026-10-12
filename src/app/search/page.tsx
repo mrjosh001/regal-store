@@ -52,7 +52,12 @@ function SearchContent() {
       }
 
       const { data } = await request;
-      setProducts(data || []);
+      setProducts((data || [])
+        .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+        .map((product) => ({
+          ...product,
+          category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+        })));
       setLoading(false);
     }
 
