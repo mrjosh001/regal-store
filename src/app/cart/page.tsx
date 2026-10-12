@@ -28,8 +28,39 @@ export default function CartPage() {
     return () => window.removeEventListener("cart-updated", onUpdate);
   }, []);
 
-  function handleOrder() {
+  const [inventoryMessage, setInventoryMessage] = useState<string | null>(null);
+
+  async function handleOrder() {
     if (items.length === 0) return;
+    setInventoryMessage(null);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const productIds = [...new Set(items.map((item) => item.id))];
+      const { data, error } = await supabase.from("products").select("id, name, stock_quantity, is_available").in("id", productIds);
+      if (error) throw error;
+      const liveProducts = new Map((data || []).map((product) => [product.id, product]));
+      const issues: string[] = [];
+      for (const item of items) {
+        const product = liveProducts.get(item.id);
+        if (!product) { issues.push(`${item.name} is no longer listed.`); continue; }
+        if (product.is_available === false || product.stock_quantity === 0) { issues.push(`${item.name} is currently sold out or unavailable.`); continue; }
+        if (product.stock_quantity != null && item.quantity > product.stock_quantity) {
+          issues.push(`${item.name}: only ${product.stock_quantity} in stock; your cart has ${item.quantity}.`);
+        }
+      }
+      if (issues.length) {
+        setInventoryMessage(`Please update your cart before ordering: ${issues.join(" ")}`);
+        setItems(items.map((item) => {
+          const latest = liveProducts.get(item.id);
+          return latest ? { ...item, stock_quantity: latest.stock_quantity } : item;
+        }));
+        return;
+      }
+    } catch {
+      setInventoryMessage("We could not verify live stock just now. Please try again before sending your order.");
+      return;
+    }
 
     const lines = items.map(
       (item) => {
@@ -55,6 +86,7 @@ export default function CartPage() {
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         <Link href="/" className="text-sm font-medium text-black/50 hover:text-[#1769e0]">← Continue shopping</Link>
+        {inventoryMessage && <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">{inventoryMessage}</p>}
         <div className="mb-6 mt-5 flex items-end justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-blue">Your selection</p>
