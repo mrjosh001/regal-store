@@ -4,15 +4,22 @@ export type CartItem = {
   price: number;
   image_url: string | null;
   quantity: number;
+  size?: string | null;
+  color?: string | null;
 };
 
 const CART_KEY = "regal-cart";
+
+export function cartItemKey(item: Pick<CartItem, "id" | "size" | "color">) {
+  return `${item.id}::${item.size || ""}::${item.color || ""}`;
+}
 
 export function getCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(CART_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -26,7 +33,7 @@ export function saveCart(items: CartItem[]) {
 
 export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   const cart = getCart();
-  const existing = cart.find((i) => i.id === item.id);
+  const existing = cart.find((i) => cartItemKey(i) === cartItemKey(item));
   if (existing) {
     existing.quantity += qty;
   } else {
@@ -36,18 +43,20 @@ export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   return cart;
 }
 
-export function removeFromCart(id: string) {
-  const cart = getCart().filter((i) => i.id !== id);
+export function removeFromCart(key: string) {
+  const cart = getCart().filter((item) => cartItemKey(item) !== key && item.id !== key);
   saveCart(cart);
   return cart;
 }
 
-export function updateQuantity(id: string, quantity: number) {
+export function updateQuantity(key: string, quantity: number) {
   let cart = getCart();
   if (quantity <= 0) {
-    cart = cart.filter((i) => i.id !== id);
+    cart = cart.filter((item) => cartItemKey(item) !== key && item.id !== key);
   } else {
-    cart = cart.map((i) => (i.id === id ? { ...i, quantity } : i));
+    cart = cart.map((item) =>
+      cartItemKey(item) === key || item.id === key ? { ...item, quantity } : item
+    );
   }
   saveCart(cart);
   return cart;
@@ -59,10 +68,10 @@ export function clearCart() {
 
 export function cartCount(items?: CartItem[]) {
   const cart = items || getCart();
-  return cart.reduce((sum, i) => sum + i.quantity, 0);
+  return cart.reduce((sum, item) => sum + item.quantity, 0);
 }
 
 export function cartTotal(items?: CartItem[]) {
   const cart = items || getCart();
-  return cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
