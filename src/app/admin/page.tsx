@@ -190,7 +190,7 @@ export default function AdminPage() {
     setDescription(product.description || "");
     setPrice(String(product.price));
     setCompareAtPrice(product.compare_at_price ? String(product.compare_at_price) : "");
-    setCategory(product.category === "Fashion" ? "Clothing" : product.category || "Clothing");
+    setCategory(["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category || "Clothing");
     setIsNew(!!product.is_new);
     setSizeOptions((product.sizes || []).join(", "));
     setColorOptions((product.colors || []).join(", "));
@@ -311,7 +311,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-surface">
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f3ef]">
         <p className="text-black/50">Loading admin...</p>
       </div>
     );
@@ -319,7 +319,7 @@ export default function AdminPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-surface px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f3ef] px-4">
         <div className="w-full max-w-lg rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-semibold text-brand-black">Admin dashboard could not load</h1>
           <p className="mt-3 break-words text-sm text-black/60">{loadError}</p>
@@ -344,16 +344,16 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-surface flex">
-      <aside className="w-64 bg-white border-r border-black/5 hidden md:flex flex-col fixed h-full">
-        <div className="p-5 border-b border-black/5">
+    <div className="min-h-screen bg-[#f4f3ef] flex">
+      <aside className="w-64 bg-[#171a21] border-r border-white/10 hidden md:flex flex-col fixed h-full text-white">
+        <div className="p-5 border-b border-white/10">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">R</span>
             </div>
             <div>
-              <p className="font-semibold text-sm text-brand-black">Regal Store</p>
-              <p className="text-xs text-black/40">Admin</p>
+              <p className="font-semibold text-sm text-white">Regal Store</p>
+              <p className="text-xs text-white/45">STORE CONTROL</p>
             </div>
           </Link>
         </div>
@@ -362,7 +362,7 @@ export default function AdminPage() {
           {(
             [
               { id: "overview", label: "Overview", description: "Store performance, products, and user statistics." },
-              { id: "products", label: "Products", description: "Add, edit, and manage clothing and occasional footwear." },
+              { id: "products", label: "Products", description: "Manage clothing, bags, shoes and stock levels." },
               { id: "users", label: "Users & Admins", description: "View accounts and manage store access." },
             ] as const
           ).map((tab) => (
@@ -371,17 +371,17 @@ export default function AdminPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`w-full rounded-xl px-4 py-3 text-left transition ${
                 activeTab === tab.id
-                  ? "bg-brand-blue text-white"
-                  : "text-black/60 hover:bg-brand-blue/5"
+                  ? "bg-white/10 text-white ring-1 ring-white/10"
+                  : "text-white/60 hover:bg-white/[.06] hover:text-white"
               }`}
             >
               <span className="block text-sm font-semibold">{tab.label}</span>
-              <span className={`mt-1 block text-xs leading-5 ${activeTab === tab.id ? "text-white/75" : "text-black/40"}`}>{tab.description}</span>
+              <span className={`mt-1 block text-xs leading-5 ${activeTab === tab.id ? "text-white/65" : "text-white/35"}`}>{tab.description}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-black/5">
+        <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center text-sm font-medium">
               {(user?.full_name || user?.email || "A")[0].toUpperCase()}
@@ -438,7 +438,7 @@ export default function AdminPage() {
           )}
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8 max-w-6xl">
+        <main className="w-full max-w-[1600px] p-4 sm:p-6 lg:p-10 md:ml-64">
           {message && (
             <div className="mb-6 px-4 py-3 bg-brand-blue text-white text-sm rounded-xl flex items-center justify-between">
               <span>{message}</span>
@@ -448,8 +448,8 @@ export default function AdminPage() {
 
           {activeTab === "overview" && (
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight mb-6 text-brand-black">Overview</h1>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-2 text-xs font-bold uppercase tracking-[.2em] text-[#7b705f]">REGAL STORE / CONTROL ROOM</p><h1 className="text-3xl font-semibold tracking-[-.04em] text-[#202127] sm:text-4xl">Store overview</h1><p className="mt-2 text-sm text-black/50">Inventory, catalogue and customer access at a glance.</p></div><button onClick={() => { resetForm(); setShowForm(true); setActiveTab("products"); }} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#202127] px-5 text-sm font-semibold text-white shadow-lg shadow-black/10 transition hover:bg-[#343741]">+ Add a product</button></div>
+              <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6 xl:gap-4">
                 {[
                   { label: "Total Products", value: products.length },
                   { label: "New Items", value: products.filter((p) => p.is_new).length },
@@ -458,14 +458,15 @@ export default function AdminPage() {
                   { label: "Low stock (1–5)", value: products.filter((p) => p.stock_quantity != null && p.stock_quantity > 0 && p.stock_quantity <= 5).length },
                   { label: "Out of stock", value: products.filter((p) => p.stock_quantity === 0 || p.is_available === false).length },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-2xl border border-black/5 p-5">
-                    <p className="text-sm text-black/50">{stat.label}</p>
-                    <p className="text-3xl font-semibold mt-1 text-brand-black">{stat.value}</p>
+                  <div key={stat.label} className="rounded-2xl border border-black/[.05] bg-white p-5 shadow-[0_8px_28px_-20px_rgba(0,0,0,.22)] transition hover:-translate-y-0.5 hover:shadow-md">
+                    <p className="text-xs font-medium text-black/45">{stat.label}</p>
+                    <p className="mt-3 text-3xl font-semibold tracking-tight text-[#202127]">{stat.value}</p>
+                    <div className="mt-4 h-1 w-10 rounded-full bg-[#c7b79a]" />
                   </div>
                 ))}
               </div>
-              <div className="bg-white rounded-2xl border border-black/5 p-6">
-                <h2 className="font-medium mb-4 text-brand-black">Quick Actions</h2>
+              <div className="grid gap-4 xl:grid-cols-[1.3fr_.7fr]"><div className="rounded-3xl border border-black/[.05] bg-white p-6 shadow-sm sm:p-8">
+                <p className="text-xs font-bold uppercase tracking-[.18em] text-[#8b7b62]">Shortcuts</p><h2 className="mb-5 mt-2 text-xl font-semibold tracking-tight text-[#202127]">Quick actions</h2>
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={() => {
@@ -487,8 +488,7 @@ export default function AdminPage() {
                     View Store
                   </Link>
                 </div>
-              </div>
-            </div>
+              </div><div className="rounded-3xl bg-[#202127] p-6 text-white sm:p-8"><p className="text-xs font-bold uppercase tracking-[.18em] text-white/45">Inventory pulse</p><h2 className="mt-2 text-xl font-semibold">Stock at a glance</h2><p className="mt-3 text-sm leading-6 text-white/60">Keep quantities accurate. Customers see availability on product cards and product pages, and the cart checks stock again before an order opens in WhatsApp.</p><div className="mt-6 space-y-3 text-sm"><div className="flex items-center justify-between border-b border-white/10 pb-3"><span className="text-white/60">Stock not tracked</span><strong>{products.filter((p) => p.stock_quantity == null).length}</strong></div><div className="flex items-center justify-between border-b border-white/10 pb-3"><span className="text-white/60">Available stock units</span><strong>{products.reduce((sum, p) => sum + (p.stock_quantity || 0), 0).toLocaleString()}</strong></div><div className="flex items-center justify-between"><span className="text-white/60">Categories in catalogue</span><strong>{new Set(products.map((p) => ["bag", "bags"].includes((p.category || "").toLowerCase()) ? "Bags" : ["fashion", "clothing"].includes((p.category || "").toLowerCase()) ? "Clothing" : p.category).filter(Boolean)).size}</strong></div></div></div></div>
           )}
 
           {activeTab === "products" && (
@@ -558,6 +558,7 @@ export default function AdminPage() {
                         <select value={category} onChange={(e) => setCategory(e.target.value)}
                           className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm">
                           <option>Clothing</option>
+                          <option>Bags</option>
                           <option>Shoes</option>
                         </select>
                       </div>
