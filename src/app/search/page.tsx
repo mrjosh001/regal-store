@@ -69,7 +69,7 @@ function SearchContent() {
                 : normalizedCategory === "shoes"
                   ? "Shoes"
                   : product.category,
-            is_available: product.is_available !== false,
+            is_available: product.is_available ?? null,
           };
         }));
       setLoading(false);
@@ -214,6 +214,16 @@ function SearchContent() {
                     {product.is_available === false && (
                       <span className="rounded-md bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
                         Unavailable
+                      </span>
+                    )}
+                    {product.is_available === true && (
+                      <span className="rounded-md bg-emerald-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                        Available
+                      </span>
+                    )}
+                    {product.is_available == null && (
+                      <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-900">
+                        Confirm availability
                       </span>
                     )}
                   </div>
