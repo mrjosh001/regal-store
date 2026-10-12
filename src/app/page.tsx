@@ -19,12 +19,8 @@ type HomePageProps = {
 };
 
 const CATEGORIES = [
-  { name: "Fashion", emoji: "✳", desc: "Everyday pieces, elevated" },
-  { name: "Electronics", emoji: "⌁", desc: "Useful tech, thoughtfully picked" },
-  { name: "Home", emoji: "⌂", desc: "Make your space yours" },
-  { name: "Accessories", emoji: "◈", desc: "The finishing details" },
-  { name: "Beauty", emoji: "✧", desc: "Your daily essentials" },
-  { name: "Sports", emoji: "↗", desc: "Gear for moving forward" },
+  { name: "Clothing", emoji: "✳", desc: "Everyday fits and standout pieces" },
+  { name: "Shoes", emoji: "↗", desc: "Footwear, available as selected drops" },
 ];
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -55,13 +51,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         if (fallback.error) {
           hasFetchError = true;
         } else {
-          productList = (fallback.data || []).map((product) => ({
-            ...product,
-            compare_at_price: null,
-          }));
+          productList = (fallback.data || [])
+            .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+            .map((product) => ({
+              ...product,
+              category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+              compare_at_price: null,
+            }));
         }
       } else {
-        productList = (primary.data || []) as Product[];
+        productList = ((primary.data || []) as Product[])
+          .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+          .map((product) => ({
+            ...product,
+            category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+          }));
       }
     }
   } catch {
@@ -84,7 +88,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="animate-rise-in max-w-2xl">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/[.07] bg-white/75 px-3.5 py-2 text-xs font-medium text-black/65 shadow-sm backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                A more considered way to shop
+                Clothing for your everyday
               </div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-[.22em] text-brand-blue">
                 Regal Store · Nigeria
@@ -95,7 +99,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="text-black/45">Better everyday.</span>
               </h1>
               <p className="mt-6 max-w-lg text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
-                Discover fashion, useful tech, home essentials and the little things that make life feel more like yours. Tell us what you need — we’ll help you find it.
+                Shop clothing picked for everyday style, with shoes added occasionally. Tell us what you need — we’ll help you find it.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
@@ -122,7 +126,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[.18em] text-black/40">The Regal edit</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em] text-[#1d1d1f]">Find your next favourite.</h2>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em] text-[#1d1d1f]">Find your next favourite fit.</h2>
                   </div>
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-xl text-brand-blue">✳</span>
                 </div>
@@ -157,7 +161,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             {[
               { icon: "↗", title: "Nationwide delivery", sub: "Across Nigeria" },
               { icon: "◌", title: "Personal support", sub: "Chat before you order" },
-              { icon: "✳", title: "Curated finds", sub: "Products worth discovering" },
+              { icon: "✳", title: "Curated clothing", sub: "Clothing worth discovering" },
               { icon: "♡", title: "Made convenient", sub: "Browse at your pace" },
             ].map((item) => (
               <div key={item.title} className="flex items-center gap-3 rounded-xl py-1">
@@ -197,7 +201,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {hasFetchError ? (
           <section id="products" className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
             <div className="rounded-3xl border border-black/[.06] bg-white px-6 py-14 text-center">
-              <p className="font-semibold text-[#1d1d1f]">Products are temporarily unavailable</p>
+              <p className="font-semibold text-[#1d1d1f]">The collection is temporarily unavailable</p>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Please try again in a little while, or send us a custom request.</p>
               <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#1769e0] px-5 text-sm font-semibold text-white hover:bg-[#0957c3]">Request a product</Link>
             </div>
@@ -207,7 +211,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="rounded-3xl border border-black/[.06] bg-white px-6 py-14 text-center">
               <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f5f5f7] text-2xl">✳</span>
               <p className="mt-4 font-semibold text-[#1d1d1f]">Your next great find starts here.</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Our collection is being updated. You can also tell us what you’re looking for.</p>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Our clothing collection is being updated. Shoes may appear as occasional drops.</p>
               <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#1769e0] px-5 text-sm font-semibold text-white hover:bg-[#0957c3]">Request a product</Link>
             </div>
           </section>
