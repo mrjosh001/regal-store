@@ -19,6 +19,12 @@ type Props = {
 };
 
 export default function ProductActions({ product }: Props) {
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
+
   const sizes = product.sizes || [];
   const colors = product.colors || [];
   const isSoldOut = product.stock_quantity === 0;
@@ -28,11 +34,6 @@ export default function ProductActions({ product }: Props) {
   const cartQuantity = getCart().filter((item) => cartItemKey(item) === cartItemKey({ id: product.id, size: selectedSize || null, color: selectedColor || null })).reduce((sum, item) => sum + item.quantity, 0);
   const remainingToAdd = stockTracked ? Math.max(0, (product.stock_quantity || 0) - cartQuantity) : 99;
   const quantityAvailable = !stockTracked || quantity <= remainingToAdd;
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
-  const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
 
   const optionsChosen = (!sizes.length || Boolean(selectedSize)) && (!colors.length || Boolean(selectedColor));
   const variantDetails = [
