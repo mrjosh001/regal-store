@@ -21,6 +21,7 @@ type Product = {
   sizes?: string[] | null;
   colors?: string[] | null;
   is_available?: boolean | null;
+  stock_quantity?: number | null;
   description: string | null;
 };
 
@@ -49,7 +50,7 @@ async function getProduct(id: string): Promise<Product | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available, description")
+    .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available, stock_quantity, description")
     .eq("id", id)
     .maybeSingle();
 
@@ -58,14 +59,14 @@ async function getProduct(id: string): Promise<Product | null> {
   }
 
   // Older databases may not yet have compare_at_price; keep the product page usable.
-  if (error?.message && ["compare_at_price", "sizes", "colors", "is_available"].some((field) => error.message?.includes(field))) {
+  if (error?.message && ["compare_at_price", "sizes", "colors", "is_available", "stock_quantity"].some((field) => error.message?.includes(field))) {
     const fallback = await supabase
       .from("products")
       .select("id, name, price, image_url, category, is_new, description")
       .eq("id", id)
       .maybeSingle();
     if (fallback.data && isStoreCategory(fallback.data.category)) {
-      return { ...fallback.data, compare_at_price: null, sizes: [], colors: [], is_available: null } as Product;
+      return { ...fallback.data, compare_at_price: null, sizes: [], colors: [], is_available: null, stock_quantity: null } as Product;
     }
   }
 
@@ -132,11 +133,13 @@ export default async function ProductPage({ params }: Props) {
       url: productUrl,
       priceCurrency: "NGN",
       price: String(product.price),
-      availability: product.is_available === false
+      availability: product.is_available === false || product.stock_quantity === 0
         ? "https://schema.org/OutOfStock"
-        : product.is_available === true
+        : product.stock_quantity != null && product.stock_quantity > 0
           ? "https://schema.org/InStock"
-          : undefined,
+          : product.is_available === true
+            ? "https://schema.org/InStock"
+            : undefined,
     },
   };
 
@@ -211,6 +214,11 @@ export default async function ProductPage({ params }: Props) {
               </p>
             )}
 
+            {product.stock_quantity != null && product.stock_quantity > 0 && product.is_available !== false ? (
+              <p className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-800"><span aria-hidden="true">●</span> {product.stock_quantity} in stock</p>
+            ) : product.stock_quantity === 0 ? (
+              <p className="mb-4 inline-flex w-fit rounded-full bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">Sold out</p>
+            ) : null}
             <ProductActions product={product} />
 
             <div className="mt-8 space-y-2 border-t border-black/5 pt-6 text-sm text-black/55">
