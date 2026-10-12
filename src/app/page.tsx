@@ -23,10 +23,33 @@ type HomePageProps = {
 };
 
 const CATEGORIES = [
-  { name: "Clothing", emoji: "✳", desc: "Everyday fits and standout pieces" },
-  { name: "Bags", emoji: "▱", desc: "Carry-alls, everyday bags and statement pieces" },
-  { name: "Shoes", emoji: "↗", desc: "Footwear to finish the look" },
+  {
+    name: "Clothing",
+    eyebrow: "Wear it your way",
+    description: "Easy pieces. Strong looks.",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85",
+  },
+  {
+    name: "Bags",
+    eyebrow: "Carry a little confidence",
+    description: "Everyday carry, elevated.",
+    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=85",
+  },
+  {
+    name: "Shoes",
+    eyebrow: "Start from the ground up",
+    description: "The finishing touch.",
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1000&q=85",
+  },
 ];
+
+function normaliseCategory(value: string | null | undefined) {
+  const category = (value || "").toLowerCase();
+  if (["fashion", "clothing"].includes(category)) return "Clothing";
+  if (["bag", "bags"].includes(category)) return "Bags";
+  if (category === "shoes") return "Shoes";
+  return value || "";
+}
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
@@ -60,7 +83,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
             .map((product) => ({
               ...product,
-              category: ["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category,
+              category: normaliseCategory(product.category),
               compare_at_price: null,
               sizes: [],
               colors: [],
@@ -73,7 +96,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
           .map((product) => ({
             ...product,
-            category: ["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category,
+            category: normaliseCategory(product.category),
             sizes: product.sizes || [],
             colors: product.colors || [],
             is_available: product.is_available ?? null,
@@ -88,157 +111,161 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const onSale = productList.filter(
     (product) => product.compare_at_price && product.compare_at_price > product.price
   );
+  const categoryTiles = CATEGORIES.map((category) => ({
+    ...category,
+    product: productList.find((product) => product.category === category.name && product.image_url),
+  }));
+  const heroProduct = productList.find((product) => product.image_url);
 
   return (
-    <div className="min-h-screen bg-brand-surface">
+    <div className="min-h-screen bg-[#fbf8f3] text-[#24231f]">
+      <div className="bg-[#24372d] px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[.18em] text-white sm:text-xs">
+        Clothing · Bags · Shoes <span className="mx-2 text-[#d9b989]">/</span> Everyday style, thoughtfully found
+      </div>
       <Header />
 
       <main>
-        <section className="relative isolate overflow-hidden bg-[#f5f5f7]">
-          <div className="pointer-events-none absolute -right-32 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue-200/45 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-52 left-1/4 h-[28rem] w-[28rem] rounded-full bg-indigo-100/70 blur-3xl" />
-          <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 md:grid-cols-[1.1fr_.9fr] md:py-28 lg:px-10">
-            <div className="animate-rise-in max-w-2xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/[.07] bg-white/75 px-3.5 py-2 text-xs font-medium text-black/65 shadow-sm backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                Style for every day
-              </div>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[.22em] text-brand-blue">
-                Regal Store · Nigeria
+        <section className="overflow-hidden bg-[#f1eadf]">
+          <div className="mx-auto grid max-w-[1440px] items-stretch md:min-h-[620px] md:grid-cols-[.92fr_1.08fr]">
+            <div className="flex flex-col justify-center px-6 py-14 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+              <p className="mb-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.24em] text-[#536b58] sm:text-xs">
+                <span className="h-px w-8 bg-[#536b58]" /> The Regal Store edit
               </p>
-              <h1 className="text-balance text-[2.8rem] font-semibold leading-[1.02] tracking-[-.055em] text-[#1d1d1f] sm:text-6xl lg:text-[4.5rem]">
-                Good finds.
+              <h1 className="max-w-xl font-serif text-[3.35rem] leading-[.98] tracking-[-.055em] text-[#24372d] sm:text-7xl lg:text-[5.7rem]">
+                A little more
                 <br />
-                <span className="text-black/45">Better everyday.</span>
+                <span className="italic text-[#a65f3e]">you.</span> Every day.
               </h1>
-              <p className="mt-6 max-w-lg text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
-                Explore clothing, bags and shoes chosen to make everyday style easier. Find your next favourite piece, then message us to confirm details before you order.
+              <p className="mt-6 max-w-md text-sm leading-7 text-[#5e6259] sm:text-base sm:leading-8">
+                The pieces you reach for, the details that pull a look together, and the finds that feel like they were waiting for you.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="#products"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#1769e0] px-6 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-[#0957c3]"
+                  href="#shop-the-edit"
+                  className="inline-flex min-h-12 items-center justify-center gap-3 bg-[#24372d] px-6 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]"
                 >
-                  Explore the collection <span aria-hidden="true">↗</span>
+                  Shop the collection <span aria-hidden="true">↗</span>
                 </Link>
                 <Link
                   href="/custom-order"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-black/10 bg-white/75 px-6 text-sm font-semibold text-[#1d1d1f] hover:bg-white"
+                  className="inline-flex min-h-12 items-center justify-center border border-[#24372d]/25 px-6 text-xs font-bold uppercase tracking-[.12em] text-[#24372d] hover:bg-white/50"
                 >
-                  Request something
+                  Find it for me
                 </Link>
               </div>
-              <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-black/55">
-                <span className="inline-flex items-center gap-2"><span className="text-brand-blue">✓</span> Delivery options confirmed before payment</span>
-                <span className="inline-flex items-center gap-2"><span className="text-brand-blue">✓</span> Chat before you order</span>
+              <div className="mt-10 flex items-center gap-3 text-xs text-[#66695f]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24372d]/20 text-[#24372d]">✳</span>
+                <span>Browse at your pace. Message us to confirm details before ordering.</span>
               </div>
             </div>
 
-            <div className="animate-rise-in relative mx-auto w-full max-w-md" style={{ animationDelay: "100ms" }}>
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-5 shadow-[0_30px_90px_-35px_rgba(25,45,80,.3)] backdrop-blur-xl sm:p-7">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[.18em] text-black/40">The Regal edit</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em] text-[#1d1d1f]">Find your next favourite fit.</h2>
-                  </div>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-xl text-brand-blue">✳</span>
+            <div className="relative min-h-[390px] overflow-hidden bg-[#d7c9b5] sm:min-h-[500px] md:min-h-full">
+              <img
+                src={heroProduct?.image_url || "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=90"}
+                alt={heroProduct ? heroProduct.name : "Fashion styling inspiration"}
+                className="absolute inset-0 h-full w-full object-cover"
+                fetchPriority="high"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1b261e]/50 via-transparent to-black/5" />
+              <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 text-white sm:bottom-8 sm:left-8 sm:right-8">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[.22em] text-white/75">Your next favourite</p>
+                  <p className="mt-2 max-w-xs font-serif text-2xl leading-tight sm:text-3xl">Good style lives in the details.</p>
                 </div>
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  {CATEGORIES.slice(0, 4).map((category, index) => (
-                    <Link
-                      key={category.name}
-                      href={`/?category=${encodeURIComponent(category.name)}#products`}
-                      className={`group rounded-2xl p-4 transition hover:-translate-y-0.5 hover:shadow-md ${index % 2 === 0 ? "bg-[#f5f5f7]" : "bg-blue-50/80"}`}
-                    >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm">{category.emoji}</span>
-                      <span className="mt-4 block text-sm font-semibold text-[#1d1d1f]">{category.name}</span>
-                      <span className="mt-1 block text-xs leading-5 text-black/50">{category.desc}</span>
-                    </Link>
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#1d1d1f] px-4 py-4 text-white">
-                  <div>
-                    <p className="text-sm font-semibold">Looking for something specific?</p>
-                    <p className="mt-1 text-xs text-white/60">We can help source it.</p>
-                  </div>
-                  <Link href="/custom-order" aria-label="Request a custom order" className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-[#1d1d1f] hover:bg-blue-50">↗</Link>
-                </div>
+                <Link href="#shop-the-edit" aria-label="Explore the collection" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f1eadf] text-xl text-[#24372d] hover:bg-white">↘</Link>
               </div>
-              <div className="pointer-events-none absolute -bottom-5 -right-4 -z-10 h-28 w-28 rounded-full bg-blue-300/40 blur-2xl" />
+              <div className="absolute right-5 top-5 hidden border border-white/50 bg-[#fbf8f3]/90 px-4 py-3 text-[#24372d] backdrop-blur sm:block">
+                <p className="text-[9px] font-bold uppercase tracking-[.2em]">REGAL</p>
+                <p className="mt-1 font-serif text-xl italic">The everyday edit</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="border-y border-black/[.05] bg-white/75">
-          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-5 py-5 sm:px-8 md:grid-cols-4 lg:px-10">
+        <section className="border-b border-[#e8e0d5] bg-[#fbf8f3]">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-1 divide-y divide-[#e8e0d5] px-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-10 lg:px-16">
             {[
-              { icon: "↗", title: "Delivery options", sub: "Confirm before payment" },
-              { icon: "◌", title: "Personal support", sub: "Chat before you order" },
-              { icon: "✳", title: "Style edit", sub: "Clothing, bags & shoes" },
-              { icon: "♡", title: "Made convenient", sub: "Browse at your pace" },
-            ].map((item) => (
-              <div key={item.title} className="flex items-center gap-3 rounded-xl py-1">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] text-lg text-brand-blue">{item.icon}</span>
+              { number: "01", title: "Discover", copy: "Explore clothing, bags and shoes." },
+              { number: "02", title: "Ask us", copy: "Check sizing, availability and details." },
+              { number: "03", title: "Order with clarity", copy: "Confirm the details before payment." },
+            ].map((step) => (
+              <div key={step.number} className="flex items-start gap-4 py-5 sm:px-6 sm:py-7 first:sm:pl-0 last:sm:pr-0">
+                <span className="pt-0.5 font-serif text-lg italic text-[#a65f3e]">{step.number}</span>
                 <div>
-                  <p className="text-sm font-semibold text-[#1d1d1f]">{item.title}</p>
-                  <p className="mt-0.5 text-xs text-black/45">{item.sub}</p>
+                  <p className="text-sm font-semibold text-[#24372d]">{step.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#73746c]">{step.copy}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <section id="shop-the-edit" className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 sm:py-20 lg:px-16">
+          <div className="mb-7 flex items-end justify-between gap-4 sm:mb-9">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[.2em] text-brand-blue">Explore</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em] text-[#1d1d1f] sm:text-3xl">Shop by category</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#a65f3e] sm:text-xs">Make it yours</p>
+              <h2 className="mt-2 font-serif text-3xl tracking-[-.03em] text-[#24372d] sm:text-5xl">Shop by mood. Shop by moment.</h2>
             </div>
-            <Link href="#products" className="shrink-0 text-sm font-semibold text-brand-blue hover:text-brand-blue-dark">View all <span aria-hidden="true">↗</span></Link>
+            <span className="hidden pb-1 text-xs text-[#77776e] sm:block">Three ways to find your next favourite</span>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-            {CATEGORIES.map((category) => (
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+            {categoryTiles.map((category, index) => (
               <Link
                 key={category.name}
                 href={`/?category=${encodeURIComponent(category.name)}#products`}
-                className="group rounded-2xl border border-black/[.06] bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-950/[.04]"
+                className={`group relative isolate min-h-[330px] overflow-hidden bg-[#ddd0bf] sm:min-h-[420px] ${index === 1 ? "sm:translate-y-7" : ""}`}
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5f5f7] text-xl text-brand-blue transition group-hover:bg-blue-50">{category.emoji}</span>
-                <span className="mt-4 block text-sm font-semibold text-[#1d1d1f]">{category.name}</span>
-                <span className="mt-1 block text-xs leading-5 text-black/45">{category.desc}</span>
+                <img
+                  src={category.product?.image_url || category.image}
+                  alt={category.product?.name || category.name}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/0 transition group-hover:from-black/75" />
+                <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
+                  <p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/75">{category.eyebrow}</p>
+                  <div className="mt-2 flex items-end justify-between gap-3">
+                    <div>
+                      <h3 className="font-serif text-3xl sm:text-4xl">{category.name}</h3>
+                      <p className="mt-1 text-xs text-white/80">{category.description}</p>
+                    </div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/65 text-lg transition group-hover:bg-white group-hover:text-[#24372d]">↗</span>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
         </section>
 
         {hasFetchError ? (
-          <section id="products" className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-            <div className="rounded-3xl border border-black/[.06] bg-white px-6 py-14 text-center">
-              <p className="font-semibold text-[#1d1d1f]">The collection is temporarily unavailable</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Please try again in a little while, or send us a custom request.</p>
-              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#1769e0] px-5 text-sm font-semibold text-white hover:bg-[#0957c3]">Request a product</Link>
+          <section id="products" className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-8 lg:px-16">
+            <div className="border border-[#e8e0d5] bg-white px-6 py-14 text-center">
+              <p className="font-serif text-2xl text-[#24372d]">The collection is taking a moment.</p>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">Please try again shortly, or send us a request and we’ll help you look.</p>
+              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Request a product</Link>
             </div>
           </section>
         ) : productList.length === 0 ? (
-          <section id="products" className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-            <div className="rounded-3xl border border-black/[.06] bg-white px-6 py-14 text-center">
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f5f5f7] text-2xl">✳</span>
-              <p className="mt-4 font-semibold text-[#1d1d1f]">Your next great find starts here.</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Our clothing, bags and shoes collection is being updated. Check back soon or ask us to source a specific item.</p>
-              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#1769e0] px-5 text-sm font-semibold text-white hover:bg-[#0957c3]">Request a product</Link>
+          <section id="products" className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-8 lg:px-16">
+            <div className="border border-[#e8e0d5] bg-white px-6 py-14 text-center">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f1eadf] font-serif text-2xl text-[#a65f3e]">R</span>
+              <p className="mt-4 font-serif text-2xl text-[#24372d]">Your next great find starts here.</p>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">We’re refreshing the clothing, bags and shoes collection. Check back soon or ask us to source something specific.</p>
+              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Make a request</Link>
             </div>
           </section>
         ) : (
           <>
             {onSale.length > 0 && (
-              <section className="mx-auto max-w-7xl px-5 pb-4 sm:px-8 lg:px-10">
-                <div className="flex flex-col justify-between gap-4 rounded-3xl bg-[#1d1d1f] p-6 text-white sm:flex-row sm:items-center sm:p-8">
+              <section className="mx-auto max-w-[1440px] px-5 pb-8 sm:px-8 lg:px-16">
+                <div className="flex flex-col justify-between gap-4 bg-[#24372d] p-6 text-white sm:flex-row sm:items-center sm:p-9">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[.18em] text-blue-300">Worth a closer look</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-.03em]">Special prices, while they last.</h2>
-                    <p className="mt-2 text-sm text-white/60">{onSale.length} products currently have reduced prices.</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#dfb78d]">A good find for less</p>
+                    <h2 className="mt-2 font-serif text-3xl sm:text-4xl">Special prices, while they last.</h2>
+                    <p className="mt-2 text-sm text-white/65">{onSale.length} {onSale.length === 1 ? "item has" : "items have"} a reduced price.</p>
                   </div>
-                  <Link href="#products" className="inline-flex min-h-11 items-center justify-center self-start rounded-full bg-white px-5 text-sm font-semibold text-[#1d1d1f] hover:bg-blue-50 sm:self-auto">Explore offers ↗</Link>
+                  <Link href="#products" className="inline-flex min-h-11 items-center justify-center self-start border border-white/35 px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-white hover:text-[#24372d] sm:self-auto">Explore offers ↗</Link>
                 </div>
               </section>
             )}
@@ -246,53 +273,61 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </>
         )}
 
-        <section className="mx-auto max-w-7xl px-5 py-8 pb-14 sm:px-8 lg:px-10">
-          <div className="flex flex-col justify-between gap-6 rounded-3xl border border-black/[.06] bg-white p-6 sm:p-10 md:flex-row md:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[.2em] text-brand-blue">Your request, our search</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em] text-[#1d1d1f] sm:text-3xl">Can’t find what you need?</h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-black/55">Share a product name, photo or link. We’ll help you check whether we can source it.</p>
+        <section className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-16 lg:px-16">
+          <div className="grid overflow-hidden bg-[#e7ded1] md:grid-cols-[1fr_.8fr]">
+            <div className="flex flex-col justify-center px-6 py-9 sm:px-10 sm:py-12">
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#a65f3e] sm:text-xs">Looking for something specific?</p>
+              <h2 className="mt-3 max-w-lg font-serif text-3xl leading-tight tracking-[-.035em] text-[#24372d] sm:text-5xl">Tell us what you have in mind.</h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-[#66695f]">Share a product name, photo or link. We’ll help you check whether we can source it. No need to know exactly what you’re looking for yet.</p>
+              <Link href="/custom-order" className="mt-6 inline-flex min-h-12 items-center justify-center gap-3 self-start bg-[#24372d] px-6 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Make a custom request <span>↗</span></Link>
             </div>
-            <Link href="/custom-order" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-[#1769e0] px-6 text-sm font-semibold text-white hover:bg-[#0957c3]">Make a request ↗</Link>
+            <div className="relative min-h-[230px] bg-[#c9b59d] md:min-h-[360px]">
+              <img
+                src={categoryTiles.find((category) => category.name === "Bags")?.product?.image_url || "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85"}
+                alt="A bag for everyday use"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-[#1d1d1f] text-white">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <footer className="bg-[#1d2b23] text-white">
+        <div className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-14 lg:px-16">
+          <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.4fr_.7fr_.8fr_1fr]">
             <div>
-              <Link href="/" className="inline-flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-[#1769e0]">R</span>
-                <span className="font-semibold tracking-tight">Regal Store</span>
+              <Link href="/" className="inline-flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/50 font-serif text-lg">R</span>
+                <span className="font-serif text-2xl tracking-tight">Regal Store</span>
               </Link>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-white/55">Clothing, bags and shoes for everyday style. Confirm delivery options with us before payment.</p>
+              <p className="mt-4 max-w-xs text-sm leading-6 text-white/60">Clothing, bags and shoes for the days that make up your life. Thoughtful finds, easy browsing, personal support.</p>
             </div>
             <div>
-              <p className="text-sm font-semibold">Explore</p>
-              <div className="mt-3 space-y-2 text-sm text-white/55">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Explore</p>
+              <div className="mt-4 space-y-3 text-sm text-white/65">
                 {CATEGORIES.map((category) => <Link key={category.name} href={`/?category=${encodeURIComponent(category.name)}#products`} className="block hover:text-white">{category.name}</Link>)}
+                <Link href="/search" className="block hover:text-white">Search the store</Link>
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold">Support</p>
-              <div className="mt-3 space-y-2 text-sm text-white/55">
-                <Link href="/account/help" className="block hover:text-white">Help center</Link>
-                <Link href="/account/track" className="block hover:text-white">Track order</Link>
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Customer care</p>
+              <div className="mt-4 space-y-3 text-sm text-white/65">
+                <Link href="/account/help" className="block hover:text-white">Help centre</Link>
+                <Link href="/account/track" className="block hover:text-white">Track an order</Link>
                 <Link href="/custom-order" className="block hover:text-white">Custom request</Link>
-                <Link href="/account/support" className="block hover:text-white">Contact</Link>
-                <a href={whatsappLink("Hello Regal Store, I need customer support.") || "/account/support"} target="_blank" rel="noreferrer" className="block hover:text-white">WhatsApp: +234 906 424 4342</a>
+                <Link href="/account/support" className="block hover:text-white">Contact us</Link>
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold">Need help choosing?</p>
-              <p className="mt-3 text-sm leading-6 text-white/55">Send us what you’re looking for and we’ll help you work out the next step.</p>
-              <a href={whatsappLink("Hello Regal Store, I need help choosing a product.") || "/account/support"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-white">WhatsApp support ↗</a>
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Talk to us</p>
+              <p className="mt-4 text-sm leading-6 text-white/60">Questions about an item, sizing or delivery? Contact us to confirm the details before payment.</p>
+              <a href={whatsappLink("Hello Regal Store, I need help choosing a product.") || "/account/support"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 border-b border-[#dfb78d]/70 pb-1 text-sm font-semibold text-[#dfb78d] hover:text-white">WhatsApp · +234 906 424 4342 ↗</a>
             </div>
           </div>
-          <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-10 flex flex-col gap-2 border-t border-white/15 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
             <span>© {new Date().getFullYear()} Regal Store. All rights reserved.</span>
-            <span>Made for everyday life in Nigeria.</span>
+            <span>Everyday style, thoughtfully found.</span>
           </div>
         </div>
       </footer>
