@@ -57,7 +57,7 @@ export default function ProductActions({ product }: Props) {
       return;
     }
     if (isUnavailable) {
-      pendingTab.location.href = whatsappLink(waMessage);
+      pendingTab?.location.href = whatsappLink(waMessage);
       return;
     }
     try {
