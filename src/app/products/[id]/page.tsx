@@ -36,13 +36,14 @@ function formatPrice(price: number) {
 }
 
 function isStoreCategory(category: string | null | undefined) {
-  return ["clothing", "fashion", "shoes"].includes((category || "").toLowerCase());
+  return ["clothing", "fashion", "shoes", "bag", "bags"].includes((category || "").toLowerCase());
 }
 
 function categoryName(category: string | null | undefined) {
   const normalized = (category || "").toLowerCase();
   if (normalized === "fashion" || normalized === "clothing") return "Clothing";
   if (normalized === "shoes") return "Shoes";
+  if (normalized === "bag" || normalized === "bags") return "Bags";
   return "Product";
 }
 
