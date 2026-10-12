@@ -64,7 +64,7 @@ export default function ProductActions({ product }: Props) {
 
   const waMessage = isUnavailable
     ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
-    : `Hi Regal Store! I'm interested in *${product.name}*.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
+    : `Hi Regal Store! I'm interested in *${product.name}* (Quantity: ${quantity}).${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
   const orderLink = optionsChosen ? whatsappLink(waMessage) : null;
 
   const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
