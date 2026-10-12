@@ -37,10 +37,15 @@ export default async function ProductPage({ params }: Props) {
     error = fallback.error;
   }
 
-  if (error || !product) {
+  if (
+    error ||
+    !product ||
+    !["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase())
+  ) {
     notFound();
   }
 
+  const categoryLabel = product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category;
   const compare = (product as any).compare_at_price as number | null | undefined;
   const onSale = compare && compare > product.price;
   const off = onSale ? Math.round(((compare - product.price) / compare) * 100) : null;
@@ -90,7 +95,7 @@ export default async function ProductPage({ params }: Props) {
 
           <div className="flex flex-col">
             <p className="text-xs uppercase tracking-wider text-brand-blue font-medium mb-2">
-              {product.category || "Product"}
+              {categoryLabel || "Product"}
             </p>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-brand-black mb-3">
               {product.name}
