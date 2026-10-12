@@ -65,7 +65,7 @@ async function getProduct(id: string): Promise<Product | null> {
       .eq("id", id)
       .maybeSingle();
     if (fallback.data && isStoreCategory(fallback.data.category)) {
-      return { ...fallback.data, compare_at_price: null, sizes: [], colors: [], is_available: true } as Product;
+      return { ...fallback.data, compare_at_price: null, sizes: [], colors: [], is_available: null } as Product;
     }
   }
 
@@ -132,7 +132,11 @@ export default async function ProductPage({ params }: Props) {
       url: productUrl,
       priceCurrency: "NGN",
       price: String(product.price),
-      availability: product.is_available === false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      availability: product.is_available === false
+        ? "https://schema.org/OutOfStock"
+        : product.is_available === true
+          ? "https://schema.org/InStock"
+          : undefined,
     },
   };
 
