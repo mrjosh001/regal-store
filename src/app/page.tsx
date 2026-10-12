@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/components/Header";
 import ProductGrid from "@/components/ProductGrid";
+import { whatsappLink } from "@/lib/whatsapp";
 
 type Product = {
   id: string;
@@ -263,12 +264,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <Link href="/account/track" className="block hover:text-white">Track order</Link>
                 <Link href="/custom-order" className="block hover:text-white">Custom request</Link>
                 <Link href="/account/support" className="block hover:text-white">Contact</Link>
+                <a href={whatsappLink("Hello Regal Store, I need customer support.") || "/account/support"} target="_blank" rel="noreferrer" className="block hover:text-white">WhatsApp: +234 906 424 4342</a>
               </div>
             </div>
             <div>
               <p className="text-sm font-semibold">Need help choosing?</p>
               <p className="mt-3 text-sm leading-6 text-white/55">Send us what you’re looking for and we’ll help you work out the next step.</p>
-              <Link href="/custom-order" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-white">Talk to Regal Store ↗</Link>
+              <a href={whatsappLink("Hello Regal Store, I need help choosing a product.") || "/account/support"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-white">WhatsApp support ↗</a>
             </div>
           </div>
           <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
