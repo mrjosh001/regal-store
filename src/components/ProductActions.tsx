@@ -56,8 +56,10 @@ export default function ProductActions({ product }: Props) {
       setAddError("Please allow pop-ups to continue to WhatsApp ordering.");
       return;
     }
+    // Keep a non-null reference across asynchronous stock verification.
+    const orderTab = pendingTab as Window;
     if (isUnavailable) {
-      pendingTab?.location.href = whatsappLink(waMessage);
+      orderTab.location.href = whatsappLink(waMessage);
       return;
     }
     try {
@@ -70,18 +72,18 @@ export default function ProductActions({ product }: Props) {
         .maybeSingle();
       if (error || !data) throw new Error("We could not verify current stock. Please try again or contact Regal Store.");
       if (data.is_available === false || data.stock_quantity === 0) {
-        pendingTab.close();
+        orderTab.close();
         setAddError("This product is currently sold out or unavailable. Your WhatsApp order was not opened.");
         return;
       }
       if (data.stock_quantity != null && quantity > data.stock_quantity) {
-        pendingTab.close();
+        orderTab.close();
         setAddError(`Only ${data.stock_quantity} unit(s) remain in stock. Please reduce the quantity and try again.`);
         return;
       }
-      pendingTab.location.href = whatsappLink(waMessage);
+      orderTab.location.href = whatsappLink(waMessage);
     } catch (error) {
-      pendingTab.close();
+      orderTab.close();
       setAddError(error instanceof Error ? error.message : "We could not verify current stock. Please try again.");
     }
   }
