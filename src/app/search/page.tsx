@@ -13,6 +13,7 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  created_at?: string | null;
 };
 
 function formatPrice(price: number) {
@@ -29,6 +30,8 @@ function SearchContent() {
   const [query, setQuery] = useState(q);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     setQuery(q);
@@ -42,22 +45,31 @@ function SearchContent() {
 
       let request = supabase
         .from("products")
-        .select("id, name, price, image_url, category, is_new")
+        .select("id, name, price, image_url, category, is_new, created_at")
         .order("created_at", { ascending: false });
 
-      if (q.trim()) {
+      const searchTerm = q.trim().replace(/[,%()_*]/g, " ").replace(/\\s+/g, " ").slice(0, 80);
+      if (searchTerm) {
         request = request.or(
-          `name.ilike.%${q.trim()}%,description.ilike.%${q.trim()}%,category.ilike.%${q.trim()}%`
+          `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`
         );
       }
 
       const { data } = await request;
       setProducts((data || [])
         .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
-        .map((product) => ({
-          ...product,
-          category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
-        })));
+        .map((product) => {
+          const normalizedCategory = product.category?.toLowerCase();
+          return {
+            ...product,
+            category:
+              normalizedCategory === "fashion" || normalizedCategory === "clothing"
+                ? "Clothing"
+                : normalizedCategory === "shoes"
+                  ? "Shoes"
+                  : product.category,
+          };
+        }));
       setLoading(false);
     }
 
@@ -70,6 +82,16 @@ function SearchContent() {
     if (query.trim()) params.set("q", query.trim());
     window.location.href = `/search?${params.toString()}`;
   }
+
+  const filteredProducts = products.filter((product) =>
+    activeCategory === "All" || product.category === activeCategory
+  );
+  const visibleProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === "price-asc") return a.price - b.price;
+    if (sortBy === "price-desc") return b.price - a.price;
+    if (sortBy === "name") return a.name.localeCompare(b.name);
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
 
   return (
     <div className="min-h-screen bg-brand-surface">
@@ -107,13 +129,49 @@ function SearchContent() {
             {q ? `Results for "${q}"` : "All products"}
           </h1>
           <span className="text-sm text-black/40">
-            {loading ? "..." : `${products.length} products`}
+            {loading ? "..." : `${visibleProducts.length} ${visibleProducts.length === 1 ? "product" : "products"}`}
           </span>
         </div>
 
+        {!loading && products.length > 0 && (
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-wrap gap-2" aria-label="Filter by category">
+              {["All", "Clothing", "Shoes"].map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  aria-pressed={activeCategory === category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`min-h-10 rounded-full px-4 text-sm font-medium transition ${
+                    activeCategory === category
+                      ? "bg-[#1d1d1f] text-white"
+                      : "border border-black/10 bg-white text-black/65 hover:border-black/25"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="search-sort" className="text-sm text-black/55">Sort by</label>
+              <select
+                id="search-sort"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="min-h-10 rounded-xl border border-black/10 bg-white px-3 text-sm text-brand-black"
+              >
+                <option value="newest">Newest first</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="name">Name: A to Z</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <p className="text-black/40 text-sm py-12 text-center">Searching...</p>
-        ) : products.length === 0 ? (
+        ) : visibleProducts.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-black/50 font-medium mb-1">No products found</p>
             <p className="text-black/30 text-sm mb-6">
@@ -128,7 +186,7 @@ function SearchContent() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <Link key={product.id} href={`/products/${product.id}`} className="group block">
                 <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-3 border border-black/5">
                   {product.image_url ? (
