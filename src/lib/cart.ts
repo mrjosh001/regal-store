@@ -35,10 +35,12 @@ export function saveCart(items: CartItem[]) {
 export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   const cart = getCart();
   const existing = cart.find((i) => cartItemKey(i) === cartItemKey(item));
-  const desiredQuantity = (existing?.quantity || 0) + qty;
-  if (item.stock_quantity != null && desiredQuantity > item.stock_quantity) {
-    throw new Error(`Only ${Math.max(0, item.stock_quantity - (existing?.quantity || 0))} more unit(s) are available for this option.`);
+  const currentProductQuantity = cart.filter((i) => i.id === item.id).reduce((sum, i) => sum + i.quantity, 0);
+  const desiredProductQuantity = currentProductQuantity + qty;
+  if (item.stock_quantity != null && desiredProductQuantity > item.stock_quantity) {
+    throw new Error(`Only ${Math.max(0, item.stock_quantity - currentProductQuantity)} more unit(s) are available across this product's sizes and colours.`);
   }
+  const desiredQuantity = (existing?.quantity || 0) + qty;
   if (existing) {
     existing.quantity = desiredQuantity;
     existing.stock_quantity = item.stock_quantity;
