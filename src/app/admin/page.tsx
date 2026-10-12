@@ -249,16 +249,16 @@ export default function AdminPage() {
     if (!confirm(`Set this user as ${newRole}?`)) return;
 
     const supabase = await getSupabase();
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: newRole })
-      .eq("id", userId);
+    const { error } = await supabase.rpc("admin_set_profile_role", {
+      target_user_id: userId,
+      new_role: newRole,
+    });
 
     if (!error) {
       setMessage(`User set to ${newRole}`);
       await fetchUsers();
     } else {
-      setMessage(error.message);
+      setMessage(error.message || "Could not update this user's role.");
     }
   }
 
