@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { addToCart, getCart, cartItemKey } from "@/lib/cart";
 import { whatsappLink, formatPrice } from "@/lib/whatsapp";
@@ -24,6 +24,12 @@ export default function ProductActions({ product }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
+  const [cartQuantity, setCartQuantity] = useState(0);
+
+  useEffect(() => {
+    const quantityInCart = getCart().filter((item) => item.id === product.id).reduce((sum, item) => sum + item.quantity, 0);
+    setCartQuantity(quantityInCart);
+  }, [product.id, selectedSize, selectedColor, added]);
 
   const sizes = product.sizes || [];
   const colors = product.colors || [];
@@ -31,7 +37,6 @@ export default function ProductActions({ product }: Props) {
   const isUnavailable = product.is_available === false || isSoldOut;
   const needsAvailabilityConfirmation = product.is_available == null && product.stock_quantity == null;
   const stockTracked = product.stock_quantity != null;
-  const cartQuantity = getCart().filter((item) => cartItemKey(item) === cartItemKey({ id: product.id, size: selectedSize || null, color: selectedColor || null })).reduce((sum, item) => sum + item.quantity, 0);
   const remainingToAdd = stockTracked ? Math.max(0, (product.stock_quantity || 0) - cartQuantity) : 99;
   const quantityAvailable = !stockTracked || quantity <= remainingToAdd;
 
@@ -105,7 +110,7 @@ export default function ProductActions({ product }: Props) {
           <select id="product-quantity" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className={inputClass}>
             {Array.from({ length: Math.max(1, Math.min(remainingToAdd, 99)) }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
           </select>
-          <p className="mt-1 text-xs text-black/50">{remainingToAdd} more available for this option.</p>
+          <p className="mt-1 text-xs text-black/50">{remainingToAdd} more unit(s) available across this product’s sizes and colours.</p>
         </div>
       )}
       {stockTracked && !isUnavailable && !quantityAvailable && <p role="alert" className="text-sm text-red-600">Your cart already contains all available stock for this option.</p>}
