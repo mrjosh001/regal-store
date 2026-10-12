@@ -10,6 +10,7 @@ import {
   removeFromCart,
   clearCart,
   cartTotal,
+  cartItemKey,
   type CartItem,
 } from "@/lib/cart";
 import { whatsappLink, formatPrice } from "@/lib/whatsapp";
@@ -31,7 +32,10 @@ export default function CartPage() {
     if (items.length === 0) return;
 
     const lines = items.map(
-      (item) => `• ${item.name} x${item.quantity} — ${formatPrice(item.price * item.quantity)}`
+      (item) => {
+        const options = [item.size ? `Size: ${item.size}` : null, item.color ? `Colour: ${item.color}` : null].filter(Boolean);
+        return `• ${item.name}${options.length ? ` (${options.join(", ")})` : ""} x${item.quantity} — ${formatPrice(item.price * item.quantity)}`;
+      }
     );
     const total = formatPrice(cartTotal(items));
     const message = `Hi Regal Store! I want to order:\n\n${lines.join("\n")}\n\n*Total: ${total}*\n\nPlease confirm availability and delivery.`;
@@ -70,22 +74,23 @@ export default function CartPage() {
           <>
             <div className="divide-y divide-black/[.06] overflow-hidden rounded-3xl border border-black/[.06] bg-white">
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
+                <div key={cartItemKey(item)} className="flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-[#f5f5f7] sm:h-24 sm:w-24">
                     {item.image_url ? <Image src={item.image_url} alt={item.name} fill className="object-cover" sizes="96px" unoptimized /> : <div className="flex h-full items-center justify-center text-xs text-black/35">No image</div>}
                   </div>
                   <div className="min-w-0 flex-1">
                     <Link href={`/products/${item.id}`} className="line-clamp-2 text-sm font-semibold leading-5 text-[#1d1d1f] hover:text-brand-blue">{item.name}</Link>
                     <p className="mt-1 text-sm text-black/55">{formatPrice(item.price)}</p>
+                    {(item.size || item.color) && <p className="mt-1 text-xs text-black/45">{[item.size ? `Size: ${item.size}` : null, item.color ? `Colour: ${item.color}` : null].filter(Boolean).join(" · ")}</p>}
                     <div className="mt-3 inline-flex items-center gap-3 rounded-full border border-black/[.08] px-2 py-1">
-                      <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => setItems(updateQuantity(item.id, item.quantity - 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">−</button>
+                      <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity - 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">−</button>
                       <span className="w-4 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                      <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => setItems(updateQuantity(item.id, item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">+</button>
+                      <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">+</button>
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-sm font-semibold text-[#1d1d1f]">{formatPrice(item.price * item.quantity)}</p>
-                    <button type="button" onClick={() => setItems(removeFromCart(item.id))} className="mt-2 text-xs text-black/40 underline underline-offset-2 hover:text-red-600">Remove</button>
+                    <button type="button" onClick={() => setItems(removeFromCart(cartItemKey(item)))} className="mt-2 text-xs text-black/40 underline underline-offset-2 hover:text-red-600">Remove</button>
                   </div>
                 </div>
               ))}
