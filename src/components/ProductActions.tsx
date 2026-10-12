@@ -20,7 +20,8 @@ type Props = {
 export default function ProductActions({ product }: Props) {
   const sizes = product.sizes || [];
   const colors = product.colors || [];
-  const isAvailable = product.is_available !== false;
+  const isUnavailable = product.is_available === false;
+  const needsAvailabilityConfirmation = product.is_available == null;
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [added, setAdded] = useState(false);
@@ -33,7 +34,7 @@ export default function ProductActions({ product }: Props) {
   ].filter(Boolean).join("\n");
 
   function handleAdd() {
-    if (!isAvailable || !optionsChosen) return;
+    if (isUnavailable || !optionsChosen) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -46,9 +47,9 @@ export default function ProductActions({ product }: Props) {
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const waMessage = isAvailable
-    ? `Hi Regal Store! I want to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery.`
-    : `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`;
+  const waMessage = isUnavailable
+    ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
+    : `Hi Regal Store! I'm interested in *${product.name}*.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
   const orderLink = optionsChosen ? whatsappLink(waMessage) : null;
 
   const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
@@ -82,7 +83,13 @@ export default function ProductActions({ product }: Props) {
         <p className="text-sm text-black/55">Choose {sizes.length && colors.length ? "a size and colour" : sizes.length ? "a size" : "a colour"} to continue.</p>
       )}
 
-      {isAvailable ? (
+      {needsAvailabilityConfirmation && !isUnavailable && (
+        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Availability has not been confirmed yet. The store will verify this item with you before payment.
+        </p>
+      )}
+
+      {!isUnavailable ? (
         <button
           type="button"
           onClick={handleAdd}
@@ -104,7 +111,7 @@ export default function ProductActions({ product }: Props) {
           rel="noopener noreferrer"
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]"
         >
-          {isAvailable ? "Order via WhatsApp" : "Ask about availability"} <span aria-hidden="true">↗</span>
+          {isUnavailable ? "Ask about availability" : "Order via WhatsApp"} <span aria-hidden="true">↗</span>
         </a>
       ) : (
         <button
