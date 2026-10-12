@@ -325,24 +325,32 @@ export default function AdminPage() {
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
-          {(
-            [
-              { id: "overview", label: "Overview" },
-              { id: "products", label: "Products" },
-              { id: "users", label: "Users & Admins" },
-            ] as const
-          ).map((tab) => (
+        <nav aria-label="Admin sections" className="flex-1 p-4 space-y-2">
+          {([
+            { id: "overview", label: "Overview", description: "Store performance at a glance", icon: "▦" },
+            { id: "products", label: "Products", description: "Add, edit and manage listings", icon: "◇" },
+            { id: "users", label: "Users & Admins", description: "Manage customer access and roles", icon: "♙" },
+          ] as const).map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+              aria-current={activeTab === tab.id ? "page" : undefined}
+              className={`flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition ${
                 activeTab === tab.id
-                  ? "bg-brand-blue text-white"
-                  : "text-black/60 hover:bg-brand-blue/5"
+                  ? "bg-brand-blue text-white shadow-sm shadow-brand-blue/20"
+                  : "text-brand-black/75 hover:bg-brand-blue/5"
               }`}
             >
-              {tab.label}
+              <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg ${
+                activeTab === tab.id ? "bg-white/15" : "bg-brand-blue/10 text-brand-blue"
+              }`} aria-hidden="true">{tab.icon}</span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold">{tab.label}</span>
+                <span className={`mt-1 block text-xs leading-4 ${
+                  activeTab === tab.id ? "text-white/75" : "text-black/45"
+                }`}>{tab.description}</span>
+              </span>
             </button>
           ))}
         </nav>
@@ -364,39 +372,52 @@ export default function AdminPage() {
       </aside>
 
       <div className="flex-1 md:ml-64">
-        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-black/5 bg-white px-4 py-3 md:hidden">
-          <div>
-            <p className="text-xs text-black/45">Regal Store</p>
+        <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-black/5 bg-white px-4 py-3 md:hidden">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-brand-blue">Regal Store</p>
             <p className="font-semibold text-brand-black">Admin dashboard</p>
+            <p className="mt-0.5 text-xs text-black/45">Manage your store in one place</p>
           </div>
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               aria-expanded={mobileNavOpen}
               aria-haspopup="menu"
+              aria-label="Choose dashboard section"
               onClick={() => setMobileNavOpen((open) => !open)}
-              className="flex min-h-10 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm font-medium text-brand-black shadow-sm"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm font-semibold text-brand-black shadow-sm"
             >
               {activeTab === "users" ? "Users & Admins" : activeTab === "products" ? "Products" : "Overview"}
               <span aria-hidden="true" className={mobileNavOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span>
             </button>
             {mobileNavOpen && (
-              <div role="menu" className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-black/10 bg-white p-1.5 shadow-xl">
+              <div role="menu" className="absolute right-0 top-full mt-2 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white p-2 shadow-2xl">
+                <p className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-black/40">Navigate dashboard</p>
                 {([
-                  { id: "overview", label: "Overview" },
-                  { id: "products", label: "Products" },
-                  { id: "users", label: "Users & Admins" },
+                  { id: "overview", label: "Overview", description: "See your store summary and quick actions", icon: "▦" },
+                  { id: "products", label: "Products", description: "Create listings, update prices and images", icon: "◇" },
+                  { id: "users", label: "Users & Admins", description: "Review accounts and manage permissions", icon: "♙" },
                 ] as const).map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     role="menuitem"
+                    aria-current={activeTab === tab.id ? "page" : undefined}
                     onClick={() => { setActiveTab(tab.id); setMobileNavOpen(false); }}
-                    className={`w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition ${
                       activeTab === tab.id ? "bg-brand-blue text-white" : "text-brand-black hover:bg-brand-blue/5"
                     }`}
                   >
-                    {tab.label}
+                    <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg ${
+                      activeTab === tab.id ? "bg-white/15" : "bg-brand-blue/10 text-brand-blue"
+                    }`} aria-hidden="true">{tab.icon}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold">{tab.label}</span>
+                      <span className={`mt-1 block text-xs leading-4 ${
+                        activeTab === tab.id ? "text-white/75" : "text-black/45"
+                      }`}>{tab.description}</span>
+                    </span>
+                    {activeTab === tab.id && <span aria-hidden="true" className="pt-1 text-sm">✓</span>}
                   </button>
                 ))}
               </div>
