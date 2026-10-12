@@ -23,6 +23,7 @@ export default function ProductActions({ product }: Props) {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
   const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
   const [cartQuantity, setCartQuantity] = useState(0);
 
@@ -46,26 +47,70 @@ export default function ProductActions({ product }: Props) {
     colors.length ? `Colour: ${selectedColor || "Not selected"}` : null,
   ].filter(Boolean).join("\n");
 
+  async function handleWhatsAppOrder() {
+    if (!optionsChosen) return;
+    setAddError(null);
+    // Open synchronously so the browser does not block the WhatsApp tab after the stock check.
+    const pendingTab = window.open("about:blank", "_blank");
+    if (!pendingTab) {
+      setAddError("Please allow pop-ups to continue to WhatsApp ordering.");
+      return;
+    }
+    if (isUnavailable) {
+      pendingTab.location.href = whatsappLink(waMessage);
+      return;
+    }
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("products")
+        .select("stock_quantity, is_available")
+        .eq("id", product.id)
+        .maybeSingle();
+      if (error || !data) throw new Error("We could not verify current stock. Please try again or contact Regal Store.");
+      if (data.is_available === false || data.stock_quantity === 0) {
+        pendingTab.close();
+        setAddError("This product is currently sold out or unavailable. Your WhatsApp order was not opened.");
+        return;
+      }
+      if (data.stock_quantity != null && quantity > data.stock_quantity) {
+        pendingTab.close();
+        setAddError(`Only ${data.stock_quantity} unit(s) remain in stock. Please reduce the quantity and try again.`);
+        return;
+      }
+      pendingTab.location.href = whatsappLink(waMessage);
+    } catch (error) {
+      pendingTab.close();
+      setAddError(error instanceof Error ? error.message : "We could not verify current stock. Please try again.");
+    }
+  }
+
   function handleAdd() {
     if (isUnavailable || !optionsChosen || !quantityAvailable) return;
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-      size: selectedSize || null,
-      color: selectedColor || null,
-      stock_quantity: product.stock_quantity,
-    }, quantity);
-    setQuantity(1);
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 1800);
+    setAddError(null);
+    try {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url,
+        size: selectedSize || null,
+        color: selectedColor || null,
+        stock_quantity: product.stock_quantity,
+      }, quantity);
+      setQuantity(1);
+      setAdded(true);
+      window.setTimeout(() => setAdded(false), 1800);
+    } catch (error) {
+      setAddError(error instanceof Error ? error.message : "Could not add this quantity to your cart.");
+    }
   }
 
   const waMessage = isUnavailable
     ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
     : `Hi Regal Store! I'm interested in *${product.name}* (Quantity: ${quantity}).${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
-  const orderLink = optionsChosen && quantityAvailable ? whatsappLink(waMessage) : null;
+  const orderLink = isUnavailable ? whatsappLink(waMessage) : null;
 
   const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
 
@@ -115,6 +160,8 @@ export default function ProductActions({ product }: Props) {
       )}
       {stockTracked && !isUnavailable && !quantityAvailable && <p role="alert" className="text-sm text-red-600">Your cart already contains all available stock for this option.</p>}
 
+      {addError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">{addError}</p>}
+
       {!isUnavailable ? (
         <button
           type="button"
@@ -130,23 +177,34 @@ export default function ProductActions({ product }: Props) {
         </div>
       )}
 
-      {orderLink ? (
-        <a
-          href={orderLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]"
-        >
-          {isUnavailable ? "Ask about availability" : "Order via WhatsApp"} <span aria-hidden="true">↗</span>
-        </a>
+      {isUnavailable ? (
+        orderLink ? (
+          <a
+            href={orderLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]"
+          >
+            Ask about availability <span aria-hidden="true">↗</span>
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled={!optionsChosen}
+            onClick={() => setShowWhatsAppSetup((current) => !current)}
+            className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.03] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {!optionsChosen ? "Select options to continue" : "WhatsApp ordering unavailable"}
+          </button>
+        )
       ) : (
         <button
           type="button"
-          disabled={!optionsChosen}
-          onClick={() => setShowWhatsAppSetup((current) => !current)}
-          className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.03] disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={handleWhatsAppOrder}
+          disabled={!optionsChosen || !quantityAvailable}
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {!optionsChosen ? "Select options to continue" : "WhatsApp ordering unavailable"}
+          Order via WhatsApp <span aria-hidden="true">↗</span>
         </button>
       )}
 

@@ -18,7 +18,7 @@ type Product = {
   stock_quantity?: number | null;
 };
 
-const categories = ["All", "Clothing", "Shoes"];
+const categories = ["All", "Clothing", "Bags", "Shoes"];
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("en-NG", {
@@ -49,9 +49,9 @@ export default function ProductGrid({
       ? products
       : products.filter((product) => {
           const category = product.category?.toLowerCase();
-          return active === "Clothing"
-            ? category === "clothing" || category === "fashion"
-            : category === active.toLowerCase();
+          if (active === "Clothing") return category === "clothing" || category === "fashion";
+          if (active === "Bags") return category === "bag" || category === "bags";
+          return category === active.toLowerCase();
         });
 
   const newProducts = filtered.filter((product) => product.is_new).slice(0, 4);
@@ -134,18 +134,18 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/products/${product.id}`} className="group block min-w-0">
-      <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-2xl border border-black/[.04] bg-white shadow-sm sm:rounded-3xl">
+      <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-2xl border border-black/[.04] bg-[#f0eeeb] shadow-sm transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-black/[.08] sm:rounded-3xl">
         {product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] motion-reduce:transform-none"
+            className="object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-[1.045] motion-reduce:transform-none"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-[#f5f5f7] text-sm text-black/35">Image coming soon</div>
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#f5f3ef] to-[#e9e5de] text-sm text-black/40"><span className="text-3xl" aria-hidden="true">✳</span><span>Image coming soon</span></div>
         )}
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5 sm:left-3 sm:top-3">
           {off && <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#1d1d1f] shadow-sm backdrop-blur">Save {off}%</span>}
@@ -158,7 +158,7 @@ function ProductCard({ product }: { product: Product }) {
         <span className="absolute bottom-3 right-3 flex h-9 w-9 translate-y-2 items-center justify-center rounded-full bg-white text-lg text-[#1d1d1f] opacity-0 shadow-md transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 max-sm:hidden" aria-hidden="true">↗</span>
       </div>
       <div className="px-0.5">
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-black/40">{product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category || "Curated find"}</p>
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-black/40">{["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category || "Curated find"}</p>
         <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-snug text-[#1d1d1f] transition-colors group-hover:text-brand-blue sm:text-[15px]">{product.name}</h3>
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <p className="text-sm font-semibold tracking-tight text-[#1d1d1f] sm:text-base">{formatPrice(product.price)}</p>

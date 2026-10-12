@@ -62,9 +62,21 @@ export function updateQuantity(key: string, quantity: number) {
   if (quantity <= 0) {
     cart = cart.filter((item) => cartItemKey(item) !== key && item.id !== key);
   } else {
-    cart = cart.map((item) =>
-      cartItemKey(item) === key || item.id === key ? { ...item, quantity } : item
-    );
+    const target = cart.find((item) => cartItemKey(item) === key || item.id === key);
+    if (!target) return cart;
+    const otherQuantity = cart
+      .filter((item) => item.id === target.id && cartItemKey(item) !== cartItemKey(target))
+      .reduce((sum, item) => sum + item.quantity, 0);
+    const safeQuantity = target.stock_quantity == null
+      ? quantity
+      : Math.min(quantity, Math.max(0, target.stock_quantity - otherQuantity));
+    if (safeQuantity <= 0) {
+      cart = cart.filter((item) => cartItemKey(item) !== cartItemKey(target));
+    } else {
+      cart = cart.map((item) =>
+        cartItemKey(item) === cartItemKey(target) ? { ...item, quantity: safeQuantity } : item
+      );
+    }
   }
   saveCart(cart);
   return cart;
