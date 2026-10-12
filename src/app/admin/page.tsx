@@ -66,7 +66,7 @@ export default function AdminPage() {
   const [isNew, setIsNew] = useState(true);
   const [sizeOptions, setSizeOptions] = useState("");
   const [colorOptions, setColorOptions] = useState("");
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [availabilityStatus, setAvailabilityStatus] = useState<"unknown" | "available" | "unavailable">("unknown");
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function AdminPage() {
     setIsNew(true);
     setSizeOptions("");
     setColorOptions("");
-    setIsAvailable(true);
+    setAvailabilityStatus("unknown");
     setImageUrl("");
     setImagePreviewFailed(false);
     setEditingId(null);
@@ -191,7 +191,7 @@ export default function AdminPage() {
     setIsNew(!!product.is_new);
     setSizeOptions((product.sizes || []).join(", "));
     setColorOptions((product.colors || []).join(", "));
-    setIsAvailable(product.is_available !== false);
+    setAvailabilityStatus(product.is_available === true ? "available" : product.is_available === false ? "unavailable" : "unknown");
     setImageUrl(product.image_url || "");
     setImagePreviewFailed(false);
     setShowForm(true);
@@ -229,7 +229,7 @@ export default function AdminPage() {
         is_new: isNew,
         sizes: parseOptions(sizeOptions),
         colors: parseOptions(colorOptions),
-        is_available: isAvailable,
+        is_available: availabilityStatus === "available" ? true : availabilityStatus === "unavailable" ? false : null,
         image_url: normalizedImageUrl || null,
         compare_at_price: parsedCompareAtPrice,
       };
@@ -548,10 +548,15 @@ export default function AdminPage() {
                           <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} className="w-4 h-4" />
                           <span className="text-sm font-medium">Mark as New</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={isAvailable} onChange={(e) => setIsAvailable(e.target.checked)} className="w-4 h-4" />
-                          <span className="text-sm font-medium">Available to order</span>
-                        </label>
+                        <div className="min-w-0 flex-1">
+                          <label htmlFor="product-availability" className="mb-1.5 block text-sm font-medium">Availability</label>
+                          <select id="product-availability" value={availabilityStatus} onChange={(e) => setAvailabilityStatus(e.target.value as "unknown" | "available" | "unavailable")}
+                            className="w-full rounded-xl border border-black/10 bg-brand-surface px-3 py-3 text-sm">
+                            <option value="unknown">Confirm with store</option>
+                            <option value="available">Available to order</option>
+                            <option value="unavailable">Unavailable</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -616,7 +621,7 @@ export default function AdminPage() {
                           <p className="text-xs text-black/40">
                             {product.category} · {formatPrice(product.price)}
                             {product.is_new && <span className="ml-2 text-brand-blue font-medium">New</span>}
-                            <span className={`ml-2 font-medium ${product.is_available === false ? "text-red-600" : "text-emerald-700"}`}>{product.is_available === false ? "Unavailable" : "Available"}</span>
+                            <span className={`ml-2 font-medium ${product.is_available === false ? "text-red-600" : product.is_available === true ? "text-emerald-700" : "text-amber-700"}`}>{product.is_available === false ? "Unavailable" : product.is_available === true ? "Available" : "Confirm availability"}</span>
                           </p>
                         </div>
                         <button onClick={() => startEdit(product)}
