@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { addToCart, getCart, cartItemKey } from "@/lib/cart";
+import { addToCart, getCart } from "@/lib/cart";
 import { whatsappLink, formatPrice } from "@/lib/whatsapp";
 
 type Props = {
