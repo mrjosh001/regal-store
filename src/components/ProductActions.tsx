@@ -23,6 +23,7 @@ export default function ProductActions({ product }: Props) {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
   const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
   const [cartQuantity, setCartQuantity] = useState(0);
 
@@ -48,24 +49,29 @@ export default function ProductActions({ product }: Props) {
 
   function handleAdd() {
     if (isUnavailable || !optionsChosen || !quantityAvailable) return;
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-      size: selectedSize || null,
-      color: selectedColor || null,
-      stock_quantity: product.stock_quantity,
-    }, quantity);
-    setQuantity(1);
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 1800);
+    setAddError(null);
+    try {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url,
+        size: selectedSize || null,
+        color: selectedColor || null,
+        stock_quantity: product.stock_quantity,
+      }, quantity);
+      setQuantity(1);
+      setAdded(true);
+      window.setTimeout(() => setAdded(false), 1800);
+    } catch (error) {
+      setAddError(error instanceof Error ? error.message : "Could not add this quantity to your cart.");
+    }
   }
 
   const waMessage = isUnavailable
     ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
     : `Hi Regal Store! I'm interested in *${product.name}* (Quantity: ${quantity}).${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
-  const orderLink = optionsChosen && quantityAvailable ? whatsappLink(waMessage) : null;
+  const orderLink = isUnavailable ? whatsappLink(waMessage) : optionsChosen && quantityAvailable ? whatsappLink(waMessage) : null;
 
   const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
 
@@ -114,6 +120,8 @@ export default function ProductActions({ product }: Props) {
         </div>
       )}
       {stockTracked && !isUnavailable && !quantityAvailable && <p role="alert" className="text-sm text-red-600">Your cart already contains all available stock for this option.</p>}
+
+      {addError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">{addError}</p>}
 
       {!isUnavailable ? (
         <button
