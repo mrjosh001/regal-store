@@ -14,6 +14,7 @@ type Product = {
   category: string | null;
   is_new: boolean | null;
   is_available?: boolean | null;
+  stock_quantity?: number | null;
   created_at?: string | null;
 };
 
@@ -46,7 +47,7 @@ function SearchContent() {
 
       let request = supabase
         .from("products")
-        .select("id, name, price, image_url, category, is_new, is_available, created_at")
+        .select("id, name, price, image_url, category, is_new, is_available, stock_quantity, created_at")
         .order("created_at", { ascending: false });
 
       const searchTerm = q.trim().replace(/[,%()_*]/g, " ").replace(/\\s+/g, " ").slice(0, 80);
@@ -70,6 +71,7 @@ function SearchContent() {
                   ? "Shoes"
                   : product.category,
             is_available: product.is_available ?? null,
+            stock_quantity: product.stock_quantity ?? null,
           };
         }));
       setLoading(false);
