@@ -41,12 +41,17 @@ export default function CartPage() {
       if (error) throw error;
       const liveProducts = new Map((data || []).map((product) => [product.id, product]));
       const issues: string[] = [];
+      const requestedByProduct = new Map<string, number>();
       for (const item of items) {
-        const product = liveProducts.get(item.id);
+        requestedByProduct.set(item.id, (requestedByProduct.get(item.id) || 0) + item.quantity);
+      }
+      for (const [productId, requestedQuantity] of requestedByProduct) {
+        const item = items.find((candidate) => candidate.id === productId)!;
+        const product = liveProducts.get(productId);
         if (!product) { issues.push(`${item.name} is no longer listed.`); continue; }
         if (product.is_available === false || product.stock_quantity === 0) { issues.push(`${item.name} is currently sold out or unavailable.`); continue; }
-        if (product.stock_quantity != null && item.quantity > product.stock_quantity) {
-          issues.push(`${item.name}: only ${product.stock_quantity} in stock; your cart has ${item.quantity}.`);
+        if (product.stock_quantity != null && requestedQuantity > product.stock_quantity) {
+          issues.push(`${item.name}: only ${product.stock_quantity} in stock across all sizes/colours; your cart requests ${requestedQuantity}.`);
         }
       }
       if (issues.length) {
