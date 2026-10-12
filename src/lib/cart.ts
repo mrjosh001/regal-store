@@ -6,6 +6,7 @@ export type CartItem = {
   quantity: number;
   size?: string | null;
   color?: string | null;
+  stock_quantity?: number | null;
 };
 
 const CART_KEY = "regal-cart";
@@ -34,8 +35,13 @@ export function saveCart(items: CartItem[]) {
 export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   const cart = getCart();
   const existing = cart.find((i) => cartItemKey(i) === cartItemKey(item));
+  const desiredQuantity = (existing?.quantity || 0) + qty;
+  if (item.stock_quantity != null && desiredQuantity > item.stock_quantity) {
+    throw new Error(`Only ${Math.max(0, item.stock_quantity - (existing?.quantity || 0))} more unit(s) are available for this option.`);
+  }
   if (existing) {
-    existing.quantity += qty;
+    existing.quantity = desiredQuantity;
+    existing.stock_quantity = item.stock_quantity;
   } else {
     cart.push({ ...item, quantity: qty });
   }
