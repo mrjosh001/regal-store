@@ -524,7 +524,7 @@ export default function AdminPage() {
                       <p className="text-xs text-black/40 mt-1.5">Paste a direct HTTPS image link. Only the URL is saved in the product record; the image file is not uploaded to Regal Store storage.</p>
                       {imageUrl.trim() && !imagePreviewFailed && (
                         <div className="relative mt-3 h-32 w-32 overflow-hidden rounded-xl border border-black/10 bg-brand-surface">
-                          <Image src={imageUrl.trim()} alt={name ? `${name} image preview` : "Product image preview"} fill className="object-cover" unoptimized onError={() => setImagePreviewFailed(true)} />
+                          <img src={imageUrl.trim()} alt={name ? `${name} image preview` : "Product image preview"} className="h-full w-full object-cover" onError={() => setImagePreviewFailed(true)} />
                         </div>
                       )}
                       {imageUrl.trim() && imagePreviewFailed && (
