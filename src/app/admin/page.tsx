@@ -50,7 +50,7 @@ export default function AdminPage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [compareAtPrice, setCompareAtPrice] = useState("");
-  const [category, setCategory] = useState("Fashion");
+  const [category, setCategory] = useState("Clothing");
   const [isNew, setIsNew] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
 
@@ -155,7 +155,7 @@ export default function AdminPage() {
     setDescription("");
     setPrice("");
     setCompareAtPrice("");
-    setCategory("Fashion");
+    setCategory("Clothing");
     setIsNew(true);
     setImageUrl("");
     setImagePreviewFailed(false);
@@ -169,7 +169,7 @@ export default function AdminPage() {
     setDescription(product.description || "");
     setPrice(String(product.price));
     setCompareAtPrice(product.compare_at_price ? String(product.compare_at_price) : "");
-    setCategory(product.category || "Fashion");
+    setCategory(product.category === "Fashion" ? "Clothing" : product.category || "Clothing");
     setIsNew(!!product.is_new);
     setImageUrl(product.image_url || "");
     setImagePreviewFailed(false);
@@ -328,21 +328,22 @@ export default function AdminPage() {
         <nav className="flex-1 p-4 space-y-1">
           {(
             [
-              { id: "overview", label: "Overview" },
-              { id: "products", label: "Products" },
-              { id: "users", label: "Users & Admins" },
+              { id: "overview", label: "Overview", description: "Store performance, products, and user statistics." },
+              { id: "products", label: "Products", description: "Add, edit, and manage clothing and occasional footwear." },
+              { id: "users", label: "Users & Admins", description: "View accounts and manage store access." },
             ] as const
           ).map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+              className={`w-full rounded-xl px-4 py-3 text-left transition ${
                 activeTab === tab.id
                   ? "bg-brand-blue text-white"
                   : "text-black/60 hover:bg-brand-blue/5"
               }`}
             >
-              {tab.label}
+              <span className="block text-sm font-semibold">{tab.label}</span>
+              <span className={`mt-1 block text-xs leading-5 ${activeTab === tab.id ? "text-white/75" : "text-black/40"}`}>{tab.description}</span>
             </button>
           ))}
         </nav>
@@ -369,39 +370,39 @@ export default function AdminPage() {
             <p className="text-xs text-black/45">Regal Store</p>
             <p className="font-semibold text-brand-black">Admin dashboard</p>
           </div>
-          <div className="relative">
-            <button
-              type="button"
-              aria-expanded={mobileNavOpen}
-              aria-haspopup="menu"
-              onClick={() => setMobileNavOpen((open) => !open)}
-              className="flex min-h-10 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm font-medium text-brand-black shadow-sm"
-            >
-              {activeTab === "users" ? "Users & Admins" : activeTab === "products" ? "Products" : "Overview"}
-              <span aria-hidden="true" className={mobileNavOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span>
-            </button>
-            {mobileNavOpen && (
-              <div role="menu" className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-black/10 bg-white p-1.5 shadow-xl">
+          <button
+            type="button"
+            aria-expanded={mobileNavOpen}
+            aria-controls="admin-mobile-navigation"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            className="flex min-h-10 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm font-medium text-brand-black shadow-sm"
+          >
+            {activeTab === "users" ? "Users & Admins" : activeTab === "products" ? "Products" : "Overview"}
+            <span aria-hidden="true" className={mobileNavOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span>
+          </button>
+          {mobileNavOpen && (
+            <nav id="admin-mobile-navigation" aria-label="Admin sections" className="absolute left-0 right-0 top-full border-b border-black/10 bg-white px-4 py-3 shadow-xl">
+              <div className="mx-auto flex max-w-3xl flex-col gap-2">
                 {([
-                  { id: "overview", label: "Overview" },
-                  { id: "products", label: "Products" },
-                  { id: "users", label: "Users & Admins" },
+                  { id: "overview", label: "Overview", description: "Store performance, products, and user statistics." },
+                  { id: "products", label: "Products", description: "Add, edit, and manage clothing and occasional footwear." },
+                  { id: "users", label: "Users & Admins", description: "View accounts and manage store access." },
                 ] as const).map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
-                    role="menuitem"
                     onClick={() => { setActiveTab(tab.id); setMobileNavOpen(false); }}
-                    className={`w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
-                      activeTab === tab.id ? "bg-brand-blue text-white" : "text-brand-black hover:bg-brand-blue/5"
+                    className={`w-full rounded-xl border px-4 py-3 text-left transition ${
+                      activeTab === tab.id ? "border-brand-blue bg-brand-blue/5" : "border-black/5 hover:bg-black/[.02]"
                     }`}
                   >
-                    {tab.label}
+                    <span className="block text-sm font-semibold text-brand-black">{tab.label}</span>
+                    <span className="mt-1 block text-xs leading-5 text-black/50">{tab.description}</span>
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+            </nav>
+          )}
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8 max-w-6xl">
@@ -514,12 +515,8 @@ export default function AdminPage() {
                         <label className="block text-sm font-medium mb-1.5">Category</label>
                         <select value={category} onChange={(e) => setCategory(e.target.value)}
                           className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm">
-                          <option>Fashion</option>
-                          <option>Electronics</option>
-                          <option>Home</option>
-                          <option>Accessories</option>
-                          <option>Beauty</option>
-                          <option>Sports</option>
+                          <option>Clothing</option>
+                          <option>Shoes</option>
                         </select>
                       </div>
                       <div className="flex items-end">
@@ -536,7 +533,7 @@ export default function AdminPage() {
                         placeholder="https://example.com/product-photo.jpg"
                         inputMode="url"
                         className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
-                      <p className="text-xs text-black/40 mt-1.5">Paste a direct HTTPS image link. Only the URL is saved in the product record; the image file is not uploaded to Regal Store storage.</p>
+                      <p className="text-xs text-black/50 mt-1.5">Host the photo on an external image service, then paste its direct public image URL here. Regal Store saves only the link—no image files are stored in Supabase, helping keep database egress down. Use a link that opens the image itself, not a webpage around it.</p>
                       {imageUrl.trim() && !imagePreviewFailed && (
                         <div className="relative mt-3 h-32 w-32 overflow-hidden rounded-xl border border-black/10 bg-brand-surface">
                           <img src={imageUrl.trim()} alt={name ? `${name} image preview` : "Product image preview"} className="h-full w-full object-cover" onError={() => setImagePreviewFailed(true)} />

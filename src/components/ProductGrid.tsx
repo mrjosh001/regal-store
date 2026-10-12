@@ -14,7 +14,7 @@ type Product = {
   is_new: boolean | null;
 };
 
-const categories = ["All", "Fashion", "Electronics", "Home", "Accessories", "Beauty", "Sports"];
+const categories = ["All", "Clothing", "Shoes"];
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("en-NG", {
@@ -43,7 +43,12 @@ export default function ProductGrid({
   const filtered =
     active === "All"
       ? products
-      : products.filter((product) => product.category?.toLowerCase() === active.toLowerCase());
+      : products.filter((product) => {
+          const category = product.category?.toLowerCase();
+          return active === "Clothing"
+            ? category === "clothing" || category === "fashion"
+            : category === active.toLowerCase();
+        });
 
   const newProducts = filtered.filter((product) => product.is_new).slice(0, 4);
 
@@ -145,7 +150,7 @@ function ProductCard({ product }: { product: Product }) {
         <span className="absolute bottom-3 right-3 flex h-9 w-9 translate-y-2 items-center justify-center rounded-full bg-white text-lg text-[#1d1d1f] opacity-0 shadow-md transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 max-sm:hidden" aria-hidden="true">↗</span>
       </div>
       <div className="px-0.5">
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-black/40">{product.category || "Curated find"}</p>
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-black/40">{product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category || "Curated find"}</p>
         <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-snug text-[#1d1d1f] transition-colors group-hover:text-brand-blue sm:text-[15px]">{product.name}</h3>
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <p className="text-sm font-semibold tracking-tight text-[#1d1d1f] sm:text-base">{formatPrice(product.price)}</p>
