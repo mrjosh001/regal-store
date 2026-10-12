@@ -15,6 +15,7 @@ type Product = {
   sizes?: string[] | null;
   colors?: string[] | null;
   is_available?: boolean | null;
+  stock_quantity?: number | null;
 };
 
 type HomePageProps = {
@@ -42,7 +43,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       const supabase = await createClient();
       const primary = await supabase
         .from("products")
-        .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available")
+        .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available, stock_quantity")
         .order("created_at", { ascending: false });
 
       if (primary.error) {
@@ -63,6 +64,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               sizes: [],
               colors: [],
               is_available: null,
+              stock_quantity: null,
             }));
         }
       } else {
@@ -74,6 +76,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             sizes: product.sizes || [],
             colors: product.colors || [],
             is_available: product.is_available ?? null,
+            stock_quantity: product.stock_quantity ?? null,
           }));
       }
     }
