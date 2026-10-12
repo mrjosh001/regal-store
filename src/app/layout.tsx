@@ -7,24 +7,24 @@ const siteUrl = "https://regal-store.vercel.app";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Regal Store | Clothing & Footwear in Nigeria",
+    default: "Regal Store | Clothing, Bags & Shoes in Nigeria",
     template: "%s | Regal Store",
   },
   description:
-    "Shop clothing and occasional footwear from Regal Store, with nationwide delivery across Nigeria.",
+    "Explore clothing, bags and shoes at Regal Store. Contact us to confirm product availability and delivery options before payment.",
   openGraph: {
     type: "website",
     siteName: "Regal Store",
-    title: "Regal Store | Clothing & Footwear in Nigeria",
+    title: "Regal Store | Clothing, Bags & Shoes in Nigeria",
     description:
-      "Shop clothing and occasional footwear from Regal Store, with nationwide delivery across Nigeria.",
+      "Explore clothing, bags and shoes at Regal Store. Contact us to confirm product availability and delivery options before payment.",
     url: siteUrl,
   },
   twitter: {
     card: "summary",
-    title: "Regal Store | Clothing & Footwear in Nigeria",
+    title: "Regal Store | Clothing, Bags & Shoes in Nigeria",
     description:
-      "Shop clothing and occasional footwear from Regal Store, with nationwide delivery across Nigeria.",
+      "Explore clothing, bags and shoes at Regal Store. Contact us to confirm product availability and delivery options before payment.",
   },
 };
 
