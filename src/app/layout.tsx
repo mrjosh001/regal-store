@@ -4,7 +4,7 @@ import BottomNav from "@/components/BottomNav";
 
 export const metadata: Metadata = {
   title: "Regal Store",
-  description: "Premium products delivered across Nigeria",
+  description: "Shop clothing and occasional footwear from Regal Store, with nationwide delivery across Nigeria.",
 };
 
 export default function RootLayout({

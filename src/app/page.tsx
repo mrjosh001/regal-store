@@ -183,7 +183,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
             <Link href="#products" className="shrink-0 text-sm font-semibold text-brand-blue hover:text-brand-blue-dark">View all <span aria-hidden="true">↗</span></Link>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 lg:max-w-3xl">
             {CATEGORIES.map((category) => (
               <Link
                 key={category.name}
