@@ -17,6 +17,7 @@ type Product = {
   sizes?: string[] | null;
   colors?: string[] | null;
   is_available?: boolean | null;
+  stock_quantity?: number | null;
   created_at: string;
 };
 
@@ -67,6 +68,7 @@ export default function AdminPage() {
   const [sizeOptions, setSizeOptions] = useState("");
   const [colorOptions, setColorOptions] = useState("");
   const [availabilityStatus, setAvailabilityStatus] = useState<"unknown" | "available" | "unavailable">("unknown");
+  const [stockQuantity, setStockQuantity] = useState("0");
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
@@ -175,6 +177,7 @@ export default function AdminPage() {
     setSizeOptions("");
     setColorOptions("");
     setAvailabilityStatus("unknown");
+    setStockQuantity("0");
     setImageUrl("");
     setImagePreviewFailed(false);
     setEditingId(null);
@@ -192,6 +195,7 @@ export default function AdminPage() {
     setSizeOptions((product.sizes || []).join(", "));
     setColorOptions((product.colors || []).join(", "));
     setAvailabilityStatus(product.is_available === true ? "available" : product.is_available === false ? "unavailable" : "unknown");
+    setStockQuantity(product.stock_quantity == null ? "" : String(product.stock_quantity));
     setImageUrl(product.image_url || "");
     setImagePreviewFailed(false);
     setShowForm(true);
@@ -212,7 +216,11 @@ export default function AdminPage() {
         }
       }
       const parsedPrice = Number(price);
+      const parsedStockQuantity = stockQuantity.trim() === "" ? null : Number(stockQuantity);
       const parsedCompareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
+      if (parsedStockQuantity !== null && (!Number.isInteger(parsedStockQuantity) || parsedStockQuantity < 0)) {
+        throw new Error("Stock quantity must be a whole number of zero or more, or left blank if not tracked.");
+      }
       if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
         throw new Error("Enter a valid product price.");
       }
@@ -230,6 +238,7 @@ export default function AdminPage() {
         sizes: parseOptions(sizeOptions),
         colors: parseOptions(colorOptions),
         is_available: availabilityStatus === "available" ? true : availabilityStatus === "unavailable" ? false : null,
+        stock_quantity: parsedStockQuantity,
         image_url: normalizedImageUrl || null,
         compare_at_price: parsedCompareAtPrice,
       };
@@ -446,6 +455,8 @@ export default function AdminPage() {
                   { label: "New Items", value: products.filter((p) => p.is_new).length },
                   { label: "Total Users", value: users.length },
                   { label: "Admins", value: users.filter((u) => u.role === "admin").length },
+                  { label: "Low stock (1–5)", value: products.filter((p) => p.stock_quantity != null && p.stock_quantity > 0 && p.stock_quantity <= 5).length },
+                  { label: "Out of stock", value: products.filter((p) => p.stock_quantity === 0 || p.is_available === false).length },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-white rounded-2xl border border-black/5 p-5">
                     <p className="text-sm text-black/50">{stat.label}</p>
@@ -518,6 +529,13 @@ export default function AdminPage() {
                         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0"
                           className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
                       </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-brand-blue/15 bg-brand-blue/[.03] p-4">
+                      <label htmlFor="product-stock" className="block text-sm font-medium mb-1.5">Stock quantity</label>
+                      <input id="product-stock" type="number" inputMode="numeric" min="0" step="1" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} placeholder="e.g. 12"
+                        className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
+                      <p className="mt-1.5 text-xs leading-5 text-black/50">Enter the number physically in stock. Set 0 to show Sold out. Leave blank only if this product is not being stock-counted yet. Stock is not reserved until an order is confirmed.</p>
                     </div>
 
                     <div>
@@ -621,7 +639,7 @@ export default function AdminPage() {
                           <p className="text-xs text-black/40">
                             {product.category} · {formatPrice(product.price)}
                             {product.is_new && <span className="ml-2 text-brand-blue font-medium">New</span>}
-                            <span className={`ml-2 font-medium ${product.is_available === false ? "text-red-600" : product.is_available === true ? "text-emerald-700" : "text-amber-700"}`}>{product.is_available === false ? "Unavailable" : product.is_available === true ? "Available" : "Confirm availability"}</span>
+                            <span className={`ml-2 font-medium ${product.stock_quantity === 0 || product.is_available === false ? "text-red-600" : product.stock_quantity != null && product.stock_quantity <= 5 ? "text-amber-700" : "text-emerald-700"}`}>{product.stock_quantity === 0 ? "Sold out" : product.is_available === false ? "Unavailable" : product.stock_quantity == null ? "Stock not tracked" : `${product.stock_quantity} in stock`}</span>
                           </p>
                         </div>
                         <button onClick={() => startEdit(product)}

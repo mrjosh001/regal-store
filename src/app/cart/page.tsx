@@ -28,8 +28,44 @@ export default function CartPage() {
     return () => window.removeEventListener("cart-updated", onUpdate);
   }, []);
 
-  function handleOrder() {
+  const [inventoryMessage, setInventoryMessage] = useState<string | null>(null);
+
+  async function handleOrder() {
     if (items.length === 0) return;
+    setInventoryMessage(null);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const productIds = [...new Set(items.map((item) => item.id))];
+      const { data, error } = await supabase.from("products").select("id, name, stock_quantity, is_available").in("id", productIds);
+      if (error) throw error;
+      const liveProducts = new Map((data || []).map((product) => [product.id, product]));
+      const issues: string[] = [];
+      const requestedByProduct = new Map<string, number>();
+      for (const item of items) {
+        requestedByProduct.set(item.id, (requestedByProduct.get(item.id) || 0) + item.quantity);
+      }
+      for (const [productId, requestedQuantity] of requestedByProduct) {
+        const item = items.find((candidate) => candidate.id === productId)!;
+        const product = liveProducts.get(productId);
+        if (!product) { issues.push(`${item.name} is no longer listed.`); continue; }
+        if (product.is_available === false || product.stock_quantity === 0) { issues.push(`${item.name} is currently sold out or unavailable.`); continue; }
+        if (product.stock_quantity != null && requestedQuantity > product.stock_quantity) {
+          issues.push(`${item.name}: only ${product.stock_quantity} in stock across all sizes/colours; your cart requests ${requestedQuantity}.`);
+        }
+      }
+      if (issues.length) {
+        setInventoryMessage(`Please update your cart before ordering: ${issues.join(" ")}`);
+        setItems(items.map((item) => {
+          const latest = liveProducts.get(item.id);
+          return latest ? { ...item, stock_quantity: latest.stock_quantity } : item;
+        }));
+        return;
+      }
+    } catch {
+      setInventoryMessage("We could not verify live stock just now. Please try again before sending your order.");
+      return;
+    }
 
     const lines = items.map(
       (item) => {
@@ -55,6 +91,7 @@ export default function CartPage() {
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         <Link href="/" className="text-sm font-medium text-black/50 hover:text-[#1769e0]">← Continue shopping</Link>
+        {inventoryMessage && <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">{inventoryMessage}</p>}
         <div className="mb-6 mt-5 flex items-end justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-blue">Your selection</p>
@@ -85,8 +122,9 @@ export default function CartPage() {
                     <div className="mt-3 inline-flex items-center gap-3 rounded-full border border-black/[.08] px-2 py-1">
                       <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity - 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">−</button>
                       <span className="w-4 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                      <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">+</button>
+                      <button type="button" aria-label={`Increase quantity of ${item.name}`} disabled={item.stock_quantity != null && item.quantity >= item.stock_quantity} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7] disabled:cursor-not-allowed disabled:opacity-30">+</button>
                     </div>
+                    {item.stock_quantity != null && <p className="mt-1 text-xs text-black/45">{item.stock_quantity} in stock</p>}
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-sm font-semibold text-[#1d1d1f]">{formatPrice(item.price * item.quantity)}</p>

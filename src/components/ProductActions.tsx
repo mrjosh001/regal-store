@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { addToCart } from "@/lib/cart";
+import { addToCart, getCart } from "@/lib/cart";
 import { whatsappLink, formatPrice } from "@/lib/whatsapp";
 
 type Props = {
@@ -14,18 +14,31 @@ type Props = {
     sizes?: string[] | null;
     colors?: string[] | null;
     is_available?: boolean | null;
+    stock_quantity?: number | null;
   };
 };
 
 export default function ProductActions({ product }: Props) {
-  const sizes = product.sizes || [];
-  const colors = product.colors || [];
-  const isUnavailable = product.is_available === false;
-  const needsAvailabilityConfirmation = product.is_available == null;
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
+  const [cartQuantity, setCartQuantity] = useState(0);
+
+  useEffect(() => {
+    const quantityInCart = getCart().filter((item) => item.id === product.id).reduce((sum, item) => sum + item.quantity, 0);
+    setCartQuantity(quantityInCart);
+  }, [product.id, selectedSize, selectedColor, added]);
+
+  const sizes = product.sizes || [];
+  const colors = product.colors || [];
+  const isSoldOut = product.stock_quantity === 0;
+  const isUnavailable = product.is_available === false || isSoldOut;
+  const needsAvailabilityConfirmation = product.is_available == null && product.stock_quantity == null;
+  const stockTracked = product.stock_quantity != null;
+  const remainingToAdd = stockTracked ? Math.max(0, (product.stock_quantity || 0) - cartQuantity) : 99;
+  const quantityAvailable = !stockTracked || quantity <= remainingToAdd;
 
   const optionsChosen = (!sizes.length || Boolean(selectedSize)) && (!colors.length || Boolean(selectedColor));
   const variantDetails = [
@@ -34,7 +47,7 @@ export default function ProductActions({ product }: Props) {
   ].filter(Boolean).join("\n");
 
   function handleAdd() {
-    if (isUnavailable || !optionsChosen) return;
+    if (isUnavailable || !optionsChosen || !quantityAvailable) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -42,14 +55,16 @@ export default function ProductActions({ product }: Props) {
       image_url: product.image_url,
       size: selectedSize || null,
       color: selectedColor || null,
-    });
+      stock_quantity: product.stock_quantity,
+    }, quantity);
+    setQuantity(1);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
   }
 
   const waMessage = isUnavailable
     ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
-    : `Hi Regal Store! I'm interested in *${product.name}*.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
+    : `Hi Regal Store! I'm interested in *${product.name}* (Quantity: ${quantity}).${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery before I pay.`;
   const orderLink = optionsChosen ? whatsappLink(waMessage) : null;
 
   const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
@@ -89,14 +104,25 @@ export default function ProductActions({ product }: Props) {
         </p>
       )}
 
+      {stockTracked && !isUnavailable && (
+        <div>
+          <label htmlFor="product-quantity" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Quantity</label>
+          <select id="product-quantity" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className={inputClass}>
+            {Array.from({ length: Math.max(1, Math.min(remainingToAdd, 99)) }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+          <p className="mt-1 text-xs text-black/50">{remainingToAdd} more unit(s) available across this product’s sizes and colours.</p>
+        </div>
+      )}
+      {stockTracked && !isUnavailable && !quantityAvailable && <p role="alert" className="text-sm text-red-600">Your cart already contains all available stock for this option.</p>}
+
       {!isUnavailable ? (
         <button
           type="button"
           onClick={handleAdd}
-          disabled={!optionsChosen}
+          disabled={!optionsChosen || !quantityAvailable}
           className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#1769e0] py-3.5 font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0957c3] disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {added ? "Added to cart ✓" : "Add to cart"}
+          {added ? "Added to cart ✓" : `Add ${quantity > 1 ? `${quantity} to cart` : "to cart"}`}
         </button>
       ) : (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
