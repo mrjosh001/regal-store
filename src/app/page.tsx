@@ -12,6 +12,9 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  sizes?: string[] | null;
+  colors?: string[] | null;
+  is_available?: boolean | null;
 };
 
 type HomePageProps = {
@@ -39,7 +42,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       const supabase = await createClient();
       const primary = await supabase
         .from("products")
-        .select("id, name, price, compare_at_price, image_url, category, is_new")
+        .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available")
         .order("created_at", { ascending: false });
 
       if (primary.error) {
@@ -57,6 +60,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               ...product,
               category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
               compare_at_price: null,
+              sizes: [],
+              colors: [],
+              is_available: true,
             }));
         }
       } else {
@@ -65,6 +71,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           .map((product) => ({
             ...product,
             category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+            sizes: product.sizes || [],
+            colors: product.colors || [],
+            is_available: product.is_available !== false,
           }));
       }
     }

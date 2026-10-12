@@ -14,6 +14,9 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  sizes?: string[] | null;
+  colors?: string[] | null;
+  is_available?: boolean | null;
   created_at: string;
 };
 
@@ -26,6 +29,15 @@ type Profile = {
 };
 
 type Tab = "overview" | "products" | "users";
+
+function parseOptions(value: string): string[] {
+  const unique = new Map<string, string>();
+  for (const option of value.split(",").map((item) => item.trim()).filter(Boolean)) {
+    const key = option.toLocaleLowerCase();
+    if (!unique.has(key)) unique.set(key, option);
+  }
+  return [...unique.values()];
+}
 
 export default function AdminPage() {
   const router = useRouter();
@@ -52,6 +64,9 @@ export default function AdminPage() {
   const [compareAtPrice, setCompareAtPrice] = useState("");
   const [category, setCategory] = useState("Clothing");
   const [isNew, setIsNew] = useState(true);
+  const [sizeOptions, setSizeOptions] = useState("");
+  const [colorOptions, setColorOptions] = useState("");
+  const [isAvailable, setIsAvailable] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
@@ -157,6 +172,9 @@ export default function AdminPage() {
     setCompareAtPrice("");
     setCategory("Clothing");
     setIsNew(true);
+    setSizeOptions("");
+    setColorOptions("");
+    setIsAvailable(true);
     setImageUrl("");
     setImagePreviewFailed(false);
     setEditingId(null);
@@ -171,6 +189,9 @@ export default function AdminPage() {
     setCompareAtPrice(product.compare_at_price ? String(product.compare_at_price) : "");
     setCategory(product.category === "Fashion" ? "Clothing" : product.category || "Clothing");
     setIsNew(!!product.is_new);
+    setSizeOptions((product.sizes || []).join(", "));
+    setColorOptions((product.colors || []).join(", "));
+    setIsAvailable(product.is_available !== false);
     setImageUrl(product.image_url || "");
     setImagePreviewFailed(false);
     setShowForm(true);
@@ -206,6 +227,9 @@ export default function AdminPage() {
         price: parsedPrice,
         category,
         is_new: isNew,
+        sizes: parseOptions(sizeOptions),
+        colors: parseOptions(colorOptions),
+        is_available: isAvailable,
         image_url: normalizedImageUrl || null,
         compare_at_price: parsedCompareAtPrice,
       };
@@ -519,11 +543,32 @@ export default function AdminPage() {
                           <option>Shoes</option>
                         </select>
                       </div>
-                      <div className="flex items-end">
+                      <div className="flex flex-wrap items-end gap-5">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} className="w-4 h-4" />
                           <span className="text-sm font-medium">Mark as New</span>
                         </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={isAvailable} onChange={(e) => setIsAvailable(e.target.checked)} className="w-4 h-4" />
+                          <span className="text-sm font-medium">Available to order</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Sizes (optional)</label>
+                        <input type="text" value={sizeOptions} onChange={(e) => setSizeOptions(e.target.value)}
+                          placeholder="S, M, L, XL or 40, 41, 42"
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
+                        <p className="mt-1 text-xs text-black/40">Separate options with commas. Leave empty if the item has no size choices.</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Colours (optional)</label>
+                        <input type="text" value={colorOptions} onChange={(e) => setColorOptions(e.target.value)}
+                          placeholder="Black, White, Navy"
+                          className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
+                        <p className="mt-1 text-xs text-black/40">Separate options with commas. Only list colours actually available.</p>
                       </div>
                     </div>
 
@@ -571,6 +616,7 @@ export default function AdminPage() {
                           <p className="text-xs text-black/40">
                             {product.category} · {formatPrice(product.price)}
                             {product.is_new && <span className="ml-2 text-brand-blue font-medium">New</span>}
+                            <span className={`ml-2 font-medium ${product.is_available === false ? "text-red-600" : "text-emerald-700"}`}>{product.is_available === false ? "Unavailable" : "Available"}</span>
                           </p>
                         </div>
                         <button onClick={() => startEdit(product)}

@@ -12,6 +12,9 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  sizes?: string[] | null;
+  colors?: string[] | null;
+  is_available?: boolean | null;
 };
 
 const categories = ["All", "Clothing", "Shoes"];
@@ -146,6 +149,7 @@ function ProductCard({ product }: { product: Product }) {
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5 sm:left-3 sm:top-3">
           {off && <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#1d1d1f] shadow-sm backdrop-blur">Save {off}%</span>}
           {product.is_new && <span className="rounded-full bg-[#1d1d1f]/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur">New</span>}
+          {product.is_available === false && <span className="rounded-full bg-red-600/95 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">Unavailable</span>}
         </div>
         <span className="absolute bottom-3 right-3 flex h-9 w-9 translate-y-2 items-center justify-center rounded-full bg-white text-lg text-[#1d1d1f] opacity-0 shadow-md transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 max-sm:hidden" aria-hidden="true">↗</span>
       </div>

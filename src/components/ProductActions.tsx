@@ -11,36 +11,92 @@ type Props = {
     name: string;
     price: number;
     image_url: string | null;
+    sizes?: string[] | null;
+    colors?: string[] | null;
+    is_available?: boolean | null;
   };
 };
 
 export default function ProductActions({ product }: Props) {
+  const sizes = product.sizes || [];
+  const colors = product.colors || [];
+  const isAvailable = product.is_available !== false;
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [added, setAdded] = useState(false);
   const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
 
+  const optionsChosen = (!sizes.length || Boolean(selectedSize)) && (!colors.length || Boolean(selectedColor));
+  const variantDetails = [
+    sizes.length ? `Size: ${selectedSize || "Not selected"}` : null,
+    colors.length ? `Colour: ${selectedColor || "Not selected"}` : null,
+  ].filter(Boolean).join("\n");
+
   function handleAdd() {
+    if (!isAvailable || !optionsChosen) return;
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image_url: product.image_url,
+      size: selectedSize || null,
+      color: selectedColor || null,
     });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const waMessage = `Hi Regal Store! I want to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}\n\nPlease confirm availability.`;
-  const orderLink = whatsappLink(waMessage);
+  const waMessage = isAvailable
+    ? `Hi Regal Store! I want to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease confirm availability and delivery.`
+    : `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`;
+  const orderLink = optionsChosen ? whatsappLink(waMessage) : null;
+
+  const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20";
 
   return (
     <div className="mt-auto space-y-3">
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#1769e0] py-3.5 font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0957c3]"
-      >
-        {added ? "Added to cart ✓" : "Add to cart"}
-      </button>
+      {(sizes.length > 0 || colors.length > 0) && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {sizes.length > 0 && (
+            <div>
+              <label htmlFor="product-size" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Size *</label>
+              <select id="product-size" value={selectedSize} onChange={(event) => setSelectedSize(event.target.value)} className={inputClass}>
+                <option value="">Choose a size</option>
+                {sizes.map((size) => <option key={size} value={size}>{size}</option>)}
+              </select>
+            </div>
+          )}
+          {colors.length > 0 && (
+            <div>
+              <label htmlFor="product-colour" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Colour *</label>
+              <select id="product-colour" value={selectedColor} onChange={(event) => setSelectedColor(event.target.value)} className={inputClass}>
+                <option value="">Choose a colour</option>
+                {colors.map((color) => <option key={color} value={color}>{color}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!optionsChosen && (
+        <p className="text-sm text-black/55">Choose {sizes.length && colors.length ? "a size and colour" : sizes.length ? "a size" : "a colour"} to continue.</p>
+      )}
+
+      {isAvailable ? (
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={!optionsChosen}
+          className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#1769e0] py-3.5 font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0957c3] disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          {added ? "Added to cart ✓" : "Add to cart"}
+        </button>
+      ) : (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+          Currently unavailable to order
+        </div>
+      )}
+
       {orderLink ? (
         <a
           href={orderLink}
@@ -48,22 +104,25 @@ export default function ProductActions({ product }: Props) {
           rel="noopener noreferrer"
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]"
         >
-          Order via WhatsApp <span aria-hidden="true">↗</span>
+          {isAvailable ? "Order via WhatsApp" : "Ask about availability"} <span aria-hidden="true">↗</span>
         </a>
       ) : (
         <button
           type="button"
+          disabled={!optionsChosen}
           onClick={() => setShowWhatsAppSetup((current) => !current)}
-          className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.03]"
+          className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.03] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          WhatsApp ordering unavailable
+          {!optionsChosen ? "Select options to continue" : "WhatsApp ordering unavailable"}
         </button>
       )}
-      {!orderLink && showWhatsAppSetup && (
+
+      {!orderLink && optionsChosen && showWhatsAppSetup && (
         <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900">
-          Regal Store needs to configure its business WhatsApp number before this order link can be used. You can still add this item to your cart.
+          Regal Store needs to configure its business WhatsApp number before this link can be used. You can still use the cart when the item is available.
         </p>
       )}
+
       <Link
         href="/custom-order"
         className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:border-black/20 hover:bg-black/[.02]"

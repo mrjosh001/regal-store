@@ -13,6 +13,7 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  is_available?: boolean | null;
   created_at?: string | null;
 };
 
@@ -45,7 +46,7 @@ function SearchContent() {
 
       let request = supabase
         .from("products")
-        .select("id, name, price, image_url, category, is_new, created_at")
+        .select("id, name, price, image_url, category, is_new, is_available, created_at")
         .order("created_at", { ascending: false });
 
       const searchTerm = q.trim().replace(/[,%()_*]/g, " ").replace(/\\s+/g, " ").slice(0, 80);
@@ -68,6 +69,7 @@ function SearchContent() {
                 : normalizedCategory === "shoes"
                   ? "Shoes"
                   : product.category,
+            is_available: product.is_available !== false,
           };
         }));
       setLoading(false);
@@ -203,11 +205,18 @@ function SearchContent() {
                       No image
                     </div>
                   )}
-                  {product.is_new && (
-                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-brand-blue text-white text-[10px] font-semibold uppercase tracking-wider rounded-md">
-                      New
-                    </span>
-                  )}
+                  <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+                    {product.is_new && (
+                      <span className="rounded-md bg-brand-blue px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                        New
+                      </span>
+                    )}
+                    {product.is_available === false && (
+                      <span className="rounded-md bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                        Unavailable
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-[11px] text-black/40 mb-0.5 uppercase tracking-wide">
                   {product.category || "Product"}
