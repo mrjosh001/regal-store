@@ -117,8 +117,9 @@ export default function CartPage() {
                     <div className="mt-3 inline-flex items-center gap-3 rounded-full border border-black/[.08] px-2 py-1">
                       <button type="button" aria-label={`Decrease quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity - 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">−</button>
                       <span className="w-4 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                      <button type="button" aria-label={`Increase quantity of ${item.name}`} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7]">+</button>
+                      <button type="button" aria-label={`Increase quantity of ${item.name}`} disabled={item.stock_quantity != null && item.quantity >= item.stock_quantity} onClick={() => setItems(updateQuantity(cartItemKey(item), item.quantity + 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-lg hover:bg-[#f5f5f7] disabled:cursor-not-allowed disabled:opacity-30">+</button>
                     </div>
+                    {item.stock_quantity != null && <p className="mt-1 text-xs text-black/45">{item.stock_quantity} in stock</p>}
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-sm font-semibold text-[#1d1d1f]">{formatPrice(item.price * item.quantity)}</p>
