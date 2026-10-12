@@ -62,7 +62,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               compare_at_price: null,
               sizes: [],
               colors: [],
-              is_available: true,
+              is_available: null,
             }));
         }
       } else {
@@ -73,7 +73,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
             sizes: product.sizes || [],
             colors: product.colors || [],
-            is_available: product.is_available !== false,
+            is_available: product.is_available ?? null,
           }));
       }
     }
