@@ -219,6 +219,11 @@ export default async function ProductPage({ params }: Props) {
             ) : product.stock_quantity === 0 ? (
               <p className="mb-4 inline-flex w-fit rounded-full bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">Sold out</p>
             ) : null}
+            {product.stock_quantity != null && product.stock_quantity > 0 && product.is_available !== false ? (
+              <p className="mb-4 inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-800">{product.stock_quantity} in stock</p>
+            ) : product.stock_quantity === 0 || product.is_available === false ? (
+              <p className="mb-4 inline-flex w-fit rounded-full bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">Sold out</p>
+            ) : null}
             <ProductActions product={product} />
 
             <div className="mt-8 space-y-2 border-t border-black/5 pt-6 text-sm text-black/55">
