@@ -18,6 +18,9 @@ type Product = {
   image_url: string | null;
   category: string | null;
   is_new: boolean | null;
+  sizes?: string[] | null;
+  colors?: string[] | null;
+  is_available?: boolean | null;
   description: string | null;
 };
 
@@ -46,7 +49,7 @@ async function getProduct(id: string): Promise<Product | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, price, compare_at_price, image_url, category, is_new, description")
+    .select("id, name, price, compare_at_price, image_url, category, is_new, sizes, colors, is_available, description")
     .eq("id", id)
     .maybeSingle();
 
@@ -55,14 +58,14 @@ async function getProduct(id: string): Promise<Product | null> {
   }
 
   // Older databases may not yet have compare_at_price; keep the product page usable.
-  if (error?.message?.includes("compare_at_price")) {
+  if (error?.message && ["compare_at_price", "sizes", "colors", "is_available"].some((field) => error.message?.includes(field))) {
     const fallback = await supabase
       .from("products")
       .select("id, name, price, image_url, category, is_new, description")
       .eq("id", id)
       .maybeSingle();
     if (fallback.data && isStoreCategory(fallback.data.category)) {
-      return { ...fallback.data, compare_at_price: null } as Product;
+      return { ...fallback.data, compare_at_price: null, sizes: [], colors: [], is_available: true } as Product;
     }
   }
 
@@ -129,6 +132,7 @@ export default async function ProductPage({ params }: Props) {
       url: productUrl,
       priceCurrency: "NGN",
       price: String(product.price),
+      availability: product.is_available === false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
     },
   };
 
