@@ -35,10 +35,12 @@ export function saveCart(items: CartItem[]) {
 export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   const cart = getCart();
   const existing = cart.find((i) => cartItemKey(i) === cartItemKey(item));
-  const desiredQuantity = (existing?.quantity || 0) + qty;
-  if (item.stock_quantity != null && desiredQuantity > item.stock_quantity) {
-    throw new Error(`Only ${Math.max(0, item.stock_quantity - (existing?.quantity || 0))} more unit(s) are available for this option.`);
+  const currentProductQuantity = cart.filter((i) => i.id === item.id).reduce((sum, i) => sum + i.quantity, 0);
+  const desiredProductQuantity = currentProductQuantity + qty;
+  if (item.stock_quantity != null && desiredProductQuantity > item.stock_quantity) {
+    throw new Error(`Only ${Math.max(0, item.stock_quantity - currentProductQuantity)} more unit(s) are available across this product's sizes and colours.`);
   }
+  const desiredQuantity = (existing?.quantity || 0) + qty;
   if (existing) {
     existing.quantity = desiredQuantity;
     existing.stock_quantity = item.stock_quantity;
@@ -60,9 +62,21 @@ export function updateQuantity(key: string, quantity: number) {
   if (quantity <= 0) {
     cart = cart.filter((item) => cartItemKey(item) !== key && item.id !== key);
   } else {
-    cart = cart.map((item) =>
-      cartItemKey(item) === key || item.id === key ? { ...item, quantity } : item
-    );
+    const target = cart.find((item) => cartItemKey(item) === key || item.id === key);
+    if (!target) return cart;
+    const otherQuantity = cart
+      .filter((item) => item.id === target.id && cartItemKey(item) !== cartItemKey(target))
+      .reduce((sum, item) => sum + item.quantity, 0);
+    const safeQuantity = target.stock_quantity == null
+      ? quantity
+      : Math.min(quantity, Math.max(0, target.stock_quantity - otherQuantity));
+    if (safeQuantity <= 0) {
+      cart = cart.filter((item) => cartItemKey(item) !== cartItemKey(target));
+    } else {
+      cart = cart.map((item) =>
+        cartItemKey(item) === cartItemKey(target) ? { ...item, quantity: safeQuantity } : item
+      );
+    }
   }
   saveCart(cart);
   return cart;
