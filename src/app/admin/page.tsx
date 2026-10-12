@@ -456,6 +456,7 @@ export default function AdminPage() {
                   { label: "Total Users", value: users.length },
                   { label: "Admins", value: users.filter((u) => u.role === "admin").length },
                   { label: "Low stock (1–5)", value: products.filter((p) => p.stock_quantity != null && p.stock_quantity > 0 && p.stock_quantity <= 5).length },
+                  { label: "Stock not counted", value: products.filter((p) => p.stock_quantity == null).length },
                   { label: "Out of stock", value: products.filter((p) => p.stock_quantity === 0 || p.is_available === false).length },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-white rounded-2xl border border-black/5 p-5">
