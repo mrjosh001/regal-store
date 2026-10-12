@@ -58,8 +58,14 @@ export default function ProductActions({ product }: Props) {
     }
     // Keep a non-null reference across asynchronous stock verification.
     const orderTab = pendingTab as Window;
+    const whatsappUrl = whatsappLink(waMessage);
+    if (!whatsappUrl) {
+      orderTab.close();
+      setAddError("Regal Store WhatsApp is not configured. Please contact the store directly.");
+      return;
+    }
     if (isUnavailable) {
-      orderTab.location.href = whatsappLink(waMessage);
+      orderTab.location.href = whatsappUrl;
       return;
     }
     try {
@@ -81,7 +87,7 @@ export default function ProductActions({ product }: Props) {
         setAddError(`Only ${data.stock_quantity} unit(s) remain in stock. Please reduce the quantity and try again.`);
         return;
       }
-      orderTab.location.href = whatsappLink(waMessage);
+      orderTab.location.href = whatsappUrl;
     } catch (error) {
       orderTab.close();
       setAddError(error instanceof Error ? error.message : "We could not verify current stock. Please try again.");
