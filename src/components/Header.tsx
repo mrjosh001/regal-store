@@ -53,13 +53,16 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (showSidebar) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (!showSidebar) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setShowSidebar(false);
     }
+    window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [showSidebar]);
 
@@ -152,17 +155,28 @@ export default function Header() {
       </header>
 
       {showSidebar && (
-        <div className="fixed inset-0 z-[60] flex">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        <div className="fixed inset-0 z-[60] flex" role="presentation">
+          <button
+            type="button"
+            aria-label="Close navigation menu"
+            className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-sm"
             onClick={() => setShowSidebar(false)}
           />
-          <div className="relative bg-white w-[min(300px,88vw)] h-full shadow-2xl flex flex-col">
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Regal Store navigation"
+            className="relative flex h-full w-[min(320px,88vw)] flex-col bg-white shadow-2xl animate-sidebar-in"
+          >
             <div className="p-5 bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-semibold backdrop-blur">
-                    {user.avatar_url || (user.full_name || user.email || "U")[0].toUpperCase()}
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-xl font-semibold backdrop-blur">
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      (user.full_name || user.email || "U")[0].toUpperCase()
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">
@@ -291,7 +305,7 @@ export default function Header() {
                 </Link>
               </div>
             )}
-          </div>
+          </aside>
         </div>
       )}
     </>

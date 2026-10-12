@@ -41,6 +41,9 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [imagePreviewFailed, setImagePreviewFailed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -51,50 +54,60 @@ export default function AdminPage() {
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     async function init() {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        const currentUser = authData.user;
+        if (!currentUser) {
+          router.replace("/sign-in");
+          return;
+        }
 
-      if (!user) {
-        router.push("/sign-in");
-        return;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role, full_name, email")
+          .eq("id", currentUser.id)
+          .single();
+        if (profileError) throw profileError;
+
+        if (!profile || profile.role !== "admin") {
+          if (!cancelled) setIsAdmin(false);
+          return;
+        }
+
+        if (!cancelled) {
+          setUser({ ...currentUser, ...profile });
+          setIsAdmin(true);
+        }
+
+        const [productsResult, usersResult] = await Promise.all([
+          supabase.from("products").select("*").order("created_at", { ascending: false }),
+          supabase.from("profiles").select("id, full_name, email, role, created_at").order("created_at", { ascending: false }),
+        ]);
+        if (productsResult.error) throw productsResult.error;
+        if (usersResult.error) throw usersResult.error;
+
+        if (!cancelled) {
+          setProducts(productsResult.data || []);
+          setUsers(usersResult.data || []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : "Could not load the admin dashboard.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, full_name, email")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile || profile.role !== "admin") {
-        setLoading(false);
-        setIsAdmin(false);
-        return;
-      }
-
-      setUser({ ...user, ...profile });
-      setIsAdmin(true);
-
-      const { data: productsData } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (productsData) setProducts(productsData);
-
-      const { data: usersData } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, role, created_at")
-        .order("created_at", { ascending: false });
-      if (usersData) setUsers(usersData);
-
-      setLoading(false);
     }
 
-    init();
+    void init();
+    return () => { cancelled = true; };
   }, [router]);
 
   async function getSupabase() {
@@ -104,20 +117,22 @@ export default function AdminPage() {
 
   async function fetchProducts() {
     const supabase = await getSupabase();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
-    if (data) setProducts(data);
+    if (error) throw error;
+    setProducts(data || []);
   }
 
   async function fetchUsers() {
     const supabase = await getSupabase();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("id, full_name, email, role, created_at")
       .order("created_at", { ascending: false });
-    if (data) setUsers(data);
+    if (error) throw error;
+    setUsers(data || []);
   }
 
   function resetForm() {
@@ -128,6 +143,7 @@ export default function AdminPage() {
     setCategory("Fashion");
     setIsNew(true);
     setImageUrl("");
+    setImagePreviewFailed(false);
     setEditingId(null);
     setShowForm(false);
   }
@@ -141,6 +157,7 @@ export default function AdminPage() {
     setCategory(product.category || "Fashion");
     setIsNew(!!product.is_new);
     setImageUrl(product.image_url || "");
+    setImagePreviewFailed(false);
     setShowForm(true);
     setActiveTab("products");
   }
@@ -151,15 +168,31 @@ export default function AdminPage() {
     setMessage(null);
 
     try {
+      const normalizedImageUrl = imageUrl.trim();
+      if (normalizedImageUrl) {
+        const parsedImageUrl = new URL(normalizedImageUrl);
+        if (parsedImageUrl.protocol !== "https:" && parsedImageUrl.protocol !== "http:") {
+          throw new Error("Image links must start with https:// or http://.");
+        }
+      }
+      const parsedPrice = Number(price);
+      const parsedCompareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
+      if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+        throw new Error("Enter a valid product price.");
+      }
+      if (parsedCompareAtPrice !== null && (!Number.isFinite(parsedCompareAtPrice) || parsedCompareAtPrice < parsedPrice)) {
+        throw new Error("Original price must be greater than or equal to the sale price.");
+      }
+
       const supabase = await getSupabase();
       const payload: Record<string, unknown> = {
-        name,
-        description: description || null,
-        price: parseInt(price),
+        name: name.trim(),
+        description: description.trim() || null,
+        price: parsedPrice,
         category,
         is_new: isNew,
-        image_url: imageUrl.trim() || null,
-        compare_at_price: compareAtPrice ? parseInt(compareAtPrice) : null,
+        image_url: normalizedImageUrl || null,
+        compare_at_price: parsedCompareAtPrice,
       };
 
       if (editingId) {
@@ -236,6 +269,18 @@ export default function AdminPage() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-brand-surface px-4">
+        <div className="w-full max-w-lg rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-semibold text-brand-black">Admin dashboard could not load</h1>
+          <p className="mt-3 break-words text-sm text-black/60">{loadError}</p>
+          <button onClick={() => window.location.reload()} className="mt-6 rounded-full bg-brand-blue px-5 py-3 text-sm font-medium text-white">Try again</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-brand-surface px-4">
@@ -304,20 +349,43 @@ export default function AdminPage() {
       </aside>
 
       <div className="flex-1 md:ml-64">
-        <header className="md:hidden bg-white border-b border-black/5 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-          <span className="font-semibold text-brand-black">Admin</span>
-          <div className="flex gap-2">
-            {(["overview", "products", "users"] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`text-xs px-3 py-1.5 rounded-full ${
-                  activeTab === tab ? "bg-brand-blue text-white" : "bg-black/5"
-                }`}
-              >
-                {tab === "users" ? "Users" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-black/5 bg-white px-4 py-3 md:hidden">
+          <div>
+            <p className="text-xs text-black/45">Regal Store</p>
+            <p className="font-semibold text-brand-black">Admin dashboard</p>
+          </div>
+          <div className="relative">
+            <button
+              type="button"
+              aria-expanded={mobileNavOpen}
+              aria-haspopup="menu"
+              onClick={() => setMobileNavOpen((open) => !open)}
+              className="flex min-h-10 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm font-medium text-brand-black shadow-sm"
+            >
+              {activeTab === "users" ? "Users & Admins" : activeTab === "products" ? "Products" : "Overview"}
+              <span aria-hidden="true" className={mobileNavOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span>
+            </button>
+            {mobileNavOpen && (
+              <div role="menu" className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-black/10 bg-white p-1.5 shadow-xl">
+                {([
+                  { id: "overview", label: "Overview" },
+                  { id: "products", label: "Products" },
+                  { id: "users", label: "Users & Admins" },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { setActiveTab(tab.id); setMobileNavOpen(false); }}
+                    className={`w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                      activeTab === tab.id ? "bg-brand-blue text-white" : "text-brand-black hover:bg-brand-blue/5"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </header>
 
@@ -449,14 +517,18 @@ export default function AdminPage() {
 
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Image URL</label>
-                      <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://example.com/photo.jpg"
+                      <input type="url" value={imageUrl} onChange={(e) => { setImageUrl(e.target.value); setImagePreviewFailed(false); }}
+                        placeholder="https://example.com/product-photo.jpg"
+                        inputMode="url"
                         className="w-full px-4 py-3 rounded-xl border border-black/10 bg-brand-surface text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30" />
-                      <p className="text-xs text-black/40 mt-1.5">Paste any image link (Imgur, etc.)</p>
-                      {imageUrl && (
-                        <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden border border-black/10">
-                          <Image src={imageUrl} alt="Preview" fill className="object-cover" unoptimized />
+                      <p className="text-xs text-black/40 mt-1.5">Paste a direct HTTPS image link. Only the URL is saved in the product record; the image file is not uploaded to Regal Store storage.</p>
+                      {imageUrl.trim() && !imagePreviewFailed && (
+                        <div className="relative mt-3 h-32 w-32 overflow-hidden rounded-xl border border-black/10 bg-brand-surface">
+                          <img src={imageUrl.trim()} alt={name ? `${name} image preview` : "Product image preview"} className="h-full w-full object-cover" onError={() => setImagePreviewFailed(true)} />
                         </div>
+                      )}
+                      {imageUrl.trim() && imagePreviewFailed && (
+                        <p role="status" className="mt-2 text-sm text-red-600">This image link could not be loaded. Check that it is a direct public image URL.</p>
                       )}
                     </div>
 
