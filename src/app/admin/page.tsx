@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [accessReason, setAccessReason] = useState<string | null>(null);
   const [imagePreviewFailed, setImagePreviewFailed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -73,11 +74,22 @@ export default function AdminPage() {
           .from("profiles")
           .select("role, full_name, email")
           .eq("id", currentUser.id)
-          .single();
+          .maybeSingle();
         if (profileError) throw profileError;
 
-        if (!profile || profile.role !== "admin") {
-          if (!cancelled) setIsAdmin(false);
+        if (!profile) {
+          if (!cancelled) {
+            setAccessReason("This sign-in does not have a matching Regal Store profile. Sign in with the account assigned the admin role, or ask the store owner to link this account.");
+            setIsAdmin(false);
+          }
+          return;
+        }
+
+        if (profile.role !== "admin") {
+          if (!cancelled) {
+            setAccessReason("This account is registered, but it does not have the admin role. Sign in with the store's admin account.");
+            setIsAdmin(false);
+          }
           return;
         }
 
@@ -99,7 +111,10 @@ export default function AdminPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setLoadError(error instanceof Error ? error.message : "Could not load the admin dashboard.");
+          const details = error && typeof error === "object" && "message" in error
+            ? String((error as { message?: unknown }).message || "")
+            : error instanceof Error ? error.message : "";
+          setLoadError(details || "The dashboard request failed without a readable error message.");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -234,16 +249,16 @@ export default function AdminPage() {
     if (!confirm(`Set this user as ${newRole}?`)) return;
 
     const supabase = await getSupabase();
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: newRole })
-      .eq("id", userId);
+    const { error } = await supabase.rpc("admin_set_profile_role", {
+      target_user_id: userId,
+      new_role: newRole,
+    });
 
     if (!error) {
       setMessage(`User set to ${newRole}`);
       await fetchUsers();
     } else {
-      setMessage(error.message);
+      setMessage(error.message || "Could not update this user's role.");
     }
   }
 
@@ -286,7 +301,7 @@ export default function AdminPage() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-brand-surface px-4">
         <div className="bg-white rounded-2xl border border-black/5 p-8 max-w-md w-full text-center shadow-sm">
           <h1 className="text-xl font-semibold mb-2 text-brand-black">Access Denied</h1>
-          <p className="text-sm text-black/50 mb-6">Only admins can access this dashboard.</p>
+          <p className="text-sm text-black/50 mb-6">{accessReason || "Only admins can access this dashboard."}</p>
           <Link href="/" className="inline-block px-6 py-3 bg-brand-blue text-white text-sm font-medium rounded-full">
             Back to Store
           </Link>
