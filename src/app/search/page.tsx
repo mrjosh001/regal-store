@@ -59,7 +59,7 @@ function SearchContent() {
 
       const { data } = await request;
       setProducts((data || [])
-        .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+        .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
         .map((product) => {
           const normalizedCategory = product.category?.toLowerCase();
           return {
@@ -67,9 +67,11 @@ function SearchContent() {
             category:
               normalizedCategory === "fashion" || normalizedCategory === "clothing"
                 ? "Clothing"
-                : normalizedCategory === "shoes"
-                  ? "Shoes"
-                  : product.category,
+                : normalizedCategory === "bag" || normalizedCategory === "bags"
+                  ? "Bags"
+                  : normalizedCategory === "shoes"
+                    ? "Shoes"
+                    : product.category,
             is_available: product.is_available ?? null,
             stock_quantity: product.stock_quantity ?? null,
           };
