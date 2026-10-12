@@ -24,7 +24,8 @@ type HomePageProps = {
 
 const CATEGORIES = [
   { name: "Clothing", emoji: "✳", desc: "Everyday fits and standout pieces" },
-  { name: "Shoes", emoji: "↗", desc: "Footwear, available as selected drops" },
+  { name: "Bags", emoji: "▱", desc: "Carry-alls, everyday bags and statement pieces" },
+  { name: "Shoes", emoji: "↗", desc: "Footwear to finish the look" },
 ];
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -56,10 +57,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           hasFetchError = true;
         } else {
           productList = (fallback.data || [])
-            .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+            .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
             .map((product) => ({
               ...product,
-              category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+              category: ["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category,
               compare_at_price: null,
               sizes: [],
               colors: [],
@@ -72,7 +73,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
           .map((product) => ({
             ...product,
-            category: product.category?.toLowerCase() === "fashion" ? "Clothing" : product.category,
+            category: ["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category,
             sizes: product.sizes || [],
             colors: product.colors || [],
             is_available: product.is_available ?? null,
@@ -100,7 +101,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="animate-rise-in max-w-2xl">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/[.07] bg-white/75 px-3.5 py-2 text-xs font-medium text-black/65 shadow-sm backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                Clothing for your everyday
+                Style for every day
               </div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-[.22em] text-brand-blue">
                 Regal Store · Nigeria
@@ -111,7 +112,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="text-black/45">Better everyday.</span>
               </h1>
               <p className="mt-6 max-w-lg text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
-                Shop clothing picked for everyday style, with shoes added occasionally. Tell us what you need — we’ll help you find it.
+                Explore clothing, bags and shoes chosen to make everyday style easier. Find your next favourite piece, then message us to confirm details before you order.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
@@ -128,7 +129,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </Link>
               </div>
               <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-black/55">
-                <span className="inline-flex items-center gap-2"><span className="text-brand-blue">✓</span> Nationwide delivery</span>
+                <span className="inline-flex items-center gap-2"><span className="text-brand-blue">✓</span> Delivery options confirmed before payment</span>
                 <span className="inline-flex items-center gap-2"><span className="text-brand-blue">✓</span> Chat before you order</span>
               </div>
             </div>
@@ -171,9 +172,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <section className="border-y border-black/[.05] bg-white/75">
           <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-5 py-5 sm:px-8 md:grid-cols-4 lg:px-10">
             {[
-              { icon: "↗", title: "Nationwide delivery", sub: "Across Nigeria" },
+              { icon: "↗", title: "Delivery options", sub: "Confirm before payment" },
               { icon: "◌", title: "Personal support", sub: "Chat before you order" },
-              { icon: "✳", title: "Curated clothing", sub: "Clothing worth discovering" },
+              { icon: "✳", title: "Style edit", sub: "Clothing, bags & shoes" },
               { icon: "♡", title: "Made convenient", sub: "Browse at your pace" },
             ].map((item) => (
               <div key={item.title} className="flex items-center gap-3 rounded-xl py-1">
@@ -195,7 +196,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
             <Link href="#products" className="shrink-0 text-sm font-semibold text-brand-blue hover:text-brand-blue-dark">View all <span aria-hidden="true">↗</span></Link>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 lg:max-w-3xl">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
             {CATEGORIES.map((category) => (
               <Link
                 key={category.name}
@@ -223,7 +224,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="rounded-3xl border border-black/[.06] bg-white px-6 py-14 text-center">
               <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f5f5f7] text-2xl">✳</span>
               <p className="mt-4 font-semibold text-[#1d1d1f]">Your next great find starts here.</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Our clothing collection is being updated. Shoes may appear as occasional drops.</p>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-black/50">Our clothing, bags and shoes collection is being updated. Check back soon or ask us to source a specific item.</p>
               <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#1769e0] px-5 text-sm font-semibold text-white hover:bg-[#0957c3]">Request a product</Link>
             </div>
           </section>
@@ -265,12 +266,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-[#1769e0]">R</span>
                 <span className="font-semibold tracking-tight">Regal Store</span>
               </Link>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-white/55">Thoughtful finds for everyday life, delivered across Nigeria.</p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-white/55">Clothing, bags and shoes for everyday style. Confirm delivery options with us before payment.</p>
             </div>
             <div>
               <p className="text-sm font-semibold">Explore</p>
               <div className="mt-3 space-y-2 text-sm text-white/55">
-                {CATEGORIES.slice(0, 4).map((category) => <Link key={category.name} href={`/?category=${encodeURIComponent(category.name)}#products`} className="block hover:text-white">{category.name}</Link>)}
+                {CATEGORIES.map((category) => <Link key={category.name} href={`/?category=${encodeURIComponent(category.name)}#products`} className="block hover:text-white">{category.name}</Link>)}
               </div>
             </div>
             <div>
