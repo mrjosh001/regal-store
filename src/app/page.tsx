@@ -70,7 +70,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         }
       } else {
         productList = ((primary.data || []) as Product[])
-          .filter((product) => ["clothing", "fashion", "shoes"].includes((product.category || "").toLowerCase()))
+          .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
           .map((product) => ({
             ...product,
             category: ["fashion", "clothing"].includes((product.category || "").toLowerCase()) ? "Clothing" : ["bag", "bags"].includes((product.category || "").toLowerCase()) ? "Bags" : product.category,
