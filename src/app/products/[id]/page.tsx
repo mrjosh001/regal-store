@@ -214,7 +214,7 @@ export default async function ProductPage({ params }: Props) {
             <ProductActions product={product} />
 
             <div className="mt-8 space-y-2 border-t border-black/5 pt-6 text-sm text-black/55">
-              <p>✓ Nationwide delivery available</p>
+              <p>✓ Confirm delivery options before payment</p>
               <p>✓ Confirm availability, size, and colour before payment</p>
               <p>✓ Ask our team questions before placing your order</p>
             </div>
