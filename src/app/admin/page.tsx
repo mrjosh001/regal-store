@@ -68,7 +68,7 @@ export default function AdminPage() {
   const [sizeOptions, setSizeOptions] = useState("");
   const [colorOptions, setColorOptions] = useState("");
   const [availabilityStatus, setAvailabilityStatus] = useState<"unknown" | "available" | "unavailable">("unknown");
-  const [stockQuantity, setStockQuantity] = useState("0");
+  const [stockQuantity, setStockQuantity] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function AdminPage() {
     setSizeOptions("");
     setColorOptions("");
     setAvailabilityStatus("unknown");
-    setStockQuantity("0");
+    setStockQuantity("");
     setImageUrl("");
     setImagePreviewFailed(false);
     setEditingId(null);
