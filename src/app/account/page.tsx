@@ -3,67 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cartCount } from "@/lib/cart";
 
 const AVATARS = ["🖤", "👑", "✨", "🔥", "💎", "🦁", "🌟", "🎯"];
 
-const quickActions = [
-  {
-    label: "Continue shopping",
-    href: "/",
-    desc: "Browse clothing, bags and shoes",
-    icon: "🛍️",
-    tone: "bg-[#edf1eb] text-[#263b2e]",
-  },
-  {
-    label: "Your cart",
-    href: "/cart",
-    desc: "Review items before ordering",
-    icon: "🛒",
-    tone: "bg-[#eef2f8] text-[#1e4d8c]",
-  },
-  {
-    label: "Track an order",
-    href: "/account/track",
-    desc: "Check delivery updates",
-    icon: "📦",
-    tone: "bg-[#f4e9df] text-[#9a5e3f]",
-  },
-  {
-    label: "Saved addresses",
-    href: "/account/addresses",
-    desc: "Manage delivery details",
-    icon: "📍",
-    tone: "bg-[#f0eee8] text-[#5a5e56]",
-  },
-  {
-    label: "Custom request",
-    href: "/custom-order",
-    desc: "Ask us to source a piece",
-    icon: "✨",
-    tone: "bg-[#f7efe6] text-[#a65f3e]",
-  },
-  {
-    label: "Help centre",
-    href: "/account/help",
-    desc: "Sizing, orders and support",
-    icon: "💬",
-    tone: "bg-[#eef0f4] text-[#3d4654]",
-  },
-  {
-    label: "Change password",
-    href: "/account/change-password",
-    desc: "Update your sign-in security",
-    icon: "🔒",
-    tone: "bg-[#edf1eb] text-[#263b2e]",
-  },
-  {
-    label: "Delete account",
-    href: "/account/delete",
-    desc: "Remove your profile anytime",
-    icon: "🗑️",
-    tone: "bg-[#fdecec] text-[#b42318]",
-  },
+const accountLinks = [
+  { label: "Overview", href: "/account", icon: "⌂" },
+  { label: "Track an order", href: "/account/track", icon: "↗" },
+  { label: "Saved addresses", href: "/account/addresses", icon: "⌖" },
+  { label: "Help centre", href: "/account/help", icon: "?" },
+  { label: "Custom request", href: "/custom-order", icon: "✳" },
+  { label: "Change password", href: "/account/change-password", icon: "🔒" },
 ];
 
 export default function AccountPage() {
@@ -76,16 +25,6 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [itemsInCart, setItemsInCart] = useState(0);
-
-  useEffect(() => {
-    setItemsInCart(cartCount());
-    function onCart() {
-      setItemsInCart(cartCount());
-    }
-    window.addEventListener("cart-updated", onCart);
-    return () => window.removeEventListener("cart-updated", onCart);
-  }, []);
 
   useEffect(() => {
     let redirecting = false;
@@ -107,7 +46,7 @@ export default function AccountPage() {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("full_name, email, role, avatar_url, created_at")
+          .select("full_name, email, role, avatar_url")
           .eq("id", authUser.id)
           .maybeSingle();
         if (profileError) throw profileError;
@@ -118,7 +57,6 @@ export default function AccountPage() {
             full_name: profile?.full_name,
             role: profile?.role,
             avatar_url: profile?.avatar_url,
-            created_at: profile?.created_at,
           });
           setSelectedAvatar(profile?.avatar_url || null);
         }
@@ -169,21 +107,21 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f2ec]">
-        <p className="text-sm text-[#68736a]">Preparing your space…</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f5f0]">
+        <p className="text-sm text-[#68736a]">Preparing your account…</p>
       </div>
     );
   }
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f2ec] px-5">
-        <section className="w-full max-w-md rounded-3xl border border-[#e6e4dc] bg-white p-8 text-center">
-          <h1 className="font-serif text-2xl">Account unavailable</h1>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f5f0] px-5">
+        <section className="w-full max-w-md rounded-2xl border border-[#e6e4dc] bg-white p-7 text-center">
+          <h1 className="mt-3 font-serif text-2xl">We couldn't load your account</h1>
           <p className="mt-3 text-sm text-[#687168]">{loadError}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-6 w-full rounded-full bg-[#263b2e] py-3 text-sm font-semibold text-white"
+            className="mt-6 w-full rounded-full bg-[#263b2e] px-5 py-3 text-sm font-semibold text-white"
           >
             Try again
           </button>
@@ -194,202 +132,264 @@ export default function AccountPage() {
 
   const displayName = user?.full_name?.trim() || "there";
   const initials = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
-  const memberSince = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString("en-NG", {
-        month: "short",
-        year: "numeric",
-      })
-    : null;
 
   return (
-    <div className="min-h-screen bg-[#f4f2ec] text-[#202a23]">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-[#f4f2ec]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#263b2e] text-sm font-bold text-white">
-              R
-            </span>
-            <span className="font-semibold tracking-tight">My Regal</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            {user?.role === "admin" && (
-              <Link
-                href="/admin"
-                className="hidden rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold sm:inline"
-              >
-                Admin
-              </Link>
-            )}
-            <Link
-              href="/cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-sm"
-            >
-              🛒
-              {itemsInCart > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#263b2e] px-1 text-[10px] font-bold text-white">
-                  {itemsInCart}
-                </span>
-              )}
-            </Link>
-            <button
-              onClick={() => setShowAvatarPicker(true)}
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#263b2e] text-sm text-white"
-            >
-              {selectedAvatar || initials}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
-        {message && (
-          <div className="mb-5 flex items-center justify-between rounded-2xl border border-[#d8dfd6] bg-white px-4 py-3 text-sm">
-            <span>{message}</span>
-            <button onClick={() => setMessage(null)}>✕</button>
-          </div>
-        )}
-
-        {/* Welcome hero */}
-        <section className="relative overflow-hidden rounded-[28px] bg-[#1a2820] px-6 py-8 text-white sm:px-10 sm:py-12">
-          <div className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-[#e8d5b5]/10 blur-3xl" />
-          <div className="relative">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#e8d5b5]">
+    <div className="min-h-screen bg-[#f7f5f0] text-[#202a23] md:flex">
+      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-[#e6e4dc] bg-white md:flex">
+        <Link href="/" className="flex h-[88px] items-center gap-3 border-b border-[#efeee8] px-7">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#263b2e] font-serif text-xl text-white">
+            R
+          </span>
+          <span>
+            <span className="block font-serif text-[22px] leading-tight tracking-tight">Regal Store</span>
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.22em] text-[#8a9389]">
               Customer space
-            </p>
-            <h1 className="mt-3 font-serif text-3xl leading-tight tracking-tight sm:text-5xl">
-              Hello, {displayName}
-            </h1>
-            <p className="mt-3 max-w-md text-sm leading-6 text-white/65">
-              Orders, cart, addresses and support — everything in one calm place.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/"
-                className="inline-flex min-h-11 items-center rounded-full bg-white px-5 text-xs font-bold uppercase tracking-[0.1em] text-[#1a2820]"
-              >
-                Shop now
-              </Link>
-              <Link
-                href="/cart"
-                className="inline-flex min-h-11 items-center rounded-full border border-white/25 px-5 text-xs font-bold uppercase tracking-[0.1em] text-white"
-              >
-                Cart{itemsInCart > 0 ? ` (${itemsInCart})` : ""}
-              </Link>
-            </div>
-            {memberSince && (
-              <p className="mt-6 text-[11px] text-white/40">Member since {memberSince}</p>
-            )}
-          </div>
-        </section>
+            </span>
+          </span>
+        </Link>
 
-        {/* Icon action grid — Baymard pattern */}
-        <section className="mt-10">
-          <div className="mb-5 flex items-end justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a65f3e]">
-                Quick actions
-              </p>
-              <h2 className="mt-1 font-serif text-2xl sm:text-3xl">What do you need?</h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {quickActions.map((action) => (
+        <div className="px-5 pt-7">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-[.2em] text-[#a0a59b]">Your account</p>
+          <nav className="mt-3 space-y-1">
+            {accountLinks.map((item, index) => (
               <Link
-                key={action.href}
-                href={action.href}
-                className="group flex flex-col rounded-2xl border border-black/[0.05] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+                  index === 0
+                    ? "bg-[#edf1eb] font-semibold text-[#263b2e]"
+                    : "text-[#687168] hover:bg-[#f7f5f0] hover:text-[#263b2e]"
+                }`}
               >
-                <span
-                  className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl text-xl ${action.tone}`}
-                >
-                  {action.icon}
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-current/10 text-base">
+                  {item.icon}
                 </span>
-                <span className="text-sm font-semibold leading-snug text-[#202a23]">
-                  {action.label}
-                </span>
-                <span className="mt-1 text-[11px] leading-4 text-[#83887f]">{action.desc}</span>
+                {item.label}
               </Link>
             ))}
-          </div>
-        </section>
+          </nav>
+        </div>
 
-        {/* Profile strip */}
-        <section className="mt-10 grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-2xl border border-black/[0.05] bg-white p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a65f3e]">Profile</p>
-            <div className="mt-4 flex items-center gap-4">
-              <button
-                onClick={() => setShowAvatarPicker(true)}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-[#263b2e] text-xl text-white"
-              >
-                {selectedAvatar || initials}
-              </button>
-              <div className="min-w-0">
-                <p className="truncate font-semibold">{user?.full_name || "Add your name"}</p>
-                <p className="mt-0.5 truncate text-sm text-[#83887f]">{user?.email}</p>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button
-                onClick={() => setShowSettings(true)}
-                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold"
-              >
-                Settings
-              </button>
-              <Link
-                href="/account/change-password"
-                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold"
-              >
-                Password
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-[#263b2e] p-6 text-white">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#e8d5b5]">
-              Need a find?
-            </p>
-            <h3 className="mt-2 font-serif text-2xl leading-tight">We’ll source it for you</h3>
-            <p className="mt-2 text-sm text-white/60">
-              Send a photo, name or link — we’ll check availability.
+        <div className="mt-auto p-5">
+          <div className="rounded-2xl bg-[#263b2e] p-5 text-white">
+            <p className="font-serif text-xl leading-snug">Looking for something special?</p>
+            <p className="mt-2 text-xs leading-5 text-white/65">
+              Tell us what you have in mind and we’ll help you make a request.
             </p>
             <Link
               href="/custom-order"
-              className="mt-5 inline-flex text-xs font-bold uppercase tracking-[0.1em] text-[#e8d5b5]"
+              className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.1em] text-[#e5c5a8] hover:text-white"
             >
-              Start request →
+              Make a request <span>↗</span>
             </Link>
           </div>
-        </section>
-
-        <button
-          onClick={handleSignOut}
-          className="mt-8 w-full rounded-2xl border border-red-100 bg-white py-4 text-sm font-medium text-red-600 hover:bg-red-50"
-        >
-          Sign out
-        </button>
-
-        <p className="mt-6 text-center text-xs text-[#92968d]">
-          <Link href="/" className="hover:text-[#263b2e]">
-            ← Back to storefront
+          <Link href="/" className="mt-5 flex items-center gap-2 px-3 py-2 text-sm text-[#7a8178] hover:text-[#263b2e]">
+            ← Back to the store
           </Link>
-        </p>
-      </main>
+        </div>
+      </aside>
 
-      {/* Settings sheet */}
+      <div className="min-w-0 flex-1">
+        <header className="sticky top-0 z-30 border-b border-[#e6e4dc] bg-[#f7f5f0]/95 backdrop-blur">
+          <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
+            <div className="flex items-center gap-3 md:hidden">
+              <Link href="/" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dedfd6] bg-white">
+                ←
+              </Link>
+              <span className="font-serif text-xl">Regal Store</span>
+            </div>
+            <div className="hidden md:block">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#9a7963]">Customer portal</p>
+              <p className="mt-1 text-sm text-[#687168]">Your details, requests and delivery updates.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="hidden rounded-full border border-[#d8dfd6] px-4 py-2 text-xs font-semibold text-[#263b2e] hover:bg-white sm:inline-flex"
+                >
+                  Admin dashboard ↗
+                </Link>
+              )}
+              <button
+                onClick={() => setShowSettings(true)}
+                className="flex h-10 items-center gap-2 rounded-full border border-[#dedfd6] bg-white px-3 text-sm"
+              >
+                <span>⚙</span>
+                <span className="hidden sm:inline">Settings</span>
+              </button>
+              <button
+                onClick={() => setShowAvatarPicker(true)}
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#263b2e] text-lg text-white ring-2 ring-white"
+              >
+                {selectedAvatar || initials}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-[1440px] px-5 pb-28 pt-7 sm:px-8 sm:pt-10 lg:px-12 lg:pb-12">
+          {message && (
+            <div className="mb-5 flex items-center justify-between rounded-xl border border-[#d8dfd6] bg-white px-4 py-3 text-sm text-[#263b2e]">
+              <span>{message}</span>
+              <button onClick={() => setMessage(null)}>✕</button>
+            </div>
+          )}
+
+          <section className="relative isolate overflow-hidden rounded-[26px] bg-[#263b2e] px-6 py-8 text-white sm:px-9 sm:py-10 lg:px-12 lg:py-12">
+            <div className="absolute -right-10 -top-24 h-64 w-64 rounded-full border border-white/10" />
+            <div className="relative max-w-2xl">
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#e5c5a8] sm:text-xs">
+                Your Regal account
+              </p>
+              <h1 className="mt-3 font-serif text-4xl leading-[1.04] tracking-[-.04em] sm:text-5xl lg:text-6xl">
+                Good to see you, {displayName}.
+              </h1>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-white/70 sm:text-base">
+                Follow delivery updates, manage your details and get help with your next find.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link
+                  href="/account/track"
+                  className="inline-flex min-h-11 items-center gap-3 rounded-full bg-[#f2e7d8] px-5 text-xs font-bold uppercase tracking-[.1em] text-[#263b2e] hover:bg-white"
+                >
+                  Track an order ↗
+                </Link>
+                <Link
+                  href="/"
+                  className="inline-flex min-h-11 items-center rounded-full border border-white/25 px-5 text-xs font-bold uppercase tracking-[.1em] text-white hover:bg-white/10"
+                >
+                  Continue shopping
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          <div className="mt-8 grid gap-7 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,.75fr)]">
+            <div className="min-w-0">
+              <div className="mb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Order centre</p>
+                <h2 className="mt-1 font-serif text-2xl tracking-tight sm:text-3xl">Your orders</h2>
+              </div>
+              <section className="rounded-[22px] border border-[#e6e4dc] bg-white p-6 sm:p-8">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f0eee6] text-xl">
+                    📦
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-xl">Order updates appear here</h3>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-[#777e74]">
+                      Orders placed through WhatsApp are confirmed by the store before tracking is available.
+                    </p>
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <Link
+                        href="/account/track"
+                        className="inline-flex min-h-10 items-center rounded-full bg-[#263b2e] px-4 text-xs font-bold text-white"
+                      >
+                        Open order tracking
+                      </Link>
+                      <Link
+                        href="/account/help"
+                        className="inline-flex min-h-10 items-center rounded-full border border-[#dfe1d8] px-4 text-xs font-semibold text-[#536056]"
+                      >
+                        Need help?
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div className="mb-4 mt-8">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Shortcuts</p>
+                <h2 className="mt-1 font-serif text-2xl tracking-tight sm:text-3xl">Manage your account</h2>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Link
+                  href="/account/addresses"
+                  className="group flex items-center gap-4 rounded-[20px] border border-[#e6e4dc] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-sm"
+                >
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf1eb] text-xl">⌖</span>
+                  <span className="flex-1">
+                    <span className="block font-semibold">Delivery addresses</span>
+                    <span className="mt-1 block text-xs text-[#83887f]">Review your saved details</span>
+                  </span>
+                  <span className="text-lg text-[#9aa095] group-hover:translate-x-1">→</span>
+                </Link>
+                <Link
+                  href="/account/change-password"
+                  className="group flex items-center gap-4 rounded-[20px] border border-[#e6e4dc] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-sm"
+                >
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f4e9df] text-xl">🔒</span>
+                  <span className="flex-1">
+                    <span className="block font-semibold">Change password</span>
+                    <span className="mt-1 block text-xs text-[#83887f]">Update your sign-in security</span>
+                  </span>
+                  <span className="text-lg text-[#9aa095] group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
+            </div>
+
+            <aside className="space-y-4">
+              <section className="rounded-[22px] border border-[#e6e4dc] bg-white p-6 sm:p-7">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Profile</p>
+                <h2 className="mt-2 font-serif text-2xl">Your details</h2>
+                <div className="mt-5 flex items-center gap-3 border-b border-[#efeee8] pb-5">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#263b2e] text-lg text-white">
+                    {selectedAvatar || initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{user?.full_name || "Name not added"}</p>
+                    <p className="mt-1 truncate text-xs text-[#83887f]">{user?.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="mt-4 w-full rounded-full border border-[#dfe1d8] py-3 text-xs font-bold uppercase tracking-[.1em] text-[#536056] hover:bg-[#f7f5f0]"
+                >
+                  Account settings
+                </button>
+              </section>
+
+              <section className="rounded-[22px] border border-[#e6e4dc] bg-[#eee9df] p-6 sm:p-7">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">A personal touch</p>
+                <h2 className="mt-2 font-serif text-2xl leading-tight">Can’t find what you’re looking for?</h2>
+                <p className="mt-3 text-sm leading-6 text-[#6d7269]">
+                  Send us a product photo, name or link.
+                </p>
+                <Link
+                  href="/custom-order"
+                  className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.1em] text-[#263b2e]"
+                >
+                  Start a custom request ↗
+                </Link>
+              </section>
+
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center justify-between rounded-[18px] border border-[#e6e4dc] bg-white px-5 py-4 text-sm text-[#777e74] hover:border-[#d5b9aa] hover:text-[#9a5e3f]"
+              >
+                <span>Sign out of your account</span>
+                <span>↗</span>
+              </button>
+            </aside>
+          </div>
+        </main>
+      </div>
+
       {showSettings && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 sm:items-center sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 sm:items-center sm:p-4"
           onClick={() => setShowSettings(false)}
         >
           <section
-            className="w-full max-w-md rounded-t-3xl bg-white p-6 pb-10 sm:rounded-3xl"
+            className="relative w-full max-w-md rounded-t-[28px] bg-white p-6 pb-9 shadow-2xl sm:rounded-[24px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-2xl">Settings</h2>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Your profile</p>
+                <h2 className="mt-1 font-serif text-2xl">Account settings</h2>
+              </div>
               <button
                 onClick={() => setShowSettings(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f2f0e9]"
@@ -397,15 +397,19 @@ export default function AccountPage() {
                 ✕
               </button>
             </div>
+            <p className="mt-5 break-all text-sm text-[#687168]">{user?.email}</p>
             <div className="mt-5 space-y-2">
-              <Link href="/account/change-password" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5 text-sm font-semibold">
-                Change password
+              <Link href="/account/change-password" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5">
+                <p className="text-sm font-semibold">Change password</p>
+                <p className="mt-1 text-xs text-[#83887f]">Update your sign-in password</p>
               </Link>
-              <Link href="/account/addresses" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5 text-sm font-semibold">
-                Delivery addresses
+              <Link href="/account/addresses" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5">
+                <p className="text-sm font-semibold">Delivery addresses</p>
+                <p className="mt-1 text-xs text-[#83887f]">Manage saved addresses</p>
               </Link>
-              <Link href="/account/delete" className="block rounded-xl bg-red-50 px-4 py-3.5 text-sm font-semibold text-red-600">
-                Delete account
+              <Link href="/account/delete" className="block rounded-xl bg-red-50 px-4 py-3.5">
+                <p className="text-sm font-semibold text-red-600">Delete account</p>
+                <p className="mt-1 text-xs text-red-500/80">Permanently remove your profile</p>
               </Link>
             </div>
           </section>
@@ -414,11 +418,11 @@ export default function AccountPage() {
 
       {showAvatarPicker && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 sm:items-center sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 sm:items-center sm:p-4"
           onClick={() => setShowAvatarPicker(false)}
         >
           <section
-            className="w-full max-w-md rounded-t-3xl bg-white p-6 pb-10 sm:rounded-3xl"
+            className="w-full max-w-md rounded-t-[28px] bg-white p-6 pb-9 sm:rounded-[24px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -437,7 +441,7 @@ export default function AccountPage() {
                   disabled={saving}
                   onClick={() => saveAvatar(a)}
                   className={`flex h-14 items-center justify-center rounded-2xl text-2xl ${
-                    selectedAvatar === a ? "bg-[#263b2e] ring-2 ring-[#263b2e]/30" : "bg-[#f7f5f0]"
+                    selectedAvatar === a ? "bg-[#263b2e]" : "bg-[#f7f5f0]"
                   }`}
                 >
                   {a}
