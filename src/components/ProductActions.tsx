@@ -32,8 +32,22 @@ export default function ProductActions({ product }: Props) {
     setCartQuantity(quantityInCart);
   }, [product.id, selectedSize, selectedColor, added]);
 
-  const sizes = product.sizes || [];
-  const colors = product.colors || [];
+  // Product options may be saved as a range ("30-38") or as a combined colour
+  // label ("Black and white"). Expand these into individual selectable options.
+  const sizes = (product.sizes || []).flatMap((rawSize) => {
+    const value = String(rawSize).trim();
+    const range = value.match(/^(\\d+)\\s*[-–—]\\s*(\\d+)$/);
+    if (!range) return value ? [value] : [];
+    const start = Number(range[1]);
+    const end = Number(range[2]);
+    if (end < start || end - start > 50) return [value];
+    return Array.from({ length: end - start + 1 }, (_, index) => String(start + index));
+  });
+  const colors = (product.colors || []).flatMap((rawColor) => {
+    const value = String(rawColor).trim();
+    if (!value) return [];
+    return value.split(/\\s+(?:and|&)\\s+|\\s*[,/]\\s*/i).map((color) => color.trim()).filter(Boolean);
+  }).filter((color, index, all) => all.findIndex((item) => item.toLowerCase() === color.toLowerCase()) === index);
   const isSoldOut = product.stock_quantity === 0;
   const isUnavailable = product.is_available === false || isSoldOut;
   const needsAvailabilityConfirmation = product.is_available == null && product.stock_quantity == null;
