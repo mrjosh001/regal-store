@@ -23,35 +23,54 @@ export default function AccountPage() {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    let redirecting = false;
+    let cancelled = false;
+
     async function loadUser() {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
 
-      if (!user) {
-        router.push("/sign-in");
-        return;
+        const user = authData.user;
+        if (!user) {
+          redirecting = true;
+          router.replace("/sign-in");
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, email, role, avatar_url")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (profileError) throw profileError;
+
+        if (!cancelled) {
+          setUser({
+            ...user,
+            full_name: profile?.full_name,
+            role: profile?.role,
+            avatar_url: profile?.avatar_url,
+          });
+          setSelectedAvatar(profile?.avatar_url || null);
+          setLoadError(null);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : "We couldn't load your account. Please try again.");
+        }
+      } finally {
+        if (!cancelled && !redirecting) setLoading(false);
       }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, email, role, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      setUser({
-        ...user,
-        full_name: profile?.full_name,
-        role: profile?.role,
-        avatar_url: profile?.avatar_url,
-      });
-      setSelectedAvatar(profile?.avatar_url || null);
-      setLoading(false);
     }
 
-    loadUser();
+    void loadUser();
+    return () => { cancelled = true; };
   }, [router]);
 
   async function saveAvatar(avatar: string) {
@@ -89,6 +108,20 @@ export default function AccountPage() {
           <div className="mx-auto mb-4 h-10 w-10 animate-pulse rounded-full bg-[#dce4dc]" />
           <p className="text-sm text-[#68736a]">Preparing your account…</p>
         </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f7f5f0] px-5">
+        <section className="w-full max-w-md rounded-2xl border border-[#e6e4dc] bg-white p-7 text-center">
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-[#a65f3e]">Account unavailable</p>
+          <h1 className="mt-3 font-serif text-2xl">We couldn't load your account</h1>
+          <p className="mt-3 break-words text-sm leading-6 text-[#687168]">{loadError}</p>
+          <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-full bg-[#263b2e] px-5 py-3 text-sm font-semibold text-white">Try again</button>
+          <Link href="/sign-in" className="mt-4 inline-block text-sm font-semibold text-[#536b58]">Return to sign in</Link>
+        </section>
       </div>
     );
   }
