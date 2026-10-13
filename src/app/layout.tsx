@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-NG">
-      <body className="antialiased pb-16 md:pb-0">
+      <body className="antialiased">
         {children}
         <BottomNav />
       </body>

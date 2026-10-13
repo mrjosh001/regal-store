@@ -7,7 +7,7 @@ import { cartCount } from "@/lib/cart";
 
 const links = [
   {
-    href: "/",
+    href: "/account",
     label: "Home",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,6 +36,7 @@ const links = [
   {
     href: "/account",
     label: "Account",
+    exactAccount: true,
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -44,6 +45,7 @@ const links = [
   },
 ];
 
+/** Bottom nav is only for the signed-in customer dashboard area — never the public storefront. */
 export default function BottomNav() {
   const pathname = usePathname();
   const [count, setCount] = useState(0);
@@ -57,11 +59,9 @@ export default function BottomNav() {
     return () => window.removeEventListener("cart-updated", onCart);
   }, []);
 
-  if (
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/sign-in") ||
-    pathname?.startsWith("/sign-up")
-  ) {
+  const onAccountArea = pathname?.startsWith("/account");
+
+  if (!onAccountArea) {
     return null;
   }
 
@@ -69,32 +69,33 @@ export default function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-black/[0.06] md:hidden pb-safe">
       <div className="flex items-center justify-around h-[60px] max-w-lg mx-auto px-2">
         {links.map((link) => {
-          const active =
-            link.href === "/"
-              ? pathname === "/"
-              : pathname?.startsWith(link.href);
+          const isAccountHome = link.label === "Home";
+          const isAccountTab = link.label === "Account";
+          const active = isAccountHome || isAccountTab
+            ? pathname === "/account" || (isAccountTab && pathname?.startsWith("/account/"))
+            : pathname?.startsWith(link.href);
 
           return (
             <Link
-              key={link.href}
+              key={`${link.label}-${link.href}`}
               href={link.href}
               className={`relative flex flex-col items-center justify-center gap-0.5 w-16 py-1 transition ${
-                active ? "text-brand-blue" : "text-black/35"
+                active ? "text-[#263b2e]" : "text-black/35"
               }`}
             >
               <span className="relative">
                 {link.icon}
                 {link.href === "/cart" && count > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 bg-brand-blue text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 bg-[#263b2e] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
               </span>
-              <span className={`text-[10px] font-medium ${active ? "text-brand-blue" : ""}`}>
+              <span className={`text-[10px] font-medium ${active ? "text-[#263b2e]" : ""}`}>
                 {link.label}
               </span>
               {active && (
-                <span className="absolute -top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand-blue" />
+                <span className="absolute -top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#263b2e]" />
               )}
             </Link>
           );
