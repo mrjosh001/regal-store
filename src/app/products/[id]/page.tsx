@@ -59,7 +59,6 @@ async function getProduct(id: string): Promise<Product | null> {
     return data as Product;
   }
 
-  // Older databases may not yet have compare_at_price; keep the product page usable.
   if (error?.message && ["compare_at_price", "sizes", "colors", "is_available", "stock_quantity"].some((field) => error.message?.includes(field))) {
     const fallback = await supabase
       .from("products")
@@ -153,12 +152,21 @@ export default async function ProductPage({ params }: Props) {
       />
 
       <main className="mx-auto max-w-5xl px-4 py-8 md:py-12 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-black/50 transition hover:text-brand-blue"
-        >
-          ← Back to shop
-        </Link>
+        <div className="mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
+          <Link
+            href="/search"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-black/10 bg-white px-4 text-sm font-medium text-[#202a23] shadow-sm hover:border-black/20"
+          >
+            ← Back
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#263b2e] px-4 text-sm font-medium text-white hover:bg-[#354e40]"
+          >
+            Home
+          </Link>
+          <span className="inline-flex min-h-10 items-center text-sm text-black/40">{categoryLabel}</span>
+        </div>
 
         <div className="grid gap-8 md:grid-cols-2 md:gap-12">
           <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-black/5 bg-white">
