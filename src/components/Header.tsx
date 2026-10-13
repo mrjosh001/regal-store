@@ -81,16 +81,19 @@ export default function Header() {
     router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
   }
 
+  const navItem =
+    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#202a23] hover:bg-[#edf1eb] active:bg-[#e2e9e2] transition";
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-black/[0.06]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 md:h-16">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center shadow-sm shadow-brand-blue/30 group-hover:scale-105 transition">
+              <div className="w-8 h-8 bg-[#263b2e] rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg md:text-xl font-semibold tracking-tight text-brand-black">
+              <span className="text-lg md:text-xl font-semibold tracking-tight text-[#202a23]">
                 Regal Store
               </span>
             </Link>
@@ -102,7 +105,7 @@ export default function Header() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full border border-black/8 bg-brand-surface/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/25 focus:border-brand-blue/30 transition"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full border border-black/8 bg-[#f7f5f0] text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20 transition"
                 />
                 <svg
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/35"
@@ -126,7 +129,7 @@ export default function Header() {
                 className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition"
                 aria-label="Search"
               >
-                <svg className="w-5 h-5 text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#202a23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </Link>
@@ -140,12 +143,12 @@ export default function Header() {
                   aria-label="Open menu"
                 >
                   <span className="flex items-center justify-center gap-[4.5px]">
-                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
-                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
-                    <span className="block w-[2.5px] h-[18px] rounded-full bg-brand-black" />
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-[#202a23]" />
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-[#202a23]" />
+                    <span className="block w-[2.5px] h-[18px] rounded-full bg-[#202a23]" />
                   </span>
                   {count > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-blue rounded-full ring-2 ring-white" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#a65f3e] rounded-full ring-2 ring-white" />
                   )}
                 </button>
               )}
@@ -166,27 +169,26 @@ export default function Header() {
             role="dialog"
             aria-modal="true"
             aria-label="Regal Store navigation"
-            className="relative flex h-full w-[min(320px,88vw)] flex-col bg-white shadow-2xl animate-sidebar-in"
+            className="relative flex h-full w-[min(320px,88vw)] flex-col bg-white shadow-2xl"
           >
-            <div className="p-5 bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
+            <div className="p-5 bg-[#263b2e] text-white">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-xl font-semibold backdrop-blur">
-                    {user.avatar_url ? (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-xl font-semibold">
+                    {user.avatar_url && String(user.avatar_url).startsWith("http") ? (
                       <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      (user.full_name || user.email || "U")[0].toUpperCase()
+                      user.avatar_url || (user.full_name || user.email || "U")[0].toUpperCase()
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate">
-                      {user.full_name || "Customer"}
-                    </p>
-                    <p className="text-xs text-white/70 truncate">{user.email}</p>
+                    <p className="font-semibold text-sm truncate">{user.full_name || "Customer"}</p>
+                    <p className="text-xs text-white/65 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => setShowSidebar(false)}
                     className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm"
+                    aria-label="Close"
                   >
                     ✕
                   </button>
@@ -194,12 +196,13 @@ export default function Header() {
               ) : (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">Welcome</p>
-                    <p className="text-xs text-white/70 mt-0.5">Sign in for a better experience</p>
+                    <p className="font-semibold">Welcome to Regal</p>
+                    <p className="text-xs text-white/65 mt-0.5">Sign in to track orders & save details</p>
                   </div>
                   <button
                     onClick={() => setShowSidebar(false)}
                     className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm"
+                    aria-label="Close"
                   >
                     ✕
                   </button>
@@ -208,86 +211,71 @@ export default function Header() {
             </div>
 
             <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+              <p className="px-4 pt-2 pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#9a968c]">Menu</p>
+
               {user ? (
-                <Link
-                  href="/account"
-                  onClick={() => setShowSidebar(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 active:bg-brand-blue/10 transition"
-                >
-                  <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">👤</span>
+                <Link href="/account" onClick={() => setShowSidebar(false)} className={navItem}>
+                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">👤</span>
                   My Account
                 </Link>
               ) : (
-                <Link
-                  href="/sign-in"
-                  onClick={() => setShowSidebar(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 transition"
-                >
-                  <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">🔑</span>
+                <Link href="/sign-in" onClick={() => setShowSidebar(false)} className={navItem}>
+                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔑</span>
                   Sign in
                 </Link>
               )}
 
-              <Link
-                href="/cart"
-                onClick={() => setShowSidebar(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 transition"
-              >
-                <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">🛒</span>
+              <Link href="/cart" onClick={() => setShowSidebar(false)} className={navItem}>
+                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🛒</span>
                 <span className="flex-1">Cart</span>
                 {count > 0 && (
-                  <span className="bg-brand-blue text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
+                  <span className="bg-[#263b2e] text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
                     {count}
                   </span>
                 )}
               </Link>
 
-              <Link
-                href="/custom-order"
-                onClick={() => setShowSidebar(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 transition"
-              >
-                <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">✨</span>
-                Custom Order
+              <Link href="/custom-order" onClick={() => setShowSidebar(false)} className={navItem}>
+                <span className="w-8 h-8 rounded-lg bg-[#f4e9df] flex items-center justify-center text-sm">✨</span>
+                Custom request
               </Link>
 
-              <Link
-                href="/search"
-                onClick={() => setShowSidebar(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 transition"
-              >
-                <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">🔍</span>
-                Search
+              <Link href="/search" onClick={() => setShowSidebar(false)} className={navItem}>
+                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔍</span>
+                Search the store
               </Link>
 
-              <div className="my-2 border-t border-black/5" />
+              <div className="my-2 border-t border-[#efeee8]" />
 
-              <Link
-                href="/"
-                onClick={() => setShowSidebar(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-black hover:bg-brand-blue/5 transition"
-              >
-                <span className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center text-sm">🏠</span>
-                Store Home
+              <Link href="/" onClick={() => setShowSidebar(false)} className={navItem}>
+                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🏠</span>
+                Storefront
               </Link>
 
               {user?.role === "admin" && (
                 <Link
                   href="/admin"
                   onClick={() => setShowSidebar(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-blue hover:bg-brand-blue/5 transition"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#263b2e] hover:bg-[#edf1eb] transition"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-brand-blue/15 flex items-center justify-center text-sm">⚙️</span>
-                  Admin Dashboard
+                  <span className="w-8 h-8 rounded-lg bg-[#dce4dc] flex items-center justify-center text-sm">⚙️</span>
+                  Admin dashboard
+                </Link>
+              )}
+
+              {user && (
+                <Link href="/account/change-password" onClick={() => setShowSidebar(false)} className={navItem}>
+                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔒</span>
+                  Change password
                 </Link>
               )}
             </nav>
 
             {user && (
-              <div className="p-4 border-t border-black/5">
+              <div className="p-4 border-t border-[#efeee8]">
                 <button
                   onClick={handleSignOut}
-                  className="w-full py-3 text-red-500 text-sm font-medium rounded-xl bg-red-50 hover:bg-red-100 active:scale-[0.98] transition"
+                  className="w-full py-3 text-red-600 text-sm font-medium rounded-xl bg-red-50 hover:bg-red-100 active:scale-[0.98] transition"
                 >
                   Log out
                 </button>
@@ -295,11 +283,11 @@ export default function Header() {
             )}
 
             {!user && (
-              <div className="p-4 border-t border-black/5">
+              <div className="p-4 border-t border-[#efeee8]">
                 <Link
                   href="/sign-in"
                   onClick={() => setShowSidebar(false)}
-                  className="block w-full py-3 text-center bg-brand-blue text-white text-sm font-medium rounded-xl hover:bg-brand-blue-dark transition"
+                  className="block w-full py-3 text-center bg-[#263b2e] text-white text-sm font-medium rounded-xl hover:bg-[#354e40] transition"
                 >
                   Sign in to Regal Store
                 </Link>
