@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { addToCart, getCart } from "@/lib/cart";
 import { whatsappLink, formatPrice } from "@/lib/whatsapp";
+import { expandSizes, expandColors } from "@/lib/product-options";
 
 type Props = {
   product: {
@@ -32,22 +33,8 @@ export default function ProductActions({ product }: Props) {
     setCartQuantity(quantityInCart);
   }, [product.id, selectedSize, selectedColor, added]);
 
-  // Product options may be saved as a range ("30-38") or as a combined colour
-  // label ("Black and white"). Expand these into individual selectable options.
-  const sizes = (product.sizes || []).flatMap((rawSize) => {
-    const value = String(rawSize).trim();
-    const range = value.match(/^(\\d+)\\s*[-–—]\\s*(\\d+)$/);
-    if (!range) return value ? [value] : [];
-    const start = Number(range[1]);
-    const end = Number(range[2]);
-    if (end < start || end - start > 50) return [value];
-    return Array.from({ length: end - start + 1 }, (_, index) => String(start + index));
-  });
-  const colors = (product.colors || []).flatMap((rawColor) => {
-    const value = String(rawColor).trim();
-    if (!value) return [];
-    return value.split(/\\s+(?:and|&)\\s+|\\s*[,/]\\s*/i).map((color) => color.trim()).filter(Boolean);
-  }).filter((color, index, all) => all.findIndex((item) => item.toLowerCase() === color.toLowerCase()) === index);
+  const sizes = expandSizes(product.sizes as any);
+  const colors = expandColors(product.colors as any);
   const isSoldOut = product.stock_quantity === 0;
   const isUnavailable = product.is_available === false || isSoldOut;
   const needsAvailabilityConfirmation = product.is_available == null && product.stock_quantity == null;
@@ -64,13 +51,11 @@ export default function ProductActions({ product }: Props) {
   async function handleWhatsAppOrder() {
     if (!optionsChosen) return;
     setAddError(null);
-    // Open synchronously so the browser does not block the WhatsApp tab after the stock check.
     const pendingTab = window.open("about:blank", "_blank");
     if (!pendingTab) {
       setAddError("Please allow pop-ups to continue to WhatsApp ordering.");
       return;
     }
-    // Keep a non-null reference across asynchronous stock verification.
     const orderTab = pendingTab as Window;
     const whatsappUrl = whatsappLink(waMessage);
     if (!whatsappUrl) {
