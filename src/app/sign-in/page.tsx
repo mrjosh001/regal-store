@@ -159,7 +159,7 @@ function SignInForm() {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e Soft.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
               autoComplete="email"
