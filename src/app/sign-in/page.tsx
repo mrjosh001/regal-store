@@ -34,7 +34,7 @@ function SignInForm() {
       }
 
       const supabase = await getSupabase();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
@@ -43,6 +43,22 @@ function SignInForm() {
         setError(error.message);
         setLoading(false);
         return;
+      }
+
+      const userId = data.user?.id;
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("banned_at, deleted_at, role")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if (profile?.banned_at || profile?.deleted_at) {
+          await supabase.auth.signOut();
+          setError("This account has been suspended or deleted. Contact the store if you need help.");
+          setLoading(false);
+          return;
+        }
       }
 
       router.push(safeNext);
@@ -173,6 +189,13 @@ function SignInForm() {
             className="text-[#263b2e] font-medium hover:underline"
           >
             Create one
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-xs text-black/40">
+          Staff?{" "}
+          <Link href="/admin/login" className="font-medium text-[#263b2e] hover:underline">
+            Admin sign in
           </Link>
         </p>
       </div>
