@@ -174,25 +174,22 @@ export default function Header() {
           <button
             type="button"
             aria-label="Close navigation menu"
-            className="absolute inset-0 cursor-default bg-black/45"
+            className="absolute inset-0 cursor-default bg-black/45 animate-backdrop-in"
             onClick={close}
           />
           <aside
             role="dialog"
             aria-modal="true"
             aria-label="Shop menu"
-            className="relative flex h-full w-[min(340px,90vw)] flex-col bg-white shadow-2xl"
+            className="relative flex h-full w-[min(340px,90vw)] flex-col bg-white shadow-2xl animate-sidebar-in"
           >
-            {/* Header */}
             <div className="flex items-start justify-between border-b border-[#efeee8] px-5 py-5">
               <div>
                 <p className="font-serif text-xl tracking-tight text-[#202a23]">
                   {user ? user.full_name || "Your account" : "Shop Regal"}
                 </p>
                 <p className="mt-1 text-xs text-[#83887f]">
-                  {user
-                    ? user.email
-                    : "Clothing · Bags · Shoes"}
+                  {user ? user.email : "Clothing · Bags · Shoes"}
                 </p>
               </div>
               <button
@@ -205,18 +202,12 @@ export default function Header() {
             </div>
 
             <nav className="flex-1 overflow-y-auto px-2 py-3">
-              {/* Categories — primary for guests & shoppers */}
               <p className="px-4 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a0a59b]">
                 Shop
               </p>
               <div className="space-y-0.5">
                 {shopCategories.map((cat) => (
-                  <Link
-                    key={cat.href}
-                    href={cat.href}
-                    onClick={close}
-                    className={categoryLink}
-                  >
+                  <Link key={cat.href} href={cat.href} onClick={close} className={categoryLink}>
                     <span>{cat.label}</span>
                     <span className="text-[#b8bdb6]">→</span>
                   </Link>
