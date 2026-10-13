@@ -25,18 +25,21 @@ type HomePageProps = {
 const CATEGORIES = [
   {
     name: "Clothing",
+    slug: "clothing",
     eyebrow: "Wear it your way",
     description: "Easy pieces. Strong looks.",
     image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85",
   },
   {
     name: "Bags",
+    slug: "bags",
     eyebrow: "Carry a little confidence",
     description: "Everyday carry, elevated.",
     image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=85",
   },
   {
     name: "Shoes",
+    slug: "shoes",
     eyebrow: "Start from the ground up",
     description: "The finishing touch.",
     image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1000&q=85",
@@ -80,7 +83,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           hasFetchError = true;
         } else {
           productList = (fallback.data || [])
-            .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
+            .filter((product) =>
+              ["clothing", "fashion", "shoes", "bag", "bags"].includes(
+                (product.category || "").toLowerCase()
+              )
+            )
             .map((product) => ({
               ...product,
               category: normaliseCategory(product.category),
@@ -93,7 +100,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         }
       } else {
         productList = ((primary.data || []) as Product[])
-          .filter((product) => ["clothing", "fashion", "shoes", "bag", "bags"].includes((product.category || "").toLowerCase()))
+          .filter((product) =>
+            ["clothing", "fashion", "shoes", "bag", "bags"].includes(
+              (product.category || "").toLowerCase()
+            )
+          )
           .map((product) => ({
             ...product,
             category: normaliseCategory(product.category),
@@ -113,124 +124,190 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   );
   const categoryTiles = CATEGORIES.map((category) => ({
     ...category,
-    product: productList.find((product) => product.category === category.name && product.image_url),
+    product: productList.find(
+      (product) => product.category === category.name && product.image_url
+    ),
   }));
   const heroProduct = productList.find((product) => product.image_url);
+  const wa = whatsappLink("Hello Regal Store, I need help choosing a product.");
 
   return (
-    <div className="min-h-screen bg-[#fbf8f3] text-[#24231f]">
-      <div className="bg-[#24372d] px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[.18em] text-white sm:text-xs">
-        Clothing · Bags · Shoes <span className="mx-2 text-[#d9b989]">/</span> Everyday style, thoughtfully found
+    <div className="min-h-screen bg-[#f7f5f0] text-[#202a23]">
+      {/* Announcement — glass strip */}
+      <div className="relative z-20 overflow-hidden bg-[#1a2820] px-4 py-2.5 text-center">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+        <p className="relative text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 sm:text-xs">
+          Clothing · Bags · Shoes{" "}
+          <span className="mx-2 text-[#e8d5b5]/80">/</span>{" "}
+          Everyday style, thoughtfully found
+        </p>
       </div>
+
       <Header />
 
       <main>
-        <section className="overflow-hidden bg-[#f1eadf]">
-          <div className="mx-auto grid max-w-[1440px] items-stretch md:min-h-[620px] md:grid-cols-[.92fr_1.08fr]">
-            <div className="flex flex-col justify-center px-6 py-14 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
-              <p className="mb-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.24em] text-[#536b58] sm:text-xs">
-                <span className="h-px w-8 bg-[#536b58]" /> The Regal Store edit
-              </p>
-              <h1 className="max-w-xl font-serif text-[3.35rem] leading-[.98] tracking-[-.055em] text-[#24372d] sm:text-7xl lg:text-[5.7rem]">
-                A little more
+        {/* —— CINEMATIC HERO —— */}
+        <section className="relative isolate min-h-[88vh] overflow-hidden md:min-h-[92vh]">
+          {/* Background image + ken burns */}
+          <div className="absolute inset-0">
+            <img
+              src={
+                heroProduct?.image_url ||
+                "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2000&q=90"
+              }
+              alt={heroProduct ? heroProduct.name : "Regal Store fashion"}
+              className="h-full w-full object-cover animate-ken-burns"
+              fetchPriority="high"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0f1814]/88 via-[#0f1814]/55 to-[#0f1814]/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f1814]/80 via-transparent to-[#0f1814]/20" />
+          </div>
+
+          {/* Floating orbs — depth */}
+          <div
+            className="pointer-events-none absolute -left-20 top-1/4 h-72 w-72 rounded-full bg-[#a65f3e]/20 blur-[100px] animate-float-orb"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-16 bottom-1/4 h-80 w-80 rounded-full bg-[#e8d5b5]/15 blur-[110px] animate-float-orb"
+            style={{ animationDelay: "-4s" }}
+            aria-hidden
+          />
+
+          <div className="relative mx-auto flex min-h-[88vh] max-w-[1440px] flex-col justify-end px-5 pb-16 pt-28 sm:px-8 sm:pb-20 md:min-h-[92vh] md:justify-center md:pb-24 lg:px-16">
+            <div className="max-w-2xl animate-rise-in">
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full liquid-glass px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/95 sm:text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#e8d5b5]" />
+                The Regal Store edit
+              </div>
+
+              <h1 className="font-serif text-[3.4rem] leading-[0.96] tracking-[-0.04em] text-white sm:text-6xl lg:text-[5.5rem]">
+                A little more{" "}
+                <span className="italic text-[#e8d5b5]">you.</span>
                 <br />
-                <span className="italic text-[#a65f3e]">you.</span> Every day.
+                Every day.
               </h1>
-              <p className="mt-6 max-w-md text-sm leading-7 text-[#5e6259] sm:text-base sm:leading-8">
-                The pieces you reach for, the details that pull a look together, and the finds that feel like they were waiting for you.
+
+              <p className="mt-6 max-w-md text-sm leading-7 text-white/75 sm:text-base sm:leading-8">
+                The pieces you reach for, the details that pull a look together,
+                and the finds that feel like they were waiting for you.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+
+              <div className="mt-9 flex flex-wrap gap-3">
                 <Link
                   href="#shop-the-edit"
-                  className="inline-flex min-h-12 items-center justify-center gap-3 bg-[#24372d] px-6 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]"
+                  className="btn-shimmer inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-[0.12em] text-[#1a2820] shadow-lg shadow-black/20 hover:bg-[#f7f5f0]"
                 >
-                  Shop the collection <span aria-hidden="true">↗</span>
+                  Shop the collection
+                  <span aria-hidden>↗</span>
                 </Link>
                 <Link
                   href="/custom-order"
-                  className="inline-flex min-h-12 items-center justify-center border border-[#24372d]/25 px-6 text-xs font-bold uppercase tracking-[.12em] text-[#24372d] hover:bg-white/50"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full liquid-glass px-7 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-white/20"
                 >
                   Find it for me
                 </Link>
               </div>
-              <div className="mt-10 flex items-center gap-3 text-xs text-[#66695f]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24372d]/20 text-[#24372d]">✳</span>
-                <span>Browse at your pace. Message us to confirm details before ordering.</span>
-              </div>
             </div>
 
-            <div className="relative min-h-[390px] overflow-hidden bg-[#d7c9b5] sm:min-h-[500px] md:min-h-full">
-              <img
-                src={heroProduct?.image_url || "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=90"}
-                alt={heroProduct ? heroProduct.name : "Fashion styling inspiration"}
-                className="absolute inset-0 h-full w-full object-cover"
-                fetchPriority="high"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1b261e]/50 via-transparent to-black/5" />
-              <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 text-white sm:bottom-8 sm:left-8 sm:right-8">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[.22em] text-white/75">Your next favourite</p>
-                  <p className="mt-2 max-w-xs font-serif text-2xl leading-tight sm:text-3xl">Good style lives in the details.</p>
-                </div>
-                <Link href="#shop-the-edit" aria-label="Explore the collection" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f1eadf] text-xl text-[#24372d] hover:bg-white">↘</Link>
+            {/* Glass product chip */}
+            {heroProduct && (
+              <div
+                className="mt-10 max-w-xs animate-rise-in rounded-2xl liquid-glass p-4 text-white sm:absolute sm:bottom-20 sm:right-8 sm:mt-0 lg:right-16"
+                style={{ animationDelay: "120ms" }}
+              >
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">
+                  Featured find
+                </p>
+                <p className="mt-1.5 font-serif text-lg leading-snug">{heroProduct.name}</p>
+                <Link
+                  href={`/products/${heroProduct.id}`}
+                  className="mt-3 inline-flex text-xs font-semibold text-[#e8d5b5] hover:text-white"
+                >
+                  View piece →
+                </Link>
               </div>
-              <div className="absolute right-5 top-5 hidden border border-white/50 bg-[#fbf8f3]/90 px-4 py-3 text-[#24372d] backdrop-blur sm:block">
-                <p className="text-[9px] font-bold uppercase tracking-[.2em]">REGAL</p>
-                <p className="mt-1 font-serif text-xl italic">The everyday edit</p>
-              </div>
-            </div>
+            )}
+          </div>
+
+          {/* Scroll hint */}
+          <div className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block">
+            <a
+              href="#shop-the-edit"
+              className="flex flex-col items-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/50 hover:text-white/80"
+            >
+              Scroll
+              <span className="h-8 w-px bg-gradient-to-b from-white/50 to-transparent" />
+            </a>
           </div>
         </section>
 
-        <section className="border-b border-[#e8e0d5] bg-[#fbf8f3]">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-1 divide-y divide-[#e8e0d5] px-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-10 lg:px-16">
+        {/* —— Trust strip — liquid glass cards —— */}
+        <section className="relative z-10 -mt-8 px-4 sm:-mt-10 sm:px-8 lg:px-16">
+          <div className="mx-auto grid max-w-[1440px] gap-3 sm:grid-cols-3">
             {[
-              { number: "01", title: "Discover", copy: "Explore clothing, bags and shoes." },
-              { number: "02", title: "Ask us", copy: "Check sizing, availability and details." },
-              { number: "03", title: "Order with clarity", copy: "Confirm the details before payment." },
-            ].map((step) => (
-              <div key={step.number} className="flex items-start gap-4 py-5 sm:px-6 sm:py-7 first:sm:pl-0 last:sm:pr-0">
-                <span className="pt-0.5 font-serif text-lg italic text-[#a65f3e]">{step.number}</span>
-                <div>
-                  <p className="text-sm font-semibold text-[#24372d]">{step.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-[#73746c]">{step.copy}</p>
-                </div>
+              { n: "01", t: "Discover", c: "Explore clothing, bags and shoes curated for everyday style." },
+              { n: "02", t: "Ask us", c: "Check sizing, availability and details before you commit." },
+              { n: "03", t: "Order clearly", c: "Confirm everything with us — then pay with confidence." },
+            ].map((step, i) => (
+              <div
+                key={step.n}
+                className="liquid-glass-frost animate-rise-in rounded-2xl p-5 sm:p-6"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <span className="font-serif text-lg italic text-[#a65f3e]">{step.n}</span>
+                <p className="mt-2 text-sm font-semibold text-[#24372d]">{step.t}</p>
+                <p className="mt-1 text-xs leading-5 text-[#73746c]">{step.c}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section id="shop-the-edit" className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 sm:py-20 lg:px-16">
-          <div className="mb-7 flex items-end justify-between gap-4 sm:mb-9">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#a65f3e] sm:text-xs">Make it yours</p>
-              <h2 className="mt-2 font-serif text-3xl tracking-[-.03em] text-[#24372d] sm:text-5xl">Shop by mood. Shop by moment.</h2>
+        {/* —— Categories —— */}
+        <section id="shop-the-edit" className="mx-auto max-w-[1440px] px-5 py-16 sm:px-8 sm:py-24 lg:px-16">
+          <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
+            <div className="animate-rise-in">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#a65f3e] sm:text-xs">
+                Make it yours
+              </p>
+              <h2 className="mt-2 font-serif text-3xl tracking-[-0.03em] text-[#24372d] sm:text-5xl">
+                Shop by mood.
+              </h2>
             </div>
-            <span className="hidden pb-1 text-xs text-[#77776e] sm:block">Three ways to find your next favourite</span>
+            <Link
+              href="/search"
+              className="hidden pb-1 text-xs font-semibold text-[#536b58] hover:text-[#24372d] sm:block"
+            >
+              View all →
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
             {categoryTiles.map((category, index) => (
               <Link
                 key={category.name}
-                href={`/?category=${encodeURIComponent(category.name)}#products`}
-                className={`group relative isolate min-h-[330px] overflow-hidden bg-[#ddd0bf] sm:min-h-[420px] ${index === 1 ? "sm:translate-y-7" : ""}`}
+                href={`/search?category=${category.slug}`}
+                className={`group relative isolate min-h-[340px] overflow-hidden rounded-3xl bg-[#ddd0bf] sm:min-h-[440px] ${index === 1 ? "sm:translate-y-8" : ""}`}
               >
                 <img
                   src={category.product?.image_url || category.image}
                   alt={category.product?.name || category.name}
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/0 transition group-hover:from-black/75" />
-                <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
-                  <p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/75">{category.eyebrow}</p>
-                  <div className="mt-2 flex items-end justify-between gap-3">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent transition group-hover:from-black/80" />
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+                  <span className="inline-block rounded-full liquid-glass px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-white">
+                    {category.eyebrow}
+                  </span>
+                  <div className="mt-3 flex items-end justify-between gap-3 text-white">
                     <div>
                       <h3 className="font-serif text-3xl sm:text-4xl">{category.name}</h3>
                       <p className="mt-1 text-xs text-white/80">{category.description}</p>
                     </div>
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/65 text-lg transition group-hover:bg-white group-hover:text-[#24372d]">↗</span>
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full liquid-glass text-lg transition group-hover:bg-white group-hover:text-[#24372d]">
+                      ↗
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -238,34 +315,64 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
         </section>
 
+        {/* Products */}
         {hasFetchError ? (
           <section id="products" className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-8 lg:px-16">
-            <div className="border border-[#e8e0d5] bg-white px-6 py-14 text-center">
+            <div className="rounded-3xl border border-[#e8e0d5] bg-white px-6 py-14 text-center">
               <p className="font-serif text-2xl text-[#24372d]">The collection is taking a moment.</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">Please try again shortly, or send us a request and we’ll help you look.</p>
-              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Request a product</Link>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">
+                Please try again shortly, or send us a request.
+              </p>
+              <Link
+                href="/custom-order"
+                className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[0.12em] text-white"
+              >
+                Request a product
+              </Link>
             </div>
           </section>
         ) : productList.length === 0 ? (
           <section id="products" className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-8 lg:px-16">
-            <div className="border border-[#e8e0d5] bg-white px-6 py-14 text-center">
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f1eadf] font-serif text-2xl text-[#a65f3e]">R</span>
+            <div className="rounded-3xl border border-[#e8e0d5] bg-white px-6 py-14 text-center">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f1eadf] font-serif text-2xl text-[#a65f3e]">
+                R
+              </span>
               <p className="mt-4 font-serif text-2xl text-[#24372d]">Your next great find starts here.</p>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">We’re refreshing the clothing, bags and shoes collection. Check back soon or ask us to source something specific.</p>
-              <Link href="/custom-order" className="mt-5 inline-flex min-h-11 items-center bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Make a request</Link>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#73746c]">
+                We’re refreshing the collection. Check back soon or ask us to source something.
+              </p>
+              <Link
+                href="/custom-order"
+                className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#24372d] px-5 text-xs font-bold uppercase tracking-[0.12em] text-white"
+              >
+                Make a request
+              </Link>
             </div>
           </section>
         ) : (
           <>
             {onSale.length > 0 && (
               <section className="mx-auto max-w-[1440px] px-5 pb-8 sm:px-8 lg:px-16">
-                <div className="flex flex-col justify-between gap-4 bg-[#24372d] p-6 text-white sm:flex-row sm:items-center sm:p-9">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#dfb78d]">A good find for less</p>
-                    <h2 className="mt-2 font-serif text-3xl sm:text-4xl">Special prices, while they last.</h2>
-                    <p className="mt-2 text-sm text-white/65">{onSale.length} {onSale.length === 1 ? "item has" : "items have"} a reduced price.</p>
+                <div className="relative overflow-hidden rounded-3xl bg-[#24372d] p-6 text-white sm:flex sm:items-center sm:justify-between sm:p-10">
+                  <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#e8d5b5]/10 blur-3xl" />
+                  <div className="relative">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#dfb78d]">
+                      A good find for less
+                    </p>
+                    <h2 className="mt-2 font-serif text-3xl sm:text-4xl">
+                      Special prices, while they last.
+                    </h2>
+                    <p className="mt-2 text-sm text-white/65">
+                      {onSale.length} {onSale.length === 1 ? "item has" : "items have"} a reduced
+                      price.
+                    </p>
                   </div>
-                  <Link href="#products" className="inline-flex min-h-11 items-center justify-center self-start border border-white/35 px-5 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-white hover:text-[#24372d] sm:self-auto">Explore offers ↗</Link>
+                  <Link
+                    href="#products"
+                    className="relative mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-white/35 px-5 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-white hover:text-[#24372d] sm:mt-0"
+                  >
+                    Explore offers ↗
+                  </Link>
                 </div>
               </section>
             )}
@@ -273,18 +380,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </>
         )}
 
-        <section className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-16 lg:px-16">
-          <div className="grid overflow-hidden bg-[#e7ded1] md:grid-cols-[1fr_.8fr]">
-            <div className="flex flex-col justify-center px-6 py-9 sm:px-10 sm:py-12">
-              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#a65f3e] sm:text-xs">Looking for something specific?</p>
-              <h2 className="mt-3 max-w-lg font-serif text-3xl leading-tight tracking-[-.035em] text-[#24372d] sm:text-5xl">Tell us what you have in mind.</h2>
-              <p className="mt-4 max-w-lg text-sm leading-7 text-[#66695f]">Share a product name, photo or link. We’ll help you check whether we can source it. No need to know exactly what you’re looking for yet.</p>
-              <Link href="/custom-order" className="mt-6 inline-flex min-h-12 items-center justify-center gap-3 self-start bg-[#24372d] px-6 text-xs font-bold uppercase tracking-[.12em] text-white hover:bg-[#354e40]">Make a custom request <span>↗</span></Link>
+        {/* Custom order CTA */}
+        <section className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-20 lg:px-16">
+          <div className="grid overflow-hidden rounded-3xl bg-[#e7ded1] md:grid-cols-[1fr_0.85fr]">
+            <div className="flex flex-col justify-center px-6 py-10 sm:px-10 sm:py-14">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#a65f3e] sm:text-xs">
+                Looking for something specific?
+              </p>
+              <h2 className="mt-3 max-w-lg font-serif text-3xl leading-tight tracking-[-0.035em] text-[#24372d] sm:text-5xl">
+                Tell us what you have in mind.
+              </h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-[#66695f]">
+                Share a product name, photo or link. We’ll help you check whether we can source it.
+              </p>
+              <Link
+                href="/custom-order"
+                className="btn-shimmer mt-7 inline-flex min-h-12 items-center justify-center gap-2 self-start rounded-full bg-[#24372d] px-7 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-[#354e40]"
+              >
+                Make a custom request <span>↗</span>
+              </Link>
             </div>
-            <div className="relative min-h-[230px] bg-[#c9b59d] md:min-h-[360px]">
+            <div className="relative min-h-[240px] md:min-h-[380px]">
               <img
-                src={categoryTiles.find((category) => category.name === "Bags")?.product?.image_url || "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85"}
-                alt="A bag for everyday use"
+                src={
+                  categoryTiles.find((c) => c.name === "Bags")?.product?.image_url ||
+                  "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85"
+                }
+                alt="Everyday bag"
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover"
               />
@@ -293,41 +415,73 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
       </main>
 
-      <footer className="bg-[#1d2b23] text-white">
-        <div className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-14 lg:px-16">
-          <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.4fr_.7fr_.8fr_1fr]">
+      <footer className="bg-[#1a2820] text-white">
+        <div className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-16 lg:px-16">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.7fr_0.8fr_1fr]">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/50 font-serif text-lg">R</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 font-serif text-lg">
+                  R
+                </span>
                 <span className="font-serif text-2xl tracking-tight">Regal Store</span>
               </Link>
-              <p className="mt-4 max-w-xs text-sm leading-6 text-white/60">Clothing, bags and shoes for the days that make up your life. Thoughtful finds, easy browsing, personal support.</p>
+              <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">
+                Clothing, bags and shoes for the days that make up your life.
+              </p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Explore</p>
-              <div className="mt-4 space-y-3 text-sm text-white/65">
-                {CATEGORIES.map((category) => <Link key={category.name} href={`/?category=${encodeURIComponent(category.name)}#products`} className="block hover:text-white">{category.name}</Link>)}
-                <Link href="/search" className="block hover:text-white">Search the store</Link>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#dfb78d]">Explore</p>
+              <div className="mt-4 space-y-3 text-sm text-white/60">
+                {CATEGORIES.map((c) => (
+                  <Link
+                    key={c.name}
+                    href={`/search?category=${c.slug}`}
+                    className="block hover:text-white"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+                <Link href="/search" className="block hover:text-white">
+                  Search the store
+                </Link>
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Customer care</p>
-              <div className="mt-4 space-y-3 text-sm text-white/65">
-                <Link href="/account/help" className="block hover:text-white">Help centre</Link>
-                <Link href="/account/track" className="block hover:text-white">Track an order</Link>
-                <Link href="/custom-order" className="block hover:text-white">Custom request</Link>
-                <Link href="/account/support" className="block hover:text-white">Contact us</Link>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#dfb78d]">
+                Customer care
+              </p>
+              <div className="mt-4 space-y-3 text-sm text-white/60">
+                <Link href="/account/help" className="block hover:text-white">
+                  Help centre
+                </Link>
+                <Link href="/custom-order" className="block hover:text-white">
+                  Custom request
+                </Link>
+                <Link href="/account/support" className="block hover:text-white">
+                  Contact us
+                </Link>
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#dfb78d]">Talk to us</p>
-              <p className="mt-4 text-sm leading-6 text-white/60">Questions about an item, sizing or delivery? Contact us to confirm the details before payment.</p>
-              <a href={whatsappLink("Hello Regal Store, I need help choosing a product.") || "/account/support"} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 border-b border-[#dfb78d]/70 pb-1 text-sm font-semibold text-[#dfb78d] hover:text-white">WhatsApp · +234 906 424 4342 ↗</a>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#dfb78d]">Talk to us</p>
+              <p className="mt-4 text-sm leading-6 text-white/55">
+                Questions about an item or delivery? Confirm details before payment.
+              </p>
+              <a
+                href={wa || "/account/support"}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center gap-2 border-b border-[#dfb78d]/60 pb-1 text-sm font-semibold text-[#dfb78d] hover:text-white"
+              >
+                WhatsApp ↗
+              </a>
             </div>
           </div>
-          <div className="mt-10 flex flex-col gap-2 border-t border-white/15 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/35 sm:flex-row sm:justify-between">
             <span>© {new Date().getFullYear()} Regal Store. All rights reserved.</span>
-            <span>Everyday style, thoughtfully found.</span>
+            <Link href="/account/policies" className="hover:text-white/60">
+              Policies
+            </Link>
           </div>
         </div>
       </footer>
