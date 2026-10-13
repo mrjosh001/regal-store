@@ -34,7 +34,8 @@ export default function SignUpPage() {
       password,
       options: {
         data: { full_name: fullName.trim() },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
+        // After they click the email link → auth callback → sign-in with status
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -68,36 +69,50 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#f7f5f0] flex flex-col items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl border border-[#e6e4dc] p-8 shadow-sm text-center">
-          <div className="w-12 h-12 bg-[#edf1eb] rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-[#263b2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#f7f5f0] px-4">
+        <div className="w-full max-w-md rounded-2xl border border-[#e6e4dc] bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#edf1eb]">
+            <svg className="h-7 w-7 text-[#263b2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold mb-2 text-[#202a23]">Check your email</h1>
-          <p className="text-sm text-[#687168] mb-6">
-            We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account, then you&apos;ll land in your customer space.
+          <h1 className="mb-2 text-xl font-semibold text-[#202a23]">Check your email</h1>
+          <p className="mb-3 text-sm leading-6 text-[#687168]">
+            We sent a confirmation link to{" "}
+            <strong className="text-[#202a23]">{email}</strong>.
           </p>
+          <div className="mb-6 rounded-xl bg-[#f7f5f0] px-4 py-3 text-left text-sm leading-6 text-[#536056]">
+            <p className="font-semibold text-[#202a23]">What to do next</p>
+            <ol className="mt-2 list-decimal space-y-1.5 pl-4">
+              <li>Open your inbox and find the email from Regal Store / Supabase.</li>
+              <li>
+                <strong>Check Spam / Junk / Promotions</strong> if you don’t see it.
+              </li>
+              <li>Tap the confirmation link — you’ll be taken to sign in.</li>
+            </ol>
+          </div>
           <Link
             href="/sign-in"
-            className="inline-block px-6 py-3 bg-[#263b2e] text-white text-sm font-medium rounded-full hover:bg-[#354e40] transition"
+            className="inline-block rounded-full bg-[#263b2e] px-6 py-3 text-sm font-medium text-white hover:bg-[#354e40]"
           >
-            Back to Sign in
+            Go to Sign in
           </Link>
+          <p className="mt-4 text-xs text-[#83887f]">
+            Link not working? Wait a minute, check spam, or try signing up again.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] flex flex-col">
+    <div className="flex min-h-screen flex-col bg-[#f7f5f0]">
       <header className="border-b border-[#e6e4dc] bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-14 items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-[#263b2e] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#263b2e]">
+                <span className="text-sm font-bold text-white">R</span>
               </div>
               <span className="text-xl font-semibold tracking-tight text-[#202a23]">Regal Store</span>
             </Link>
@@ -105,20 +120,20 @@ export default function SignUpPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
+      <main className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl border border-[#e6e4dc] p-8 shadow-sm">
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-semibold tracking-tight mb-2 text-[#202a23]">Create account</h1>
+          <div className="rounded-2xl border border-[#e6e4dc] bg-white p-8 shadow-sm">
+            <div className="mb-8 text-center">
+              <h1 className="mb-2 text-2xl font-semibold tracking-tight text-[#202a23]">Create account</h1>
               <p className="text-sm text-[#687168]">Join Regal Store today</p>
             </div>
 
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-black/10 rounded-xl text-sm font-medium hover:bg-[#f7f5f0] transition-colors disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-black/10 px-4 py-3 text-sm font-medium hover:bg-[#f7f5f0] disabled:opacity-50"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -132,13 +147,13 @@ export default function SignUpPage() {
                 <div className="w-full border-t border-black/10" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-white text-black/40">or continue with email</span>
+                <span className="bg-white px-3 text-black/40">or continue with email</span>
               </div>
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-[#202a23]">Full Name</label>
+                <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Full Name</label>
                 <input
                   type="text"
                   value={fullName}
@@ -146,12 +161,12 @@ export default function SignUpPage() {
                   placeholder="John Doe"
                   required
                   autoComplete="name"
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#f7f5f0] text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
+                  className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-[#202a23]">Email</label>
+                <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -159,12 +174,12 @@ export default function SignUpPage() {
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="w-full px-4 py-3 rounded-xl border border-black/10 bg-[#f7f5f0] text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
+                  className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-[#202a23]">Password</label>
+                <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -174,7 +189,7 @@ export default function SignUpPage() {
                     required
                     minLength={6}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 pr-16 rounded-xl border border-black/10 bg-[#f7f5f0] text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
+                    className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
                   />
                   <button
                     type="button"
@@ -184,25 +199,24 @@ export default function SignUpPage() {
                     {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs text-[#83887f]">Use Show to check you typed it correctly.</p>
               </div>
 
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</div>
+                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-[#263b2e] text-white font-medium rounded-full hover:bg-[#354e40] transition-colors disabled:opacity-50 mt-2"
+                className="mt-2 w-full rounded-full bg-[#263b2e] py-3.5 font-medium text-white hover:bg-[#354e40] disabled:opacity-50"
               >
                 {loading ? "Creating account..." : "Create account"}
               </button>
             </form>
 
-            <p className="text-center text-sm text-[#687168] mt-6">
+            <p className="mt-6 text-center text-sm text-[#687168]">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-[#263b2e] font-medium hover:underline">
+              <Link href="/sign-in" className="font-medium text-[#263b2e] hover:underline">
                 Sign in
               </Link>
             </p>
