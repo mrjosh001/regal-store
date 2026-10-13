@@ -36,7 +36,7 @@ export default function ProductActions({ product }: Props) {
   // label ("Black and white"). Expand these into individual selectable options.
   const sizes = (product.sizes || []).flatMap((rawSize) => {
     const value = String(rawSize).trim();
-    const range = value.match(/^(\\d+)\\s*[-–—]\\s*(\\d+)$/);
+    const range = value.match(/^(\d+)\s*[-–—]\s*(\d+)$/);
     if (!range) return value ? [value] : [];
     const start = Number(range[1]);
     const end = Number(range[2]);
@@ -46,7 +46,7 @@ export default function ProductActions({ product }: Props) {
   const colors = (product.colors || []).flatMap((rawColor) => {
     const value = String(rawColor).trim();
     if (!value) return [];
-    return value.split(/\\s+(?:and|&)\\s+|\\s*[,/]\\s*/i).map((color) => color.trim()).filter(Boolean);
+    return value.split(/\s+(?:and|&)\s+|\s*[,/]\s*/i).map((color) => color.trim()).filter(Boolean);
   }).filter((color, index, all) => all.findIndex((item) => item.toLowerCase() === color.toLowerCase()) === index);
   const isSoldOut = product.stock_quantity === 0;
   const isUnavailable = product.is_available === false || isSoldOut;
