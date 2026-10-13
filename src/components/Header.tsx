@@ -5,6 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cartCount } from "@/lib/cart";
 
+const shopCategories = [
+  { label: "Clothing", href: "/search?category=clothing" },
+  { label: "Bags", href: "/search?category=bags" },
+  { label: "Shoes", href: "/search?category=shoes" },
+  { label: "Shop all", href: "/search" },
+];
+
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -81,8 +88,13 @@ export default function Header() {
     router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
   }
 
-  const navItem =
-    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#202a23] hover:bg-[#edf1eb] active:bg-[#e2e9e2] transition";
+  const close = () => setShowSidebar(false);
+
+  const categoryLink =
+    "flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] font-medium text-[#202a23] hover:bg-[#f7f5f0] active:bg-[#edf1eb] transition";
+
+  const utilityLink =
+    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#536056] hover:bg-[#f7f5f0] transition";
 
   return (
     <>
@@ -147,7 +159,7 @@ export default function Header() {
                     <span className="block w-[2.5px] h-[18px] rounded-full bg-[#202a23]" />
                     <span className="block w-[2.5px] h-[18px] rounded-full bg-[#202a23]" />
                   </span>
-                  {count > 0 && (
+                  {user && count > 0 && (
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#a65f3e] rounded-full ring-2 ring-white" />
                   )}
                 </button>
@@ -162,137 +174,146 @@ export default function Header() {
           <button
             type="button"
             aria-label="Close navigation menu"
-            className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowSidebar(false)}
+            className="absolute inset-0 cursor-default bg-black/45"
+            onClick={close}
           />
           <aside
             role="dialog"
             aria-modal="true"
-            aria-label="Regal Store navigation"
-            className="relative flex h-full w-[min(320px,88vw)] flex-col bg-white shadow-2xl"
+            aria-label="Shop menu"
+            className="relative flex h-full w-[min(340px,90vw)] flex-col bg-white shadow-2xl"
           >
-            <div className="p-5 bg-[#263b2e] text-white">
-              {user ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-xl font-semibold">
-                    {user.avatar_url && String(user.avatar_url).startsWith("http") ? (
-                      <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      user.avatar_url || (user.full_name || user.email || "U")[0].toUpperCase()
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate">{user.full_name || "Customer"}</p>
-                    <p className="text-xs text-white/65 truncate">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => setShowSidebar(false)}
-                    className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm"
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">Welcome to Regal</p>
-                    <p className="text-xs text-white/65 mt-0.5">Sign in to track orders & save details</p>
-                  </div>
-                  <button
-                    onClick={() => setShowSidebar(false)}
-                    className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm"
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-[#efeee8] px-5 py-5">
+              <div>
+                <p className="font-serif text-xl tracking-tight text-[#202a23]">
+                  {user ? user.full_name || "Your account" : "Shop Regal"}
+                </p>
+                <p className="mt-1 text-xs text-[#83887f]">
+                  {user
+                    ? user.email
+                    : "Clothing · Bags · Shoes"}
+                </p>
+              </div>
+              <button
+                onClick={close}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f2f0e9] text-sm text-[#536056]"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
-            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-              <p className="px-4 pt-2 pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#9a968c]">Menu</p>
+            <nav className="flex-1 overflow-y-auto px-2 py-3">
+              {/* Categories — primary for guests & shoppers */}
+              <p className="px-4 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a0a59b]">
+                Shop
+              </p>
+              <div className="space-y-0.5">
+                {shopCategories.map((cat) => (
+                  <Link
+                    key={cat.href}
+                    href={cat.href}
+                    onClick={close}
+                    className={categoryLink}
+                  >
+                    <span>{cat.label}</span>
+                    <span className="text-[#b8bdb6]">→</span>
+                  </Link>
+                ))}
+              </div>
 
-              {user ? (
-                <Link href="/account" onClick={() => setShowSidebar(false)} className={navItem}>
-                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">👤</span>
-                  My Account
-                </Link>
-              ) : (
-                <Link href="/sign-in" onClick={() => setShowSidebar(false)} className={navItem}>
-                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔑</span>
-                  Sign in
-                </Link>
-              )}
+              <div className="my-3 border-t border-[#efeee8]" />
 
-              <Link href="/cart" onClick={() => setShowSidebar(false)} className={navItem}>
-                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🛒</span>
-                <span className="flex-1">Cart</span>
-                {count > 0 && (
-                  <span className="bg-[#263b2e] text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
-                    {count}
-                  </span>
-                )}
+              <p className="px-4 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a0a59b]">
+                Discover
+              </p>
+              <Link href="/search" onClick={close} className={utilityLink}>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f7f5f0] text-sm">🔍</span>
+                Search
               </Link>
-
-              <Link href="/custom-order" onClick={() => setShowSidebar(false)} className={navItem}>
-                <span className="w-8 h-8 rounded-lg bg-[#f4e9df] flex items-center justify-center text-sm">✨</span>
-                Custom request
+              <Link
+                href={user ? "/custom-order" : "/sign-in?next=/custom-order"}
+                onClick={close}
+                className={utilityLink}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f4e9df] text-sm">✨</span>
+                Find it for me
               </Link>
-
-              <Link href="/search" onClick={() => setShowSidebar(false)} className={navItem}>
-                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔍</span>
-                Search the store
-              </Link>
-
-              <div className="my-2 border-t border-[#efeee8]" />
-
-              <Link href="/" onClick={() => setShowSidebar(false)} className={navItem}>
-                <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🏠</span>
-                Storefront
-              </Link>
-
-              {user?.role === "admin" && (
-                <Link
-                  href="/admin"
-                  onClick={() => setShowSidebar(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#263b2e] hover:bg-[#edf1eb] transition"
-                >
-                  <span className="w-8 h-8 rounded-lg bg-[#dce4dc] flex items-center justify-center text-sm">⚙️</span>
-                  Admin dashboard
-                </Link>
-              )}
 
               {user && (
-                <Link href="/account/change-password" onClick={() => setShowSidebar(false)} className={navItem}>
-                  <span className="w-8 h-8 rounded-lg bg-[#edf1eb] flex items-center justify-center text-sm">🔒</span>
-                  Change password
-                </Link>
+                <>
+                  <div className="my-3 border-t border-[#efeee8]" />
+                  <p className="px-4 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a0a59b]">
+                    Your space
+                  </p>
+                  <Link href="/account" onClick={close} className={utilityLink}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">👤</span>
+                    My account
+                  </Link>
+                  <Link href="/cart" onClick={close} className={utilityLink}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">🛒</span>
+                    <span className="flex-1">Bag</span>
+                    {count > 0 && (
+                      <span className="min-w-[20px] rounded-full bg-[#263b2e] px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                  <Link href="/account/change-password" onClick={close} className={utilityLink}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">🔒</span>
+                    Change password
+                  </Link>
+                  {user.role === "admin" && (
+                    <Link href="/admin" onClick={close} className={utilityLink}>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#dce4dc] text-sm">⚙️</span>
+                      Admin dashboard
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {!user && (
+                <>
+                  <div className="my-3 border-t border-[#efeee8]" />
+                  <p className="px-4 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a0a59b]">
+                    Account
+                  </p>
+                  <Link href="/sign-in" onClick={close} className={utilityLink}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">🔑</span>
+                    Sign in
+                  </Link>
+                  <Link href="/sign-up" onClick={close} className={utilityLink}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">✦</span>
+                    Create account
+                  </Link>
+                </>
               )}
             </nav>
 
-            {user && (
-              <div className="p-4 border-t border-[#efeee8]">
+            <div className="border-t border-[#efeee8] p-4 space-y-2">
+              {user ? (
                 <button
                   onClick={handleSignOut}
-                  className="w-full py-3 text-red-600 text-sm font-medium rounded-xl bg-red-50 hover:bg-red-100 active:scale-[0.98] transition"
+                  className="w-full rounded-xl bg-red-50 py-3 text-sm font-medium text-red-600 hover:bg-red-100"
                 >
                   Log out
                 </button>
-              </div>
-            )}
-
-            {!user && (
-              <div className="p-4 border-t border-[#efeee8]">
-                <Link
-                  href="/sign-in"
-                  onClick={() => setShowSidebar(false)}
-                  className="block w-full py-3 text-center bg-[#263b2e] text-white text-sm font-medium rounded-xl hover:bg-[#354e40] transition"
-                >
-                  Sign in to Regal Store
-                </Link>
-              </div>
-            )}
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    onClick={close}
+                    className="block w-full rounded-full bg-[#263b2e] py-3.5 text-center text-sm font-semibold text-white hover:bg-[#354e40]"
+                  >
+                    Sign in to order
+                  </Link>
+                  <p className="text-center text-[11px] text-[#9a968c]">
+                    An account is required to place orders
+                  </p>
+                </>
+              )}
+            </div>
           </aside>
         </div>
       )}
