@@ -9,18 +9,17 @@ const AVATARS = ["🖤", "👑", "✨", "🔥", "💎", "🦁", "🌟", "🎯"];
 
 const accountLinks = [
   { label: "Overview", href: "/account", icon: "⌂" },
+  { label: "Settings", href: "/account/settings", icon: "⚙" },
   { label: "Track an order", href: "/account/track", icon: "↗" },
   { label: "Saved addresses", href: "/account/addresses", icon: "⌖" },
   { label: "Help centre", href: "/account/help", icon: "?" },
   { label: "Custom request", href: "/custom-order", icon: "✳" },
-  { label: "Change password", href: "/account/change-password", icon: "🔒" },
 ];
 
 export default function AccountPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -166,13 +165,6 @@ export default function AccountPage() {
         </div>
 
         <div className="mt-auto p-5">
-          <div className="rounded-2xl bg-[#263b2e] p-5 text-white">
-            <p className="font-serif text-xl leading-snug">Looking for something special?</p>
-            <p className="mt-2 text-xs leading-5 text-white/65">Tell us what you have in mind and we’ll help you make a request.</p>
-            <Link href="/custom-order" className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.1em] text-[#e5c5a8] hover:text-white">
-              Make a request <span>↗</span>
-            </Link>
-          </div>
           <Link href="/" className="mt-5 flex items-center gap-2 px-3 py-2 text-sm text-[#7a8178] hover:text-[#263b2e]">← Back to the store</Link>
         </div>
       </aside>
@@ -192,9 +184,9 @@ export default function AccountPage() {
               {user?.role === "admin" && (
                 <Link href="/admin" className="hidden rounded-full border border-[#d8dfd6] px-4 py-2 text-xs font-semibold text-[#263b2e] hover:bg-white sm:inline-flex">Admin dashboard ↗</Link>
               )}
-              <button onClick={() => setShowSettings(true)} className="flex h-10 items-center gap-2 rounded-full border border-[#dedfd6] bg-white px-3 text-sm">
+              <Link href="/account/settings" className="flex h-10 items-center gap-2 rounded-full border border-[#dedfd6] bg-white px-3 text-sm">
                 <span>⚙</span><span className="hidden sm:inline">Settings</span>
-              </button>
+              </Link>
               <button onClick={() => setShowAvatarPicker(true)} className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#263b2e] text-lg text-white ring-2 ring-white">
                 {selectedAvatar || initials}
               </button>
@@ -209,6 +201,19 @@ export default function AccountPage() {
               <button onClick={() => setMessage(null)}>✕</button>
             </div>
           )}
+
+          <Link
+            href="/account/settings"
+            className="mb-5 flex items-center gap-4 rounded-[20px] border border-[#e6e4dc] bg-white p-4 shadow-sm"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf1eb] text-xl">⚙</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-[#a65f3e]">Account settings</span>
+              <span className="mt-0.5 block text-sm font-semibold text-[#202a23]">Name, password & security</span>
+              <span className="mt-0.5 block text-xs text-[#83887f]">Change your display name and sign-in details</span>
+            </span>
+            <span className="text-[#b0b5ad]">→</span>
+          </Link>
 
           <section className="relative isolate overflow-hidden rounded-[26px] bg-[#263b2e] px-6 py-8 text-white sm:px-9 sm:py-10 lg:px-12 lg:py-12">
             <div className="absolute -right-10 -top-24 h-64 w-64 rounded-full border border-white/10" />
@@ -236,29 +241,10 @@ export default function AccountPage() {
 
           <div className="mt-8 grid gap-7 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,.75fr)]">
             <div className="min-w-0">
-              <div className="mb-4">
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Order centre</p>
-                <h2 className="mt-1 font-serif text-2xl tracking-tight sm:text-3xl">Your orders</h2>
-              </div>
-              <section className="rounded-[22px] border border-[#e6e4dc] bg-white p-6 sm:p-8">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f0eee6] text-xl">📦</div>
-                  <div>
-                    <h3 className="font-serif text-xl">Order updates appear here</h3>
-                    <p className="mt-2 max-w-lg text-sm leading-6 text-[#777e74]">
-                      Orders placed through WhatsApp are confirmed by the store before tracking is available.
-                    </p>
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <Link href="/account/track" className="inline-flex min-h-10 items-center rounded-full bg-[#263b2e] px-4 text-xs font-bold text-white">Open order tracking</Link>
-                      <Link href="/account/help" className="inline-flex min-h-10 items-center rounded-full border border-[#dfe1d8] px-4 text-xs font-semibold text-[#536056]">Need help?</Link>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <div className="mb-4 mt-8">
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Shortcuts</p>
-                <h2 className="mt-1 font-serif text-2xl tracking-tight sm:text-3xl">Manage your account</h2>
+              <div className="mb-4 mt-2">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Browse</p>
+                <h2 className="mt-1 font-serif text-2xl tracking-tight sm:text-3xl">Categories</h2>
+                <p className="mt-1 text-sm text-[#687168]">Tap a category to open its pages.</p>
               </div>
               <AccountActionGrid />
             </div>
@@ -274,16 +260,9 @@ export default function AccountPage() {
                     <p className="mt-1 truncate text-xs text-[#83887f]">{user?.email}</p>
                   </div>
                 </div>
-                <button onClick={() => setShowSettings(true)} className="mt-4 w-full rounded-full border border-[#dfe1d8] py-3 text-xs font-bold uppercase tracking-[.1em] text-[#536056] hover:bg-[#f7f5f0]">
+                <Link href="/account/settings" className="mt-4 flex w-full items-center justify-center rounded-full border border-[#dfe1d8] py-3 text-xs font-bold uppercase tracking-[.1em] text-[#536056] hover:bg-[#f7f5f0]">
                   Account settings
-                </button>
-              </section>
-
-              <section className="rounded-[22px] border border-[#e6e4dc] bg-[#eee9df] p-6 sm:p-7">
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">A personal touch</p>
-                <h2 className="mt-2 font-serif text-2xl leading-tight">Can’t find what you’re looking for?</h2>
-                <p className="mt-3 text-sm leading-6 text-[#6d7269]">Send us a product photo, name or link.</p>
-                <Link href="/custom-order" className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.1em] text-[#263b2e]">Start a custom request ↗</Link>
+                </Link>
               </section>
 
               <button onClick={handleSignOut} className="flex w-full items-center justify-between rounded-[18px] border border-[#e6e4dc] bg-white px-5 py-4 text-sm text-[#777e74] hover:border-[#d5b9aa] hover:text-[#9a5e3f]">
@@ -293,35 +272,6 @@ export default function AccountPage() {
           </div>
         </main>
       </div>
-
-      {showSettings && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 sm:items-center sm:p-4" onClick={() => setShowSettings(false)}>
-          <section className="relative w-full max-w-md rounded-t-[28px] bg-white p-6 pb-9 shadow-2xl sm:rounded-[24px]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Your profile</p>
-                <h2 className="mt-1 font-serif text-2xl">Account settings</h2>
-              </div>
-              <button onClick={() => setShowSettings(false)} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f2f0e9]">✕</button>
-            </div>
-            <p className="mt-5 break-all text-sm text-[#687168]">{user?.email}</p>
-            <div className="mt-5 space-y-2">
-              <Link href="/account/change-password" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5">
-                <p className="text-sm font-semibold">Change password</p>
-                <p className="mt-1 text-xs text-[#83887f]">Update your sign-in password</p>
-              </Link>
-              <Link href="/account/addresses" className="block rounded-xl bg-[#f7f5f0] px-4 py-3.5">
-                <p className="text-sm font-semibold">Delivery addresses</p>
-                <p className="mt-1 text-xs text-[#83887f]">Manage saved addresses</p>
-              </Link>
-              <Link href="/account/delete" className="block rounded-xl bg-red-50 px-4 py-3.5">
-                <p className="text-sm font-semibold text-red-600">Delete account</p>
-                <p className="mt-1 text-xs text-red-500/80">Permanently remove your profile</p>
-              </Link>
-            </div>
-          </section>
-        </div>
-      )}
 
       {showAvatarPicker && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 sm:items-center sm:p-4" onClick={() => setShowAvatarPicker(false)}>
