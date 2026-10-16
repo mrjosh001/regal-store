@@ -21,6 +21,7 @@ export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -184,11 +185,14 @@ export default function AccountPage() {
               {user?.role === "admin" && (
                 <Link href="/admin" className="hidden rounded-full border border-[#d8dfd6] px-4 py-2 text-xs font-semibold text-[#263b2e] hover:bg-white sm:inline-flex">Admin dashboard ↗</Link>
               )}
-              <Link href="/account/settings" className="flex h-10 items-center gap-2 rounded-full border border-[#dedfd6] bg-white px-3 text-sm">
-                <span>⚙</span><span className="hidden sm:inline">Settings</span>
-              </Link>
-              <button onClick={() => setShowAvatarPicker(true)} className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#263b2e] text-lg text-white ring-2 ring-white">
-                {selectedAvatar || initials}
+              <button
+                type="button"
+                onClick={() => setShowAccountMenu(true)}
+                aria-label="Open account menu"
+                aria-expanded={showAccountMenu}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dedfd6] bg-white text-lg text-[#263b2e] shadow-sm transition hover:bg-[#f1efe8]"
+              >
+                ☰
               </button>
             </div>
           </div>
@@ -201,19 +205,6 @@ export default function AccountPage() {
               <button onClick={() => setMessage(null)}>✕</button>
             </div>
           )}
-
-          <Link
-            href="/account/settings"
-            className="mb-5 flex items-center gap-4 rounded-[20px] border border-[#e6e4dc] bg-white p-4 shadow-sm"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf1eb] text-xl">⚙</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-[#a65f3e]">Account settings</span>
-              <span className="mt-0.5 block text-sm font-semibold text-[#202a23]">Name, password & security</span>
-              <span className="mt-0.5 block text-xs text-[#83887f]">Change your display name and sign-in details</span>
-            </span>
-            <span className="text-[#b0b5ad]">→</span>
-          </Link>
 
           <section className="relative isolate overflow-hidden rounded-[26px] bg-[#263b2e] px-6 py-8 text-white sm:px-9 sm:py-10 lg:px-12 lg:py-12">
             <div className="absolute -right-10 -top-24 h-64 w-64 rounded-full border border-white/10" />
@@ -273,8 +264,100 @@ export default function AccountPage() {
         </main>
       </div>
 
+      {showAccountMenu && (
+        <div
+          className="fixed inset-0 z-[70] bg-black/30"
+          onClick={() => setShowAccountMenu(false)}
+          aria-hidden="true"
+        >
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Account menu"
+            className="absolute right-0 top-0 flex h-full w-[min(88vw,380px)] flex-col overflow-y-auto bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#e6e4dc] px-5 py-5 sm:px-6">
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAvatarPicker(true)}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#263b2e] text-lg text-white"
+                  aria-label="Change avatar"
+                >
+                  {selectedAvatar || initials}
+                </button>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#202a23]">{user?.full_name || "Your account"}</p>
+                  <p className="truncate text-xs text-[#83887f]">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAccountMenu(false)}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f2f0e9] text-lg text-[#263b2e]"
+                aria-label="Close account menu"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-5 py-6 sm:px-6">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#a65f3e]">Your account</p>
+              <nav className="mt-3 space-y-1">
+                {accountLinks.filter((item) => item.label !== "Overview").map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setShowAccountMenu(false)}
+                    className="flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 text-sm text-[#536056] transition hover:bg-[#f7f5f0] hover:text-[#263b2e]"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e6e4dc] bg-[#faf9f5] text-base">{item.icon}</span>
+                    <span className="min-w-0 flex-1">{item.label}</span>
+                    <span className="text-[#b0b5ad]">→</span>
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="my-5 border-t border-[#efeee8]" />
+              <Link
+                href="/account/settings"
+                onClick={() => setShowAccountMenu(false)}
+                className="flex items-center gap-3 rounded-xl bg-[#edf1eb] px-3 py-3 text-sm font-semibold text-[#263b2e]"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-base">⚙</span>
+                <span className="min-w-0 flex-1">Name, password & security</span>
+                <span>→</span>
+              </Link>
+
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setShowAccountMenu(false)}
+                  className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[#536056] hover:bg-[#f7f5f0]"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e6e4dc]">⌘</span>
+                  <span className="flex-1">Admin dashboard</span>
+                  <span className="text-[#b0b5ad]">↗</span>
+                </Link>
+              )}
+            </div>
+
+            <div className="mt-auto border-t border-[#e6e4dc] p-5 sm:p-6">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex min-h-12 w-full items-center justify-between rounded-xl border border-[#e6e4dc] px-4 py-3 text-sm text-[#777e74] hover:border-[#d5b9aa] hover:text-[#9a5e3f]"
+              >
+                <span>Sign out of your account</span><span>↗</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {showAvatarPicker && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 sm:items-center sm:p-4" onClick={() => setShowAvatarPicker(false)}>
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/35 sm:items-center sm:p-4" onClick={() => setShowAvatarPicker(false)}>
           <section className="w-full max-w-md rounded-t-[28px] bg-white p-6 pb-9 sm:rounded-[24px]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="font-serif text-2xl">Choose avatar</h2>
