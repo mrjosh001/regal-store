@@ -29,7 +29,7 @@ export type OrderLine = {
 export function buildOrderMessage(lines: OrderLine[], opts?: { intro?: string; footer?: string }) {
   const intro =
     opts?.intro ||
-    "Hi Regal Store! I want to place an order:";
+    "Hi Regal’s Drip! I want to place an order:";
 
   const body = lines
     .map((item, index) => {
