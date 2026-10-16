@@ -34,7 +34,7 @@ export default function SignUpPage() {
       password,
       options: {
         data: { full_name: fullName.trim() },
-        // After they click the email link → auth callback → sign-in with status
+        // Confirmation → auth callback → sign-in confirmation message.
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -71,34 +71,32 @@ export default function SignUpPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#f7f5f0] px-4">
         <div className="w-full max-w-md rounded-2xl border border-[#e6e4dc] bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#edf1eb]">
-            <svg className="h-7 w-7 text-[#263b2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#edf1eb]">
+            <svg className="h-7 w-7 text-[#263b2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="mb-2 text-xl font-semibold text-[#202a23]">Check your email</h1>
-          <p className="mb-3 text-sm leading-6 text-[#687168]">
-            We sent a confirmation link to{" "}
-            <strong className="text-[#202a23]">{email}</strong>.
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#6c796e]">Almost there</p>
+          <h1 className="mb-2 text-2xl font-semibold tracking-tight text-[#202a23]">Verify your email</h1>
+          <p className="mb-5 text-sm leading-6 text-[#687168]">
+            We sent a confirmation link to <strong className="text-[#202a23]">{email}</strong>.
           </p>
-          <div className="mb-6 rounded-xl bg-[#f7f5f0] px-4 py-3 text-left text-sm leading-6 text-[#536056]">
-            <p className="font-semibold text-[#202a23]">What to do next</p>
+          <div className="mb-6 rounded-xl bg-[#f7f5f0] px-4 py-4 text-left text-sm leading-6 text-[#536056]">
+            <p className="font-semibold text-[#202a23]">Before you sign in</p>
             <ol className="mt-2 list-decimal space-y-1.5 pl-4">
-              <li>Open your inbox and find the email from Regal Store / Supabase.</li>
-              <li>
-                <strong>Check Spam / Junk / Promotions</strong> if you don’t see it.
-              </li>
-              <li>Tap the confirmation link — you’ll be taken to sign in.</li>
+              <li>Open the confirmation email from Regal Store.</li>
+              <li>If it is missing, check <strong>Spam, Junk, or Promotions</strong>.</li>
+              <li>Tap <strong>Confirm my email</strong>. You’ll be returned to the Regal Store sign-in page.</li>
             </ol>
           </div>
           <Link
             href="/sign-in"
-            className="inline-block rounded-full bg-[#263b2e] px-6 py-3 text-sm font-medium text-white hover:bg-[#354e40]"
+            className="inline-flex w-full items-center justify-center rounded-full bg-[#263b2e] px-6 py-3.5 text-sm font-semibold text-white hover:bg-[#354e40]"
           >
             Go to Sign in
           </Link>
-          <p className="mt-4 text-xs text-[#83887f]">
-            Link not working? Wait a minute, check spam, or try signing up again.
+          <p className="mt-4 text-xs leading-5 text-[#83887f]">
+            Didn’t receive it? Give it a minute, check your spam folder, and make sure <strong>{email}</strong> is correct.
           </p>
         </div>
       </div>
@@ -133,7 +131,7 @@ export default function SignUpPage() {
               disabled={loading}
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-black/10 px-4 py-3 text-sm font-medium hover:bg-[#f7f5f0] disabled:opacity-50"
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -154,79 +152,26 @@ export default function SignUpPage() {
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Full Name</label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  autoComplete="name"
-                  className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
-                />
+                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" required autoComplete="name" className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20" />
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                  className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
-                />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email" className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20" />
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#202a23]">Password</label>
                 <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                    className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[#536b58]"
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
+                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} autoComplete="new-password" className="w-full rounded-xl border border-black/10 bg-[#f7f5f0] px-4 py-3 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20" />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[#536b58]">{showPassword ? "Hide" : "Show"}</button>
                 </div>
               </div>
-
-              {error && (
-                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="mt-2 w-full rounded-full bg-[#263b2e] py-3.5 font-medium text-white hover:bg-[#354e40] disabled:opacity-50"
-              >
-                {loading ? "Creating account..." : "Create account"}
-              </button>
+              {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
+              <button type="submit" disabled={loading} className="mt-2 w-full rounded-full bg-[#263b2e] py-3.5 font-medium text-white hover:bg-[#354e40] disabled:opacity-50">{loading ? "Creating account..." : "Create account"}</button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-[#687168]">
-              Already have an account?{" "}
-              <Link href="/sign-in" className="font-medium text-[#263b2e] hover:underline">
-                Sign in
-              </Link>
-            </p>
+            <p className="mt-6 text-center text-sm text-[#687168]">Already have an account? <Link href="/sign-in" className="font-medium text-[#263b2e] hover:underline">Sign in</Link></p>
           </div>
-
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-black/40 hover:text-[#263b2e]">
-              ← Back to shop
-            </Link>
-          </div>
+          <div className="mt-6 text-center"><Link href="/" className="text-sm text-black/40 hover:text-[#263b2e]">← Back to shop</Link></div>
         </div>
       </main>
     </div>
