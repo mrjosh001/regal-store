@@ -22,11 +22,11 @@ function replaceBrand(root: Node) {
 
 function replaceAttributes() {
   const elements = document.querySelectorAll<HTMLElement>(
-    "[title], [aria-label], [alt], meta[property='og:title'], meta[name='twitter:title']"
+    "[title], [aria-label], [alt], [href], meta[property='og:title'], meta[name='twitter:title']"
   );
 
   for (const element of elements) {
-    for (const attribute of ["title", "aria-label", "alt", "content"]) {
+    for (const attribute of ["title", "aria-label", "alt", "href", "content"]) {
       const value = element.getAttribute(attribute);
       if (value?.includes(OLD_BRAND)) {
         element.setAttribute(attribute, value.replaceAll(OLD_BRAND, NEW_BRAND));
