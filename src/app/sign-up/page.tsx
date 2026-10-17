@@ -17,6 +17,11 @@ export default function SignUpPage() {
     return createClient();
   }
 
+  function getSiteOrigin() {
+    if (typeof window === "undefined") return "https://regalsdrip.store";
+    return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+  }
+
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -29,13 +34,15 @@ export default function SignUpPage() {
     }
 
     const supabase = await getSupabase();
+    const callbackUrl = `${getSiteOrigin()}/auth/callback?flow=signup`;
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
         data: { full_name: fullName.trim() },
-        // Confirmation → auth callback → sign-in confirmation message.
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Email confirmation always returns through the server callback,
+        // which clears the confirmation session and sends the customer to sign-in.
+        emailRedirectTo: callbackUrl,
       },
     });
 
@@ -57,7 +64,7 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/account`,
+        redirectTo: `${getSiteOrigin()}/auth/callback?next=/account`,
       },
     });
 
@@ -84,9 +91,9 @@ export default function SignUpPage() {
           <div className="mb-6 rounded-xl bg-[#f7f5f0] px-4 py-4 text-left text-sm leading-6 text-[#536056]">
             <p className="font-semibold text-[#202a23]">Before you sign in</p>
             <ol className="mt-2 list-decimal space-y-1.5 pl-4">
-              <li>Open the confirmation email from Regal Store.</li>
+              <li>Open the confirmation email from Regal’s Drip.</li>
               <li>If it is missing, check <strong>Spam, Junk, or Promotions</strong>.</li>
-              <li>Tap <strong>Confirm my email</strong>. You’ll be returned to the Regal Store sign-in page.</li>
+              <li>Tap <strong>Confirm my email</strong>. You’ll be returned to the Regal’s Drip sign-in page.</li>
             </ol>
           </div>
           <Link
@@ -112,7 +119,7 @@ export default function SignUpPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#263b2e]">
                 <span className="text-sm font-bold text-white">R</span>
               </div>
-              <span className="text-xl font-semibold tracking-tight text-[#202a23]">Regal Store</span>
+              <span className="text-xl font-semibold tracking-tight text-[#202a23]">Regal’s Drip</span>
             </Link>
           </div>
         </div>
@@ -123,7 +130,7 @@ export default function SignUpPage() {
           <div className="rounded-2xl border border-[#e6e4dc] bg-white p-8 shadow-sm">
             <div className="mb-8 text-center">
               <h1 className="mb-2 text-2xl font-semibold tracking-tight text-[#202a23]">Create account</h1>
-              <p className="text-sm text-[#687168]">Join Regal Store today</p>
+              <p className="text-sm text-[#687168]">Join Regal’s Drip today</p>
             </div>
 
             <button
