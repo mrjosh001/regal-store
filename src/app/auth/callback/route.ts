@@ -12,6 +12,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
+  const flow = searchParams.get("flow");
   const next = safePath(searchParams.get("next"));
   const errorDescription = searchParams.get("error_description");
   const errorCode = searchParams.get("error");
@@ -26,18 +27,27 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient();
+  const isSignupConfirmation = flow === "signup" || type === "signup";
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // OAuth / intentional post-login destination
+      // Email signup confirmation must not leave the customer signed in.
+      // Clear the temporary confirmation session, then send them to sign-in.
+      if (isSignupConfirmation) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${origin}/sign-in?confirm=success`);
+      }
+
+      // OAuth / intentional post-login destination.
       if (next) {
         return NextResponse.redirect(`${origin}${next}`);
       }
-      // Email confirmation (no next) → clear session, show success on sign-in
+
       await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/sign-in?confirm=success`);
     }
+
     const msg = (error.message || "").toLowerCase();
     if (msg.includes("expired")) {
       return NextResponse.redirect(`${origin}/sign-in?confirm=expired`);
@@ -51,9 +61,15 @@ export async function GET(request: Request) {
       type: type as "signup" | "email" | "invite" | "magiclink" | "recovery" | "email_change",
     });
     if (!error) {
+      if (isSignupConfirmation) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${origin}/sign-in?confirm=success`);
+      }
+
       if (next) {
         return NextResponse.redirect(`${origin}${next}`);
       }
+
       await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/sign-in?confirm=success`);
     }
