@@ -25,7 +25,7 @@ export type OrderLine = {
   color?: string | null;
 };
 
-/** Build a rich WhatsApp order message including image links and line details. */
+/** Build a rich WhatsApp order message including a standalone product image URL for each item. */
 export function buildOrderMessage(lines: OrderLine[], opts?: { intro?: string; footer?: string }) {
   const intro =
     opts?.intro ||
@@ -45,7 +45,7 @@ export function buildOrderMessage(lines: OrderLine[], opts?: { intro?: string; f
         `*${index + 1}. ${item.name}*`,
         options ? `   ${options}` : null,
         `   Qty: ${item.quantity} × ${formatPrice(item.price)} = ${lineTotal}`,
-        item.image_url ? `   Photo: ${item.image_url}` : null,
+        item.image_url ? `🖼️ Product image:\n${item.image_url}` : null,
       ].filter(Boolean);
 
       return parts.join("\n");
