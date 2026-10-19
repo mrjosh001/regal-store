@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./system-theme.css";
 import BottomNav from "@/components/BottomNav";
 import BrandRebrand from "@/components/BrandRebrand";
 
@@ -13,6 +14,10 @@ export const metadata: Metadata = {
   },
   description:
     "Explore clothing, bags and shoes at Regal’s Drip. Contact us to confirm product availability and delivery options before payment.",
+  icons: {
+    icon: "/regals-drip-logo.webp",
+    apple: "/regals-drip-logo.webp",
+  },
   openGraph: {
     type: "website",
     siteName: "Regal’s Drip",
