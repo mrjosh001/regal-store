@@ -1,0 +1,139 @@
+/* Regal's Drip system theme + brand presentation.
+   The site follows the user's OS/browser light/dark preference automatically. */
+:root {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c100e;
+    --foreground: #f4efe8;
+    --brand-black: #f4efe8;
+    --brand-white: #111612;
+    --forest: #c8d8ce;
+    --forest-deep: #e4eee8;
+    --copper: #d18a67;
+    --champagne: #ead8bb;
+    --surface: rgba(24, 31, 27, 0.82);
+  }
+
+  html,
+  body {
+    background: #0c100e !important;
+    color: #f4efe8 !important;
+    color-scheme: dark;
+  }
+
+  [class*="bg-white"],
+  [class*="bg-[#fff"],
+  [class*="bg-[#f7f5f0]"],
+  [class*="bg-[#fbf8f3]"],
+  [class*="bg-[#f8f6f1]"],
+  [class*="bg-[#f4f1eb]"],
+  [class*="bg-[#f1eee7]"] {
+    background-color: #151b18 !important;
+  }
+
+  [class*="bg-white/"] {
+    background-color: rgba(21, 27, 24, 0.84) !important;
+  }
+
+  [class*="text-black"],
+  [class*="text-[#202a23]"],
+  [class*="text-[#263b2e]"],
+  [class*="text-[#1a2820]"],
+  [class*="text-[#202"],
+  [class*="text-gray-900"],
+  [class*="text-gray-800"],
+  [class*="text-slate-900"] {
+    color: #f4efe8 !important;
+  }
+
+  [class*="text-gray-700"],
+  [class*="text-gray-600"],
+  [class*="text-gray-500"],
+  [class*="text-[#536056]"],
+  [class*="text-[#69736c]"] {
+    color: #b9c1bb !important;
+  }
+
+  [class*="border-black"],
+  [class*="border-[#efeee8]"],
+  [class*="border-[#e8e5de]"],
+  [class*="border-gray-200"],
+  [class*="border-gray-300"] {
+    border-color: #303934 !important;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: #151b18 !important;
+    color: #f4efe8 !important;
+    border-color: #39423d !important;
+    color-scheme: dark;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #8e9891 !important;
+  }
+
+  .liquid-glass {
+    background: linear-gradient(135deg, rgba(35, 43, 39, 0.78) 0%, rgba(22, 29, 25, 0.68) 50%, rgba(29, 37, 32, 0.74) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .liquid-glass-frost,
+  .glass-surface {
+    background: rgba(21, 27, 24, 0.86) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  ::selection {
+    color: #0c100e;
+    background: #e8d5b5;
+  }
+
+  :focus-visible {
+    outline-color: rgba(232, 213, 181, 0.75);
+  }
+}
+
+/* Brand mark: use the Git-tracked logo asset instead of a database-stored image. */
+.regals-drip-logo {
+  display: block;
+  width: auto;
+  height: 2.75rem;
+  max-width: 12rem;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 639px) {
+  .regals-drip-logo {
+    height: 2.35rem;
+    max-width: 9.5rem;
+  }
+}
+
+header a[href="/"] {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+header a[href="/"]::before {
+  content: "";
+  display: block;
+  width: 9.5rem;
+  height: 3rem;
+  background: url("/regals-drip-logo.webp") center / contain no-repeat;
+}
+
+@media (max-width: 639px) {
+  header a[href="/"]::before {
+    width: 7.75rem;
+    height: 2.5rem;
+  }
+}
