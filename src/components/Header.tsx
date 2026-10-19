@@ -244,7 +244,7 @@ export default function Header() {
                   </Link>
                   <Link href="/cart" onClick={close} className={utilityLink}>
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#edf1eb] text-sm">🛒</span>
-                    <span className="flex-1">Bag</span>
+                    <span className="flex-1">Cart</span>
                     {count > 0 && (
                       <span className="min-w-[20px] rounded-full bg-[#263b2e] px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
                         {count}
