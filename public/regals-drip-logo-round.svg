@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">Regal’s Drip</title>
+<desc id="desc">Regal’s Drip fashion logo</desc>
+<defs><clipPath id="circle"><circle cx="256" cy="256" r="256"/></clipPath></defs>
+<image href="data:image/webp;base64,"+b64w+"" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid slice" clip-path="url(#circle)"/>
+</svg>
