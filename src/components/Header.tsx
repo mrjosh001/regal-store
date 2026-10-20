@@ -84,12 +84,13 @@ export default function Header() {
           <div className="flex items-center justify-between h-14 md:h-16">
             <Link href="/" className="flex items-center gap-2.5 group min-w-0" aria-label="Regal’s Drip home">
               <Image
-                src="/regals-drip-logo-round.svg"
+                src="/regals-drip-logo.webp"
                 alt="Regal’s Drip"
                 width={44}
                 height={44}
                 priority
-                className="regals-drip-logo h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-black/10 shadow-sm"
+                unoptimized
+                className="regals-drip-logo h-11 w-11 shrink-0 rounded-full object-cover object-center ring-1 ring-black/10 shadow-sm"
               />
               <span className="brand-name text-lg md:text-xl font-semibold tracking-tight text-[#202a23] truncate">Regal’s Drip</span>
             </Link>
@@ -124,7 +125,7 @@ export default function Header() {
           <aside role="dialog" aria-modal="true" aria-label="Shop menu" className="relative flex h-full w-[min(340px,90vw)] flex-col bg-white shadow-2xl animate-sidebar-in">
             <div className="flex items-start justify-between border-b border-[#efeee8] px-5 py-5">
               <div className="flex items-center gap-3 min-w-0">
-                <Image src="/regals-drip-logo-round.svg" alt="Regal’s Drip" width={48} height={48} className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-black/10 shadow-sm" />
+                <Image src="/regals-drip-logo.webp" alt="Regal’s Drip" width={48} height={48} unoptimized className="regals-drip-logo h-12 w-12 shrink-0 rounded-full object-cover object-center ring-1 ring-black/10 shadow-sm" />
                 <div className="min-w-0">
                   <p className="font-serif text-xl tracking-tight text-[#202a23] truncate">{user ? user.full_name || "Your account" : "Regal’s Drip"}</p>
                   <p className="mt-1 text-xs text-[#83887f] truncate">{user ? user.email : "Clothing · Bags · Shoes"}</p>
