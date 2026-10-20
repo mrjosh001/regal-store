@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { addToCart, getCart } from "@/lib/cart";
 import { whatsappLink } from "@/lib/whatsapp";
 import { expandSizes, expandColors } from "@/lib/product-options";
+import { galleryImages, imageForColor } from "@/lib/product-gallery";
 
 type Props = {
   product: {
@@ -12,16 +13,19 @@ type Props = {
     name: string;
     price: number;
     image_url: string | null;
+    image_urls?: string[] | null;
     sizes?: string[] | null;
     colors?: string[] | null;
     is_available?: boolean | null;
     stock_quantity?: number | null;
   };
+  selectedColor?: string;
+  onColorChange?: (color: string) => void;
 };
 
-export default function ProductActions({ product }: Props) {
+export default function ProductActions({ product, selectedColor: controlledColor, onColorChange }: Props) {
   const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
+  const [internalColor, setInternalColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -29,6 +33,9 @@ export default function ProductActions({ product }: Props) {
   const [cartQuantity, setCartQuantity] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+
+  const selectedColor = controlledColor ?? internalColor;
+  const images = useMemo(() => galleryImages(product.image_url, product.image_urls), [product.image_url, product.image_urls]);
 
   useEffect(() => {
     async function checkAuth() {
@@ -47,39 +54,54 @@ export default function ProductActions({ product }: Props) {
   }, []);
 
   useEffect(() => {
-    const quantityInCart = getCart()
-      .filter((item) => item.id === product.id)
-      .reduce((sum, item) => sum + item.quantity, 0);
+    const quantityInCart = getCart().filter((item) => item.id === product.id).reduce((sum, item) => sum + item.quantity, 0);
     setCartQuantity(quantityInCart);
   }, [product.id, selectedSize, selectedColor, added]);
 
   const sizes = expandSizes(product.sizes as any);
   const colors = expandColors(product.colors as any);
+  const selectedImageUrl = imageForColor(selectedColor, colors, images) || product.image_url;
   const isSoldOut = product.stock_quantity === 0;
   const isUnavailable = product.is_available === false || isSoldOut;
-  const needsAvailabilityConfirmation =
-    product.is_available == null && product.stock_quantity == null;
+  const needsAvailabilityConfirmation = product.is_available == null && product.stock_quantity == null;
   const stockTracked = product.stock_quantity != null;
-  const remainingToAdd = stockTracked
-    ? Math.max(0, (product.stock_quantity || 0) - cartQuantity)
-    : 99;
+  const remainingToAdd = stockTracked ? Math.max(0, (product.stock_quantity || 0) - cartQuantity) : 99;
   const quantityAvailable = !stockTracked || quantity <= remainingToAdd;
   const isSignedIn = Boolean(userId);
-
-  const optionsChosen =
-    (!sizes.length || Boolean(selectedSize)) &&
-    (!colors.length || Boolean(selectedColor));
+  const optionsChosen = (!sizes.length || Boolean(selectedSize)) && (!colors.length || Boolean(selectedColor));
   const variantDetails = [
     sizes.length ? `Size: ${selectedSize || "Not selected"}` : null,
     colors.length ? `Colour: ${selectedColor || "Not selected"}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  ].filter(Boolean).join("\n");
 
-  const photoLine = product.image_url ? `\nPhoto: ${product.image_url}` : "";
+  const photoLines = images.map((url, index) => `🖼️ Product image ${index + 1}:\n${url}`).join("\n");
   const waMessage = isUnavailable
-    ? `Hi Regal Store! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}${photoLine}\n\nPlease let me know if this item can be sourced or restocked.`
-    : `Hi Regal Store! I want to order:\n\n*1. ${product.name}*\n${variantDetails ? `   ${variantDetails.replace(/\n/g, " · ")}\n` : ""}   Qty: ${quantity} × ₦${product.price.toLocaleString("en-NG")}${photoLine}\n\nPlease confirm availability, total, and delivery before I pay.`;
+    ? `Hi Regal’s Drip! I'm interested in *${product.name}*, which is currently marked unavailable on the website.${variantDetails ? `\n${variantDetails}` : ""}${photoLines ? `\n${photoLines}` : ""}\n\nPlease let me know if this item can be sourced or restocked.`
+    : `Hi Regal’s Drip! I want to order:\n\n*1. ${product.name}*\n${variantDetails ? `   ${variantDetails.replace(/\n/g, " · ")}\n` : ""}   Qty: ${quantity} × ₦${product.price.toLocaleString("en-NG")}\n${selectedImageUrl ? `   Selected product image:\n${selectedImageUrl}\n` : ""}${photoLines}\n\nPlease confirm availability, total, and delivery before I pay.`;
+
+  function changeColor(color: string) {
+    setInternalColor(color);
+    onColorChange?.(color);
+  }
+
+  async function createOrderRecord() {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { error } = await supabase.rpc("create_customer_order", {
+      p_total: product.price * quantity,
+      p_items: [{
+        product_id: product.id,
+        product_name: product.name,
+        unit_price: product.price,
+        quantity,
+        size: selectedSize || null,
+        color: selectedColor || null,
+        selected_image_url: selectedImageUrl,
+        image_urls: images,
+      }],
+    });
+    if (error) throw error;
+  }
 
   async function handleWhatsAppOrder() {
     if (!isSignedIn) {
@@ -97,23 +119,14 @@ export default function ProductActions({ product }: Props) {
     const whatsappUrl = whatsappLink(waMessage);
     if (!whatsappUrl) {
       orderTab.close();
-      setAddError("Regal Store WhatsApp is not configured. Please contact the store directly.");
-      return;
-    }
-    if (isUnavailable) {
-      orderTab.location.href = whatsappUrl;
+      setAddError("Regal’s Drip WhatsApp is not configured. Please contact the store directly.");
       return;
     }
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("products")
-        .select("stock_quantity, is_available")
-        .eq("id", product.id)
-        .maybeSingle();
-      if (error || !data)
-        throw new Error("We could not verify current stock. Please try again or contact Regal Store.");
+      const { data, error } = await supabase.from("products").select("stock_quantity, is_available, image_url, image_urls").eq("id", product.id).maybeSingle();
+      if (error || !data) throw new Error("We could not verify current stock. Please try again or contact Regal’s Drip.");
       if (data.is_available === false || data.stock_quantity === 0) {
         orderTab.close();
         setAddError("This product is currently sold out or unavailable. Your WhatsApp order was not opened.");
@@ -124,10 +137,11 @@ export default function ProductActions({ product }: Props) {
         setAddError(`Only ${data.stock_quantity} unit(s) remain in stock. Please reduce the quantity and try again.`);
         return;
       }
+      await createOrderRecord();
       orderTab.location.href = whatsappUrl;
     } catch (error) {
       orderTab.close();
-      setAddError(error instanceof Error ? error.message : "We could not verify current stock. Please try again.");
+      setAddError(error instanceof Error ? error.message : "We could not create your order record. Please try again.");
     }
   }
 
@@ -139,18 +153,16 @@ export default function ProductActions({ product }: Props) {
     if (isUnavailable || !optionsChosen || !quantityAvailable) return;
     setAddError(null);
     try {
-      addToCart(
-        {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image_url: product.image_url,
-          size: selectedSize || null,
-          color: selectedColor || null,
-          stock_quantity: product.stock_quantity,
-        },
-        quantity
-      );
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: selectedImageUrl,
+        image_urls: images,
+        size: selectedSize || null,
+        color: selectedColor || null,
+        stock_quantity: product.stock_quantity,
+      }, quantity);
       setQuantity(1);
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1800);
@@ -160,16 +172,10 @@ export default function ProductActions({ product }: Props) {
   }
 
   const orderLink = isUnavailable ? whatsappLink(waMessage) : null;
-  const inputClass =
-    "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-[#263b2e] focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20";
+  const inputClass = "min-h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-[#1d1d1f] focus:border-[#263b2e] focus:outline-none focus:ring-2 focus:ring-[#263b2e]/20";
 
   if (!authChecked) {
-    return (
-      <div className="mt-auto space-y-3">
-        <div className="h-12 animate-pulse rounded-full bg-black/5" />
-        <div className="h-12 animate-pulse rounded-full bg-black/5" />
-      </div>
-    );
+    return <div className="mt-auto space-y-3"><div className="h-12 animate-pulse rounded-full bg-black/5" /><div className="h-12 animate-pulse rounded-full bg-black/5" /></div>;
   }
 
   return (
@@ -181,52 +187,36 @@ export default function ProductActions({ product }: Props) {
               <label htmlFor="product-size" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Size *</label>
               <select id="product-size" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className={inputClass}>
                 <option value="">Choose a size</option>
-                {sizes.map((size) => (
-                  <option key={size} value={size}>{size}</option>
-                ))}
+                {sizes.map((size) => <option key={size} value={size}>{size}</option>)}
               </select>
             </div>
           )}
           {colors.length > 0 && (
             <div>
               <label htmlFor="product-colour" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Colour *</label>
-              <select id="product-colour" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className={inputClass}>
+              <select id="product-colour" value={selectedColor} onChange={(e) => changeColor(e.target.value)} className={inputClass}>
                 <option value="">Choose a colour</option>
-                {colors.map((color) => (
-                  <option key={color} value={color}>{color}</option>
-                ))}
+                {colors.map((color) => <option key={color} value={color}>{color}</option>)}
               </select>
+              <p className="mt-1.5 text-xs text-black/50">If a matching photo is available, the gallery changes automatically.</p>
             </div>
           )}
         </div>
       )}
 
-      {!optionsChosen && (
-        <p className="text-sm text-black/55">
-          Choose {sizes.length && colors.length ? "a size and colour" : sizes.length ? "a size" : "a colour"} to continue.
-        </p>
-      )}
-
-      {needsAvailabilityConfirmation && !isUnavailable && (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-          Availability has not been confirmed yet. The store will verify this item with you before payment.
-        </p>
-      )}
+      {!optionsChosen && <p className="text-sm text-black/55">Choose {sizes.length && colors.length ? "a size and colour" : sizes.length ? "a size" : "a colour"} to continue.</p>}
+      {needsAvailabilityConfirmation && !isUnavailable && <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">Availability has not been confirmed yet. The store will verify this item with you before payment.</p>}
 
       {stockTracked && !isUnavailable && isSignedIn && (
         <div>
           <label htmlFor="product-quantity" className="mb-1.5 block text-sm font-medium text-[#1d1d1f]">Quantity</label>
           <select id="product-quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className={inputClass}>
-            {Array.from({ length: Math.max(1, Math.min(remainingToAdd, 99)) }, (_, i) => i + 1).map((value) => (
-              <option key={value} value={value}>{value}</option>
-            ))}
+            {Array.from({ length: Math.max(1, Math.min(remainingToAdd, 99)) }, (_, i) => i + 1).map((value) => <option key={value} value={value}>{value}</option>)}
           </select>
         </div>
       )}
 
-      {addError && (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">{addError}</p>
-      )}
+      {addError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">{addError}</p>}
 
       {!isSignedIn ? (
         <div className="space-y-3 rounded-2xl border border-[#e6e4dc] bg-[#f7f5f0] p-4">
@@ -238,36 +228,21 @@ export default function ProductActions({ product }: Props) {
       ) : (
         <>
           {!isUnavailable ? (
-            <button type="button" onClick={handleAdd} disabled={!optionsChosen || !quantityAvailable} className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#1769e0] py-3.5 font-semibold text-white hover:bg-[#0957c3] disabled:opacity-45">
-              {added ? "Added to cart ✓" : `Add ${quantity > 1 ? `${quantity} to cart` : "to cart"}`}
-            </button>
-          ) : (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">Currently unavailable to order</div>
-          )}
+            <button type="button" onClick={handleAdd} disabled={!optionsChosen || !quantityAvailable} className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#1769e0] py-3.5 font-semibold text-white hover:bg-[#0957c3] disabled:opacity-45">{added ? "Added to cart ✓" : `Add ${quantity > 1 ? `${quantity} to cart` : "to cart"}`}</button>
+          ) : <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">Currently unavailable to order</div>}
 
           {isUnavailable ? (
-            orderLink ? (
-              <a href={orderLink} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]">Ask about availability ↗</a>
-            ) : (
-              <button type="button" disabled={!optionsChosen} onClick={() => setShowWhatsAppSetup((c) => !c)} className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold disabled:opacity-50">WhatsApp ordering unavailable</button>
-            )
+            orderLink ? <a href={orderLink} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851]">Ask about availability ↗</a>
+              : <button type="button" disabled={!optionsChosen} onClick={() => setShowWhatsAppSetup((c) => !c)} className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold disabled:opacity-50">WhatsApp ordering unavailable</button>
           ) : (
-            <button type="button" onClick={handleWhatsAppOrder} disabled={!optionsChosen || !quantityAvailable} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851] disabled:opacity-50">
-              Order via WhatsApp ↗
-            </button>
+            <button type="button" onClick={handleWhatsAppOrder} disabled={!optionsChosen || !quantityAvailable} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 font-semibold text-white hover:bg-[#1da851] disabled:opacity-50">Order via WhatsApp ↗</button>
           )}
 
-          {!orderLink && optionsChosen && showWhatsAppSetup && (
-            <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900">
-              Regal Store needs to configure its business WhatsApp number before this link can be used.
-            </p>
-          )}
+          {!orderLink && optionsChosen && showWhatsAppSetup && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900">Regal’s Drip needs to configure its business WhatsApp number before this link can be used.</p>}
         </>
       )}
 
-      <Link href={isSignedIn ? "/custom-order" : `/sign-in?next=${encodeURIComponent("/custom-order")}`} className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.02]">
-        Request a similar item
-      </Link>
+      <Link href={isSignedIn ? "/custom-order" : `/sign-in?next=${encodeURIComponent("/custom-order")}`} className="flex min-h-12 w-full items-center justify-center rounded-full border border-black/10 bg-white py-3.5 font-semibold text-[#1d1d1f] hover:bg-black/[.02]">Request a similar item</Link>
     </div>
   );
 }
