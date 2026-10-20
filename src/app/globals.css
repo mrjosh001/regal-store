@@ -158,3 +158,14 @@ button:active, a:active { transform: scale(0.98); }
   [class*="text-blue-"], [class*="text-sky-"] { color: #a8ceff !important; }
   [class*="text-purple-"], [class*="text-violet-"], [class*="text-pink-"] { color: #e0c2ff !important; }
 }
+
+
+@media (prefers-color-scheme: dark) {
+  [class*="text-[#687168]"], [class*="text-[#68736a]"], [class*="text-[#777e74]"], [class*="text-[#7a8178]"], [class*="text-[#83887f]"], [class*="text-[#8a9389]"], [class*="text-[#9a7963]"], [class*="text-[#a0a59b]"], [class*="text-[#b0b5ad]"], [class*="text-[#536056]"], [class*="text-[#626b64]"] { color: #c4cec7 !important; }
+  [class*="text-[#202a23]"], [class*="text-[#263b2e]"], [class*="text-[#1d1d1f]"], [class*="text-brand-black"] { color: #f4f7f4 !important; }
+  [class*="bg-[#f7f5f0]"], [class*="bg-[#f4f3ef]"], [class*="bg-[#f5f5f7]"], [class*="bg-[#faf9f5]"], [class*="bg-[#f2f0e9]"], [class*="bg-[#edf1eb]"], [class*="bg-[#f1efe8]"] { background-color: #171c19 !important; }
+  [class*="border-[#e6e4dc]"], [class*="border-[#efeee8]"], [class*="border-[#dedfd6]"], [class*="border-[#dfe1d8]"], [class*="border-[#d8dfd6]"] { border-color: #3a443e !important; }
+}
+@media (prefers-color-scheme: light) {
+  [class*="text-[#a0a59b]"], [class*="text-[#b0b5ad]"], [class*="text-black/3"], [class*="text-black/4"], [class*="text-black/5"], [class*="text-black/6"], [class*="text-[#83887f]"], [class*="text-[#8a9389]"], [class*="text-[#777e74]"] { color: #626b64 !important; }
+}
