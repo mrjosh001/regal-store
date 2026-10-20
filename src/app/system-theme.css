@@ -3,36 +3,128 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c100e; --foreground: #f4efe8; --brand-black: #f4efe8;
-    --brand-white: #111612; --forest: #c8d8ce; --forest-deep: #e4eee8;
-    --copper: #d18a67; --champagne: #ead8bb; --surface: rgba(24,31,27,.82);
+    --background: #0b0f0d;
+    --foreground: #f7f3ec;
+    --brand-black: #f7f3ec;
+    --brand-white: #121714;
+    --forest: #d5e2d9;
+    --forest-deep: #edf5ef;
+    --copper: #e0a07e;
+    --champagne: #f0ddbd;
+    --surface: rgba(24, 31, 27, .94);
   }
-  html, body { background:#0c100e !important; color:#f4efe8 !important; color-scheme:dark; }
-  header { background:rgba(15,20,17,.92) !important; border-color:#303934 !important; color:#f4efe8 !important; }
-  aside { background:#151b18 !important; color:#f4efe8 !important; border-color:#303934 !important; }
-  [class*="bg-white"],[class*="bg-[#fff"],[class*="bg-[#f7f5f0]"],[class*="bg-[#fbf8f3]"],[class*="bg-[#f8f6f1]"],[class*="bg-[#f4f1eb]"],[class*="bg-[#f1eee7]"],[class*="bg-[#f2f0e9]"],[class*="bg-[#edf1eb]"],[class*="bg-[#dce4dc]"],[class*="bg-[#f4e9df]"] { background-color:#151b18 !important; }
-  [class*="bg-white/"] { background-color:rgba(21,27,24,.9) !important; }
-  [class*="text-black"],[class*="text-[#202a23]"],[class*="text-[#263b2e]"],[class*="text-[#1a2820]"],[class*="text-[#202"],[class*="text-gray-900"],[class*="text-gray-800"],[class*="text-slate-900"],[class*="text-[#536056]"],[class*="text-[#69736c]"],[class*="text-[#83887f]"],[class*="text-[#9a968c]"],[class*="text-[#a0a59b]"],[class*="text-[#b8bdb6]"] { color:#e8eee9 !important; }
-  [class*="text-gray-700"],[class*="text-gray-600"],[class*="text-gray-500"] { color:#b9c1bb !important; }
-  [class*="border-black"],[class*="border-[#efeee8]"],[class*="border-[#e8e5de]"],[class*="border-gray-200"],[class*="border-gray-300"] { border-color:#303934 !important; }
-  input, textarea, select { background:#151b18 !important; color:#f4efe8 !important; border-color:#39423d !important; color-scheme:dark; }
-  input::placeholder, textarea::placeholder { color:#8e9891 !important; }
-  button[aria-label="Search"], button[aria-label="Open menu"], header a[aria-label="Regal’s Drip home"] { color:#f4efe8 !important; }
-  header button span span { background-color:#f4efe8 !important; }
-  .liquid-glass { background:linear-gradient(135deg,rgba(35,43,39,.78),rgba(22,29,25,.68) 50%,rgba(29,37,32,.74)) !important; border-color:rgba(255,255,255,.12) !important; box-shadow:0 8px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08) !important; }
-  .liquid-glass-frost, .glass-surface { background:rgba(21,27,24,.86) !important; border-color:rgba(255,255,255,.1) !important; }
-  ::selection { color:#0c100e; background:#e8d5b5; }
-  :focus-visible { outline-color:rgba(232,213,181,.75); }
+
+  html, body { background: #0b0f0d !important; color: #f7f3ec !important; color-scheme: dark; }
+  body, main, section, article, nav, footer { color: #f7f3ec; }
+
+  header { background: rgba(12, 17, 14, .96) !important; border-color: #343d38 !important; color: #f7f3ec !important; }
+  aside { background: #151c18 !important; color: #f7f3ec !important; border-color: #343d38 !important; }
+
+  /* Convert light Tailwind surfaces to dark surfaces. */
+  [class*="bg-white"],
+  [class*="bg-[#fff"],
+  [class*="bg-[#f7f5f0"],
+  [class*="bg-[#fbf8f3"],
+  [class*="bg-[#f8f6f1"],
+  [class*="bg-[#f4f1eb"],
+  [class*="bg-[#f1eee7"],
+  [class*="bg-[#f2f0e9"],
+  [class*="bg-[#edf1eb"],
+  [class*="bg-[#dce4dc"],
+  [class*="bg-[#f4e9df"],
+  [class*="bg-[#f5f3ee"]],
+  [class*="bg-[#faf8f4"]] {
+    background-color: #171e1a !important;
+  }
+  [class*="bg-white/"] { background-color: rgba(23, 30, 26, .96) !important; }
+
+  /* Force arbitrary light text colors to a high-contrast light value. */
+  [class*="text-[#"],
+  [class*="text-gray-"],
+  [class*="text-slate-"],
+  [class*="text-stone-"],
+  [class*="text-zinc-"],
+  [class*="text-neutral-"],
+  [class*="text-black"],
+  [class*="text-[#202a23"],
+  [class*="text-[#263b2e"],
+  [class*="text-[#1a2820"] {
+    color: #eef4ef !important;
+  }
+
+  /* Secondary copy stays readable without becoming pure white. */
+  [class*="text-gray-500"], [class*="text-gray-600"], [class*="text-gray-700"],
+  [class*="text-[#536056"], [class*="text-[#69736c"], [class*="text-[#83887f"],
+  [class*="text-[#9a968c"], [class*="text-[#a0a59b"], [class*="text-[#b8bdb6"]] {
+    color: #bdc8c1 !important;
+  }
+
+  /* Keep intentional light text on dark buttons/cards readable. */
+  [class*="text-white"], [class*="text-[#fff"], [class*="text-[#ffffff"] {
+    color: #ffffff !important;
+  }
+
+  [class*="border-black"],
+  [class*="border-[#efeee8"],
+  [class*="border-[#e8e5de"],
+  [class*="border-gray-200"],
+  [class*="border-gray-300"] {
+    border-color: #39433d !important;
+  }
+
+  input, textarea, select {
+    background: #151c18 !important;
+    color: #f7f3ec !important;
+    border-color: #414b45 !important;
+    color-scheme: dark;
+  }
+  input::placeholder, textarea::placeholder { color: #9aa79f !important; opacity: 1 !important; }
+
+  button[aria-label="Search"],
+  button[aria-label="Open menu"],
+  header a[aria-label="Regal’s Drip home"] { color: #f7f3ec !important; }
+  header button span span { background-color: #f7f3ec !important; }
+
+  .liquid-glass {
+    background: linear-gradient(135deg, rgba(35, 44, 39, .9), rgba(20, 27, 23, .88) 50%, rgba(28, 37, 32, .9)) !important;
+    border-color: rgba(255,255,255,.14) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.09) !important;
+  }
+  .liquid-glass-frost, .glass-surface {
+    background: rgba(21, 28, 24, .94) !important;
+    border-color: rgba(255,255,255,.12) !important;
+  }
+
+  ::selection { color: #0b0f0d; background: #f0ddbd; }
+  :focus-visible { outline-color: rgba(240,221,189,.9); }
+
+  /* Never allow common light hover surfaces to produce invisible text. */
+  a:hover, button:hover { color: inherit; }
 }
 
-/* The brand mark is a Git-tracked asset, never a database image. */
-.regals-drip-logo { display:block; width:2.75rem; height:2.75rem; max-width:none; object-fit:cover; object-position:center; border-radius:9999px; flex:0 0 auto; }
-@media (max-width:639px) { .regals-drip-logo { width:2.4rem; height:2.4rem; } }
+/* The brand mark is a Git-tracked public asset, never a database image. */
+.regals-drip-logo {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 9999px;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+@media (max-width:639px) {
+  .regals-drip-logo { width: 2.4rem; height: 2.4rem; }
+}
 
-/* Keep the brand name visible; the previous pseudo-element logo override was hiding it. */
-header a[href="/"] { font-size:inherit !important; line-height:normal !important; }
+header a[href="/"] { font-size: inherit !important; line-height: normal !important; }
 
 @media (prefers-reduced-transparency: reduce) {
-  .liquid-glass, .liquid-glass-dark, .liquid-glass-frost, .glass-surface { background:#fff; -webkit-backdrop-filter:none; backdrop-filter:none; }
-  .liquid-glass-dark { background:#263b2e; }
+  .liquid-glass, .liquid-glass-dark, .liquid-glass-frost, .glass-surface {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .liquid-glass-dark { background: #263b2e; }
 }

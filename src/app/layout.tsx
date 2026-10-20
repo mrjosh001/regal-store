@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   },
   description: "Explore clothing, bags and shoes at Regal’s Drip. Contact us to confirm product availability and delivery options before payment.",
   icons: {
-    icon: "/regals-drip-logo-round.svg",
-    apple: "/regals-drip-logo-round.svg",
+    icon: "/regals-drip-logo.webp",
+    apple: "/regals-drip-logo.webp",
   },
   openGraph: {
     type: "website",
