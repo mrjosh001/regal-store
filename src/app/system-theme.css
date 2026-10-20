@@ -21,7 +21,6 @@
     color-scheme: dark;
   }
 
-  /* Make ordinary page copy readable regardless of Tailwind's light-mode text utility. */
   body,
   body main,
   body section,
@@ -45,6 +44,34 @@
     color: #f7f3ec !important;
   }
 
+  /* Tailwind's light text utilities otherwise win on specificity. These rules
+     explicitly remap the common light-mode copy colours to readable dark-mode values. */
+  [class*="text-black/"],
+  [class*="text-[#1d1d1f"],
+  [class*="text-[#202a23"],
+  [class*="text-[#687168"],
+  [class*="text-[#1f2937"],
+  [class*="text-[#111827"],
+  [class*="text-brand-black"] {
+    color: #f7f3ec !important;
+  }
+
+  [class*="text-brand-blue"],
+  [class*="text-[#2563eb"],
+  [class*="text-[#1769e0"] {
+    color: #8fc5ff !important;
+  }
+
+  [class*="text-[#a65f3e"] {
+    color: #efb18f !important;
+  }
+
+  [class*="text-[#687168"]],
+  [class*="text-[#71717a"]],
+  [class*="text-shade-"] {
+    color: #b8c3bc !important;
+  }
+
   header {
     background: rgba(12, 17, 14, .97) !important;
     border-color: #343d38 !important;
@@ -58,7 +85,6 @@
     border-color: #343d38 !important;
   }
 
-  /* Common light surfaces become dark without using selectors containing Tailwind brackets. */
   [class*="bg-white"],
   [class*="bg-[#f"],
   [class*="bg-[#e"],
@@ -85,13 +111,17 @@
     opacity: 1 !important;
   }
 
+  option {
+    background: #151c18 !important;
+    color: #f7f3ec !important;
+  }
+
   [class*="border-black"],
   [class*="border-gray-"],
   [class*="border-[#"] {
     border-color: #39433d !important;
   }
 
-  /* Preserve deliberate dark-button surfaces while ensuring their text stays white. */
   [class*="bg-[#263b2e"],
   [class*="bg-[#202a23"],
   [class*="bg-[#1a2820"] {
@@ -126,14 +156,8 @@
   :focus-visible {
     outline-color: rgba(240, 221, 189, .9);
   }
-
-  a:hover,
-  button:hover {
-    color: inherit;
-  }
 }
 
-/* The brand mark is a Git-tracked public asset, never a database image. */
 .regals-drip-logo {
   display: block;
   width: 2.75rem;
