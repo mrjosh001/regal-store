@@ -3,8 +3,9 @@ import "./globals.css";
 import "./system-theme.css";
 import BottomNav from "@/components/BottomNav";
 import BrandRebrand from "@/components/BrandRebrand";
+import AuthRedirectBridge from "@/components/AuthRedirectBridge";
 
-const siteUrl = "https://regal-store.vercel.app";
+const siteUrl = "https://regalsdrip.store";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -15,8 +16,8 @@ export const metadata: Metadata = {
   description:
     "Explore clothing, bags and shoes at Regal’s Drip. Contact us to confirm product availability and delivery options before payment.",
   icons: {
-    icon: "/regals-drip-logo.webp",
-    apple: "/regals-drip-logo.webp",
+    icon: "/regals-drip-logo.svg",
+    apple: "/regals-drip-logo.svg",
   },
   openGraph: {
     type: "website",
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en-NG">
       <body className="antialiased">
+        <AuthRedirectBridge />
         <BrandRebrand />
         {children}
         <BottomNav />
