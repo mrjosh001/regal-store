@@ -3,6 +3,7 @@ export type CartItem = {
   name: string;
   price: number;
   image_url: string | null;
+  image_urls?: string[];
   quantity: number;
   size?: string | null;
   color?: string | null;
@@ -44,6 +45,8 @@ export function addToCart(item: Omit<CartItem, "quantity">, qty = 1) {
   if (existing) {
     existing.quantity = desiredQuantity;
     existing.stock_quantity = item.stock_quantity;
+    existing.image_url = item.image_url;
+    existing.image_urls = item.image_urls;
   } else {
     cart.push({ ...item, quantity: qty });
   }
@@ -73,9 +76,7 @@ export function updateQuantity(key: string, quantity: number) {
     if (safeQuantity <= 0) {
       cart = cart.filter((item) => cartItemKey(item) !== cartItemKey(target));
     } else {
-      cart = cart.map((item) =>
-        cartItemKey(item) === cartItemKey(target) ? { ...item, quantity: safeQuantity } : item
-      );
+      cart = cart.map((item) => cartItemKey(item) === cartItemKey(target) ? { ...item, quantity: safeQuantity } : item);
     }
   }
   saveCart(cart);
